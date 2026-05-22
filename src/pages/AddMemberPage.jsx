@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
 function AddMemberPage() {
 
@@ -13,8 +14,7 @@ function AddMemberPage() {
 
     try {
 
-      await axios.post(
-        "http://localhost:8080/members",
+     await axios.post(`${API_BASE_URL}/members`,
         {
           name,
           phone,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../config";
 
 function UpdateExistingMemberPage() {
 
@@ -133,7 +134,7 @@ function UpdateExistingMemberPage() {
     try {
 
       const response = await axios.get(
-        "http://localhost:8080/members"
+        "${API_BASE_URL}/members"
       );
 
       setMembers(response.data);

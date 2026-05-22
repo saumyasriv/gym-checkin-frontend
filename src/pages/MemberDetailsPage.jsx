@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 function MemberDetailsPage() {
 
@@ -20,7 +21,7 @@ function MemberDetailsPage() {
     try {
 
       const response = await axios.get(
-        `http://localhost:8080/members/${id}`
+        `${API_BASE_URL}/members/${id}`
       );
 
       setMember(response.data);
