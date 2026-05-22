@@ -4,24 +4,26 @@ import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
 function AddMemberPage() {
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addMember = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-
-     await axios.post(`${API_BASE_URL}/members`,
-        {
-          name,
-          phone,
-          email,
-          notes
-        }
-      );
+      await axios.post(`${API_BASE_URL}/members`, {
+        name,
+        phone,
+        email,
+        notes,
+      });
 
       toast.success("Member added!");
 
@@ -29,26 +31,22 @@ function AddMemberPage() {
       setPhone("");
       setEmail("");
       setNotes("");
-
     } catch (error) {
-
       console.error(error);
-
-      toast.success("Failed to add member!");
+      toast.error("Failed to add member!");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-screen text-black p-8">
-
       <div className="max-w-2xl mx-auto">
-
         <h1 className="text-5xl font-bold mb-10">
           Add a new Trooper
         </h1>
 
         <div className="space-y-5">
-
           <input
             placeholder="Name"
             value={name}
@@ -105,8 +103,9 @@ function AddMemberPage() {
             "
           />
 
-            <button
+          <button
             onClick={addMember}
+            disabled={isSubmitting}
             className="
               w-full
               bg-black
@@ -116,17 +115,16 @@ function AddMemberPage() {
               text-2xl
               font-bold
               mt-4
+              disabled:opacity-50
+              disabled:cursor-not-allowed
             "
           >
-            Add Member
+            {isSubmitting ? "Adding..." : "Add Member"}
           </button>
-
         </div>
-
       </div>
-
     </div>
-  )
+  );
 }
 
 export default AddMemberPage;
