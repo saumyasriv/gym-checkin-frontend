@@ -148,8 +148,7 @@ function UpdateExistingMemberPage() {
 
     try {
 
-      await axios.post(
-        "http://localhost:8080/memberships",
+      await axios.post(`${API_BASE_URL}/memberships`,
         {
           memberId,
           packageName,
