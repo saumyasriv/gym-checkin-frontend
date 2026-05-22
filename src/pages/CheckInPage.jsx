@@ -5,35 +5,27 @@ import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
 function CheckInPage() {
-
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
   const [members, setMembers] = useState([]);
 
   useEffect(() => {
-
     if (query.length < 1) {
       setMembers([]);
       return;
     }
 
     searchMembers();
-
   }, [query]);
 
   const searchMembers = async () => {
-
     try {
-
       const response = await axios.get(
         `${API_BASE_URL}/members/search?query=${query}`
       );
 
-      
-
       setMembers(response.data);
-
     } catch (error) {
       console.error(error);
     }
@@ -43,11 +35,9 @@ function CheckInPage() {
     memberId,
     type
   ) => {
-
     try {
-
       await axios.post(
-        "http://localhost:8080/checkins",
+        `${API_BASE_URL}/checkins`,
         {
           memberId,
           type
@@ -61,11 +51,8 @@ function CheckInPage() {
       }
 
       setMembers(prevMembers => {
-
         return [...prevMembers].map(member => {
-
           if (member.id === memberId) {
-
             return {
               ...member,
               totalRemainingCredits:
@@ -78,26 +65,52 @@ function CheckInPage() {
       });
 
     } catch (error) {
-
+      console.error(error);
       toast.error("No Credits!");
     }
   };
 
+  const deleteMember = async (memberId) => {
+    const confirmed = window.confirm(
+      "Delete this member permanently?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/members/${memberId}`
+      );
+
+      toast.success("Member deleted");
+
+      setMembers(currentMembers =>
+        currentMembers.filter(
+          member => member.id !== memberId
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete member");
+    }
+  };
+
   const isAdmin =
-  localStorage.getItem("isAdmin") === "true";
+    localStorage.getItem("isAdmin") === "true";
+
   return (
     <div
       className="min-h-screen text-black p-8"
       onClick={() => {
-  setMembers([]);
-  setQuery("");
-}}
+        setMembers([]);
+        setQuery("");
+      }}
     >
-
       <div className="max-w-5xl mx-auto">
 
         <div className="mb-12">
-
           <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
           </h1>
@@ -105,7 +118,6 @@ function CheckInPage() {
           <p className="text-black text-xl mt-3">
             Group class check-ins
           </p>
-
         </div>
 
         <input
@@ -134,9 +146,10 @@ function CheckInPage() {
               key={member.id}
               onClick={(e) => {
                 e.stopPropagation();
+
                 if (isAdmin) {
-  navigate(`/members/${member.id}`);
-}
+                  navigate(`/members/${member.id}`);
+                }
               }}
               className="
                 bg-black/80
@@ -223,6 +236,29 @@ function CheckInPage() {
                   No Show
                 </button>
 
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteMember(member.id);
+                    }}
+                    className="
+                      bg-zinc-700
+                      text-white
+                      px-4
+                      py-3
+                      rounded-2xl
+                      text-xl
+                      font-bold
+                      active:scale-95
+                      transition
+                    "
+                    title="Delete Member"
+                  >
+                    🗑️
+                  </button>
+                )}
+
               </div>
 
             </div>
@@ -234,7 +270,7 @@ function CheckInPage() {
       </div>
 
     </div>
-  )
+  );
 }
 
 export default CheckInPage;
