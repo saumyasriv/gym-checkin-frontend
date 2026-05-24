@@ -8,26 +8,38 @@ function CheckInPage() {
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
+  const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
 
   useEffect(() => {
-    if (query.length < 1) {
+    fetchAllMembers();
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim()) {
       setMembers([]);
       return;
     }
 
-    searchMembers();
-  }, [query]);
+    const filteredMembers = allMembers.filter(member =>
+      member.name
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    );
 
-  const searchMembers = async () => {
+    setMembers(filteredMembers);
+  }, [query, allMembers]);
+
+  const fetchAllMembers = async () => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/members/search?query=${query}`
+        `${API_BASE_URL}/members`
       );
 
-      setMembers(response.data);
+      setAllMembers(response.data);
     } catch (error) {
       console.error(error);
+      toast.error("Failed to load members");
     }
   };
 
@@ -50,8 +62,8 @@ function CheckInPage() {
         toast.success("No show marked!");
       }
 
-      setMembers(prevMembers => {
-        return [...prevMembers].map(member => {
+      setMembers(prevMembers =>
+        prevMembers.map(member => {
           if (member.id === memberId) {
             return {
               ...member,
@@ -61,8 +73,22 @@ function CheckInPage() {
           }
 
           return member;
-        });
-      });
+        })
+      );
+
+      setAllMembers(prevMembers =>
+        prevMembers.map(member => {
+          if (member.id === memberId) {
+            return {
+              ...member,
+              totalRemainingCredits:
+                Number(member.totalRemainingCredits) - 1
+            };
+          }
+
+          return member;
+        })
+      );
 
     } catch (error) {
       console.error(error);
@@ -91,6 +117,13 @@ function CheckInPage() {
           member => member.id !== memberId
         )
       );
+
+      setAllMembers(currentMembers =>
+        currentMembers.filter(
+          member => member.id !== memberId
+        )
+      );
+
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete member");
