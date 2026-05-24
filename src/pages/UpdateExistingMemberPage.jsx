@@ -131,18 +131,23 @@ function UpdateExistingMemberPage() {
 
   const fetchMembers = async () => {
 
-    try {
+  try {
 
-      const response = await axios.get(
-        "${API_BASE_URL}/members"
-      );
+    const response = await axios.get(
+      `${API_BASE_URL}/members`
+    );
 
-      setMembers(response.data);
+    console.log("Members loaded:", response.data);
 
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    setMembers(response.data);
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error("Failed to load members");
+  }
+};
 
   const addMembership = async () => {
 
