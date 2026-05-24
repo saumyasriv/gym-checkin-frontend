@@ -60,7 +60,7 @@ function AddMembershipPage() {
       <div className="max-w-2xl mx-auto">
 
         <h1 className="text-5xl font-bold mb-10">
-          Add Membership for a trooper
+          Add membership for a Trooper
         </h1>
 
         <div className="space-y-5">
