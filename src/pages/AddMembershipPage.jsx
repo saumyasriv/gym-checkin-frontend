@@ -110,6 +110,10 @@ function AddMembershipPage() {
               Select Package
             </option>
 
+            <option value="8 Sessions">
+              8 Sessions
+            </option>
+
             <option value="12 Sessions">
               12 Sessions
             </option>

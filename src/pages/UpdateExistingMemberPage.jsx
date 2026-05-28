@@ -47,6 +47,11 @@ function UpdateExistingMemberPage() {
     let weeks = 0;
     let credits = 0;
 
+    if (packageName === "8 Sessions") {
+      weeks = 5;
+      credits = 8;
+    }
+
     if (packageName === "12 Sessions") {
       weeks = 5;
       credits = 12;
@@ -250,6 +255,10 @@ function UpdateExistingMemberPage() {
 
             <option value="">
               Select Package
+            </option>
+
+            <option>
+              8 Sessions
             </option>
 
             <option>
