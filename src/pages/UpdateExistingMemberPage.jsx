@@ -80,52 +80,74 @@ function UpdateExistingMemberPage() {
     // calculate actual Mon/Wed/Fri sessions
     let usedCredits = 0;
 
-    // normalize dates
-    const currentDate = new Date(
-      start.getFullYear(),
-      start.getMonth(),
-      start.getDate()
-    );
+if (packageName === "8 Sessions") {
 
-    const normalizedToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
+  const diffInDays = Math.floor(
+    (today - start) /
+    (1000 * 60 * 60 * 24)
+  );
 
-    while (
-      currentDate <= normalizedToday
+  const completedWeeks =
+    Math.floor(diffInDays / 7);
+
+  const daysIntoCurrentWeek =
+    diffInDays % 7;
+
+  usedCredits =
+    completedWeeks * 2;
+
+  // If most of the current week has passed,
+  // assume both sessions are consumed.
+  if (daysIntoCurrentWeek >= 4) {
+    usedCredits += 2;
+  }
+
+} else {
+
+  // Existing Mon/Wed/Fri logic
+
+  const currentDate = new Date(
+    start.getFullYear(),
+    start.getMonth(),
+    start.getDate()
+  );
+
+  const normalizedToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  while (
+    currentDate <= normalizedToday
+  ) {
+
+    const day =
+      currentDate.getDay();
+
+    if (
+      day === 1 ||
+      day === 3 ||
+      day === 5
     ) {
-
-      const day =
-        currentDate.getDay();
-
-      // Monday = 1
-      // Wednesday = 3
-      // Friday = 5
-
-      if (
-        day === 1 ||
-        day === 3 ||
-        day === 5
-      ) {
-        usedCredits++;
-      }
-
-      currentDate.setDate(
-        currentDate.getDate() + 1
-      );
+      usedCredits++;
     }
 
-    const calculatedRemaining =
-      Math.max(
-        credits - usedCredits,
-        0
-      );
-
-    setRemainingCredits(
-      calculatedRemaining
+    currentDate.setDate(
+      currentDate.getDate() + 1
     );
+  }
+}
+
+const calculatedRemaining =
+  Math.max(
+    credits - usedCredits,
+    0
+  );
+
+setRemainingCredits(
+  calculatedRemaining
+);
 
     // expiry date
     setExpiryDate(
