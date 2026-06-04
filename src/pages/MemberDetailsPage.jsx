@@ -48,11 +48,12 @@ function MemberDetailsPage() {
       date.toDateString() === yesterday.toDateString();
 
     const formattedTime =
-      date.toLocaleTimeString("en-IN", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true
-      });
+  date.toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
 
     if (isToday) {
       return `Today • ${formattedTime}`;
