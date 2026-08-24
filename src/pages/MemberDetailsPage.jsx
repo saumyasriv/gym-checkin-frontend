@@ -8,6 +8,8 @@ function MemberDetailsPage() {
   const { id } = useParams();
 
   const [member, setMember] = useState(null);
+  const [notes, setNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const [visibleCount, setVisibleCount] =
     useState(5);
@@ -25,9 +27,33 @@ function MemberDetailsPage() {
       );
 
       setMember(response.data);
+      setNotes(response.data.notes || "");
 
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const saveNotes = async () => {
+    try {
+      setSavingNotes(true);
+
+      await axios.put(
+        `${API_BASE_URL}/members/${id}/notes`,
+        notes
+      );
+
+      setMember(prev => ({
+        ...prev,
+        notes
+      }));
+
+    } catch (error) {
+      console.error(error);
+      alert("Failed to save notes.");
+
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -38,7 +64,6 @@ function MemberDetailsPage() {
     const today = new Date();
 
     const yesterday = new Date();
-
     yesterday.setDate(today.getDate() - 1);
 
     const isToday =
@@ -48,12 +73,12 @@ function MemberDetailsPage() {
       date.toDateString() === yesterday.toDateString();
 
     const formattedTime =
-  date.toLocaleTimeString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true
-  });
+      date.toLocaleTimeString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      });
 
     if (isToday) {
       return `Today • ${formattedTime}`;
@@ -158,6 +183,50 @@ function MemberDetailsPage() {
             ))}
 
           </div>
+
+        </div>
+
+        {/* Member Notes */}
+        <div className="mb-16">
+
+          <h2 className="text-4xl font-bold mb-6">
+            Notes
+          </h2>
+
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add any adhoc membership or member details..."
+            rows={5}
+            className="
+              w-full
+              bg-black/80
+              text-white
+              p-6
+              rounded-3xl
+              text-2xl
+              resize-none
+              focus:outline-none
+            "
+          />
+
+          <button
+            onClick={saveNotes}
+            disabled={savingNotes}
+            className="
+              mt-4
+              bg-black
+              text-white
+              px-6
+              py-4
+              rounded-2xl
+              text-xl
+              font-bold
+              disabled:opacity-50
+            "
+          >
+            {savingNotes ? "Saving..." : "Save Notes"}
+          </button>
 
         </div>
 
