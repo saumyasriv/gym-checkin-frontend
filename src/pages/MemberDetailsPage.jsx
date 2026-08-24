@@ -38,10 +38,10 @@ function MemberDetailsPage() {
     try {
       setSavingNotes(true);
 
-      await axios.put(
-        `${API_BASE_URL}/members/${id}/notes`,
-        notes
-      );
+     await axios.put(
+  `${API_BASE_URL}/members/${id}/notes`,
+  { notes }
+);
 
       setMember(prev => ({
         ...prev,
