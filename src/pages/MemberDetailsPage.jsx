@@ -34,28 +34,32 @@ function MemberDetailsPage() {
     }
   };
 
-  const saveNotes = async () => {
-    try {
-      setSavingNotes(true);
+const saveNotes = async () => {
+  try {
+    setSavingNotes(true);
 
-     await axios.put(
-  `${API_BASE_URL}/members/${id}/notes`,
-  { notes }
-);
+    await axios.put(
+      `${API_BASE_URL}/members/${id}/notes`,
+      JSON.stringify({ notes }),
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
-      setMember(prev => ({
-        ...prev,
-        notes
-      }));
+    setMember(prev => ({
+      ...prev,
+      notes
+    }));
 
-    } catch (error) {
-      console.error(error);
-      alert("Failed to save notes.");
-
-    } finally {
-      setSavingNotes(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Failed to save notes.");
+  } finally {
+    setSavingNotes(false);
+  }
+};
 
   const formatCheckinTime = (time) => {
 
