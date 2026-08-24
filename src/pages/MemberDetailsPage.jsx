@@ -196,7 +196,7 @@ function MemberDetailsPage() {
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add any adhoc membership or member details..."
+            placeholder="Add membership or member details..."
             rows={5}
             className="
               w-full
