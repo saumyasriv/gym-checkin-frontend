@@ -52,10 +52,10 @@ const saveNotes = async () => {
       ...prev,
       notes
     }));
-
+  toast.success("Notes saved successfully!");
   } catch (error) {
     console.error(error);
-    alert("Failed to save notes.");
+    toast.error("Failed to save notes.");
   } finally {
     setSavingNotes(false);
   }

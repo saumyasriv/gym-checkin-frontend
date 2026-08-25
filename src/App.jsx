@@ -31,18 +31,27 @@ function Layout() {
 
     <>
 
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: {
-            background: "#000",
-            color: "#fff",
-            fontSize: "18px",
-            padding: "16px",
-            borderRadius: "16px"
-          }
-        }}
-      />
+    <Toaster
+  position="top-center"
+  containerStyle={{
+    top: "50%",
+    transform: "translateY(-50%)"
+  }}
+  toastOptions={{
+    duration: 3000,
+    style: {
+      background: "#000",
+      color: "#fff",
+      fontSize: "24px",
+      fontWeight: "bold",
+      padding: "28px 40px",
+      borderRadius: "24px",
+      minWidth: "420px",
+      textAlign: "center",
+      boxShadow: "0 10px 40px rgba(0, 0, 0, 0.4)"
+    }
+  }}
+/>
 
       <div className="min-h-screen bg-yellow-400 relative overflow-hidden">
 
