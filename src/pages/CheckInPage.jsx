@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
 function CheckInPage() {
+
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
@@ -16,6 +17,7 @@ function CheckInPage() {
   }, []);
 
   useEffect(() => {
+
     if (!query.trim()) {
       setMembers([]);
       return;
@@ -28,17 +30,23 @@ function CheckInPage() {
     );
 
     setMembers(filteredMembers);
+
   }, [query, allMembers]);
 
   const fetchAllMembers = async () => {
+
     try {
+
       const response = await axios.get(
         `${API_BASE_URL}/members`
       );
 
       setAllMembers(response.data);
+
     } catch (error) {
+
       console.error(error);
+
       toast.error("Failed to load members");
     }
   };
@@ -47,7 +55,9 @@ function CheckInPage() {
     memberId,
     type
   ) => {
+
     try {
+
       await axios.post(
         `${API_BASE_URL}/checkins`,
         {
@@ -57,46 +67,71 @@ function CheckInPage() {
       );
 
       if (type === "CHECKIN") {
+
         toast.success("Checked in!");
+
       } else {
+
         toast.success("No show marked!");
+
       }
 
       setMembers(prevMembers =>
         prevMembers.map(member => {
+
           if (member.id === memberId) {
+
             return {
               ...member,
               totalRemainingCredits:
                 Number(member.totalRemainingCredits) - 1
             };
+
           }
 
           return member;
+
         })
       );
 
       setAllMembers(prevMembers =>
         prevMembers.map(member => {
+
           if (member.id === memberId) {
+
             return {
               ...member,
               totalRemainingCredits:
                 Number(member.totalRemainingCredits) - 1
             };
+
           }
 
           return member;
+
         })
       );
 
     } catch (error) {
+
       console.error(error);
-      toast.error("No Credits!");
+
+      const message = error.response?.data;
+
+      if (message === "Credits expired") {
+
+        toast.error("Credits expired!");
+
+      } else {
+
+        toast.error("No Credits!");
+
+      }
     }
   };
 
   const deleteMember = async (memberId) => {
+
     const confirmed = window.confirm(
       "Delete this member permanently?"
     );
@@ -106,6 +141,7 @@ function CheckInPage() {
     }
 
     try {
+
       await axios.delete(
         `${API_BASE_URL}/members/${memberId}`
       );
@@ -125,7 +161,9 @@ function CheckInPage() {
       );
 
     } catch (error) {
+
       console.error(error);
+
       toast.error("Failed to delete member");
     }
   };
@@ -134,6 +172,7 @@ function CheckInPage() {
     localStorage.getItem("isAdmin") === "true";
 
   return (
+
     <div
       className="min-h-screen text-black p-8"
       onClick={() => {
@@ -141,9 +180,11 @@ function CheckInPage() {
         setQuery("");
       }}
     >
+
       <div className="max-w-5xl mx-auto">
 
         <div className="mb-12">
+
           <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
           </h1>
@@ -151,14 +192,20 @@ function CheckInPage() {
           <p className="text-black text-xl mt-3">
             Group class check-ins
           </p>
+
         </div>
+
 
         <input
           type="text"
           placeholder="Search member..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
+          onChange={(e) =>
+            setQuery(e.target.value)
+          }
+          onClick={(e) =>
+            e.stopPropagation()
+          }
           className="
             w-full
             p-6
@@ -171,6 +218,7 @@ function CheckInPage() {
           "
         />
 
+
         <div className="mt-10 space-y-5">
 
           {members.map(member => (
@@ -178,11 +226,13 @@ function CheckInPage() {
             <div
               key={member.id}
               onClick={(e) => {
+
                 e.stopPropagation();
 
                 if (isAdmin) {
                   navigate(`/members/${member.id}`);
                 }
+
               }}
               className="
                 bg-black/80
@@ -219,16 +269,19 @@ function CheckInPage() {
 
               </div>
 
+
               <div className="flex items-center gap-2">
 
                 <button
                   onClick={(e) => {
+
                     e.stopPropagation();
 
                     processAttendance(
                       member.id,
                       "CHECKIN"
                     );
+
                   }}
                   className="
                     bg-white
@@ -245,17 +298,20 @@ function CheckInPage() {
                   Check In
                 </button>
 
+
                 <button
                   onClick={(e) => {
+
                     e.stopPropagation();
 
                     processAttendance(
                       member.id,
                       "NO_SHOW"
                     );
+
                   }}
                   className="
-                    bg-red-500
+                    bg-zinc-700
                     text-white
                     px-5
                     py-3
@@ -269,16 +325,21 @@ function CheckInPage() {
                   No Show
                 </button>
 
+
                 {isAdmin && (
+
                   <button
                     onClick={(e) => {
+
                       e.stopPropagation();
+
                       deleteMember(member.id);
+
                     }}
                     className="
-                      bg-zinc-700
+                      bg-red-600
                       text-white
-                      px-4
+                      px-5
                       py-3
                       rounded-2xl
                       text-xl
@@ -286,10 +347,10 @@ function CheckInPage() {
                       active:scale-95
                       transition
                     "
-                    title="Delete Member"
                   >
-                    🗑️
+                    Delete
                   </button>
+
                 )}
 
               </div>
@@ -303,6 +364,7 @@ function CheckInPage() {
       </div>
 
     </div>
+
   );
 }
 

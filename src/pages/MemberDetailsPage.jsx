@@ -2,15 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
-import toast from "react-hot-toast";
 
 function MemberDetailsPage() {
 
   const { id } = useParams();
 
   const [member, setMember] = useState(null);
-  const [notes, setNotes] = useState("");
-  const [savingNotes, setSavingNotes] = useState(false);
 
   const [visibleCount, setVisibleCount] =
     useState(5);
@@ -28,39 +25,13 @@ function MemberDetailsPage() {
       );
 
       setMember(response.data);
-      setNotes(response.data.notes || "");
 
     } catch (error) {
+
       console.error(error);
+
     }
   };
-
-const saveNotes = async () => {
-  try {
-    setSavingNotes(true);
-
-    await axios.put(
-      `${API_BASE_URL}/members/${id}/notes`,
-      JSON.stringify({ notes }),
-      {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    setMember(prev => ({
-      ...prev,
-      notes
-    }));
-  toast.success("Notes saved successfully!");
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to save notes.");
-  } finally {
-    setSavingNotes(false);
-  }
-};
 
   const formatCheckinTime = (time) => {
 
@@ -69,6 +40,7 @@ const saveNotes = async () => {
     const today = new Date();
 
     const yesterday = new Date();
+
     yesterday.setDate(today.getDate() - 1);
 
     const isToday =
@@ -100,21 +72,35 @@ const saveNotes = async () => {
     }) + ` • ${formattedTime}`;
   };
 
+  const getToday = () => {
+
+    const today = new Date();
+
+    return `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${String(
+      today.getDate()
+    ).padStart(2, "0")}`;
+  };
+
   if (!member) {
 
     return (
       <div className="p-10 text-3xl">
         Loading...
       </div>
-    )
+    );
+
   }
 
   return (
+
     <div className="min-h-screen text-black p-8">
 
       <div className="max-w-5xl mx-auto">
 
         {/* Member Header */}
+
         <div className="mb-12">
 
           <h1 className="text-6xl font-bold">
@@ -146,7 +132,9 @@ const saveNotes = async () => {
 
         </div>
 
+
         {/* Memberships */}
+
         <div className="mb-16">
 
           <h2 className="text-4xl font-bold mb-6">
@@ -178,9 +166,16 @@ const saveNotes = async () => {
                 </div>
 
                 <div className="text-2xl mt-2">
-                  Expiry:
+
+                  {membership.expiryDate < getToday()
+                    ? "Expired:"
+                    : "Expiry:"
+                  }
+
                   {" "}
+
                   {membership.expiryDate}
+
                 </div>
 
               </div>
@@ -191,51 +186,9 @@ const saveNotes = async () => {
 
         </div>
 
-        {/* Member Notes */}
-        <div className="mb-16">
-
-          <h2 className="text-4xl font-bold mb-6">
-            Notes
-          </h2>
-
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add membership or member details..."
-            rows={5}
-            className="
-              w-full
-              bg-black/80
-              text-white
-              p-6
-              rounded-3xl
-              text-2xl
-              resize-none
-              focus:outline-none
-            "
-          />
-
-          <button
-            onClick={saveNotes}
-            disabled={savingNotes}
-            className="
-              mt-4
-              bg-black
-              text-white
-              px-6
-              py-4
-              rounded-2xl
-              text-xl
-              font-bold
-              disabled:opacity-50
-            "
-          >
-            {savingNotes ? "Saving..." : "Save Notes"}
-          </button>
-
-        </div>
 
         {/* Recent Checkins */}
+
         <div>
 
           <h2 className="text-4xl font-bold mb-6">
@@ -268,9 +221,12 @@ const saveNotes = async () => {
                     </div>
 
                     <div>
+
                       {checkin.type === "NO_SHOW"
                         ? "⚠ No Show"
-                        : "✓ Check In"}
+                        : "✓ Check In"
+                      }
+
                     </div>
 
                   </div>
@@ -281,7 +237,9 @@ const saveNotes = async () => {
 
           </div>
 
+
           {/* Buttons */}
+
           <div className="flex items-center">
 
             {visibleCount < member.checkins.length && (
@@ -328,7 +286,7 @@ const saveNotes = async () => {
                   Collapse
                 </button>
 
-            )}
+              )}
 
           </div>
 
@@ -337,7 +295,8 @@ const saveNotes = async () => {
       </div>
 
     </div>
-  )
+
+  );
 }
 
 export default MemberDetailsPage;
