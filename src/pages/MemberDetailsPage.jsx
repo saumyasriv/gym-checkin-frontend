@@ -222,54 +222,54 @@ function MemberDetailsPage() {
 
         {/* Notes */}
 
-        <div className="mb-16">
+<div className="mb-16">
 
-          <h2 className="text-4xl font-bold mb-6">
-            Notes
-          </h2>
+  <h2 className="text-4xl font-bold mb-6">
+    Notes
+  </h2>
 
-          <textarea
-            value={member.notes || ""}
-            onChange={(e) =>
-              setMember(prev => ({
-                ...prev,
-                notes: e.target.value
-              }))
-            }
-            placeholder="Add notes about this member..."
-            className="
-              w-full
-              min-h-[220px]
-              p-6
-              rounded-3xl
-              bg-white
-              text-black
-              text-2xl
-              outline-none
-              shadow-2xl
-              resize-y
-            "
-          />
+  <textarea
+    value={member.notes || ""}
+    onChange={(e) =>
+      setMember(prev => ({
+        ...prev,
+        notes: e.target.value
+      }))
+    }
+    placeholder="Add notes about this member..."
+    className="
+      w-full
+      min-h-[220px]
+      p-6
+      rounded-3xl
+      bg-black/80
+      text-white
+      text-2xl
+      outline-none
+      shadow-xl
+      resize-y
+    "
+  />
 
-          <button
-            onClick={saveNotes}
-            className="
-              mt-4
-              bg-black
-              text-white
-              px-8
-              py-4
-              rounded-2xl
-              text-xl
-              font-bold
-              active:scale-95
-              transition
-            "
-          >
-            Save Notes
-          </button>
+  <button
+    onClick={saveNotes}
+    className="
+      mt-4
+      bg-black
+      text-white
+      px-8
+      py-4
+      rounded-2xl
+      text-xl
+      font-bold
+      active:scale-95
+      transition
+    "
+  >
+    Save Notes
+  </button>
 
-        </div>
+</div>
 
 
         {/* Recent Checkins */}
