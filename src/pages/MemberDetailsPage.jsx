@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
 function MemberDetailsPage() {
@@ -9,8 +10,7 @@ function MemberDetailsPage() {
 
   const [member, setMember] = useState(null);
 
-  const [visibleCount, setVisibleCount] =
-    useState(5);
+  const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     fetchMember();
@@ -65,11 +65,14 @@ function MemberDetailsPage() {
       return `Yesterday • ${formattedTime}`;
     }
 
-    return date.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    }) + ` • ${formattedTime}`;
+    return (
+      date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      }) +
+      ` • ${formattedTime}`
+    );
   };
 
   const getToday = () => {
@@ -81,6 +84,36 @@ function MemberDetailsPage() {
     ).padStart(2, "0")}-${String(
       today.getDate()
     ).padStart(2, "0")}`;
+  };
+
+  const saveNotes = async () => {
+
+    try {
+
+      await axios.put(
+        `${API_BASE_URL}/members/${id}/notes`,
+        JSON.stringify({
+          notes: member.notes || ""
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      toast.success(
+        "Notes saved successfully!"
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      toast.error(
+        "Failed to save notes."
+      );
+    }
   };
 
   if (!member) {
@@ -108,7 +141,7 @@ function MemberDetailsPage() {
           </h1>
 
           <div className="text-2xl mt-4">
-            {member.phoneNumber}
+            {member.phone}
           </div>
 
           <div className="text-2xl mt-2">
@@ -183,6 +216,58 @@ function MemberDetailsPage() {
             ))}
 
           </div>
+
+        </div>
+
+
+        {/* Notes */}
+
+        <div className="mb-16">
+
+          <h2 className="text-4xl font-bold mb-6">
+            Notes
+          </h2>
+
+          <textarea
+            value={member.notes || ""}
+            onChange={(e) =>
+              setMember(prev => ({
+                ...prev,
+                notes: e.target.value
+              }))
+            }
+            placeholder="Add notes about this member..."
+            className="
+              w-full
+              min-h-[220px]
+              p-6
+              rounded-3xl
+              bg-white
+              text-black
+              text-2xl
+              outline-none
+              shadow-2xl
+              resize-y
+            "
+          />
+
+          <button
+            onClick={saveNotes}
+            className="
+              mt-4
+              bg-black
+              text-white
+              px-8
+              py-4
+              rounded-2xl
+              text-xl
+              font-bold
+              active:scale-95
+              transition
+            "
+          >
+            Save Notes
+          </button>
 
         </div>
 
