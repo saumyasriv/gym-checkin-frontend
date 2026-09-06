@@ -485,16 +485,17 @@ function CheckInPage() {
                       e.stopPropagation()
                     }
                     className="
-                      bg-white
-                      text-black
-                      px-4
-                      py-3
-                      rounded-2xl
-                      text-xl
-                      font-bold
-                      outline-none
-                      cursor-pointer
-                    "
+  bg-white
+  text-black
+  w-[180px]
+  h-[58px]
+  px-4
+  rounded-2xl
+  text-lg
+  font-bold
+  outline-none
+  cursor-pointer
+"
                   >
 
                     <option value="">
