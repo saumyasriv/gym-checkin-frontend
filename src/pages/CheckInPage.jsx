@@ -487,9 +487,8 @@ function CheckInPage() {
                     className="
   bg-white
   text-black
-  w-[180px]
   h-[58px]
-  px-4
+  px-3
   rounded-2xl
   text-lg
   font-bold
