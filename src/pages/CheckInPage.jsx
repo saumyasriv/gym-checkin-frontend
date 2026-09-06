@@ -14,6 +14,10 @@ function CheckInPage() {
 
   const [selectedTimings, setSelectedTimings] = useState({});
 
+  const [currentTime, setCurrentTime] = useState(
+    new Date()
+  );
+
   const classTimings = [
     "6:00 AM",
     "7:00 AM",
@@ -22,15 +26,38 @@ function CheckInPage() {
     "10:00 PM"
   ];
 
+  const isAdmin =
+    localStorage.getItem("isAdmin") === "true";
+
+
   useEffect(() => {
+
     fetchAllMembers();
+
   }, []);
+
+
+  useEffect(() => {
+
+    const timer = setInterval(() => {
+
+      setCurrentTime(new Date());
+
+    }, 60000);
+
+    return () => clearInterval(timer);
+
+  }, []);
+
 
   useEffect(() => {
 
     if (!query.trim()) {
+
       setMembers([]);
+
       return;
+
     }
 
     const filteredMembers = allMembers.filter(member =>
@@ -42,6 +69,7 @@ function CheckInPage() {
     setMembers(filteredMembers);
 
   }, [query, allMembers]);
+
 
   const fetchAllMembers = async () => {
 
@@ -58,14 +86,18 @@ function CheckInPage() {
       console.error(error);
 
       toast.error("Failed to load members");
+
     }
+
   };
+
 
   const getTimingMinutes = (timing) => {
 
     const [time, period] = timing.split(" ");
 
-    let [hours, minutes] = time.split(":").map(Number);
+    let [hours, minutes] =
+      time.split(":").map(Number);
 
     if (period === "AM") {
 
@@ -82,23 +114,26 @@ function CheckInPage() {
     }
 
     return hours * 60 + minutes;
+
   };
+
 
   const isTimingDisabled = (timing) => {
 
-    const now = new Date();
-
     const currentMinutes =
-      now.getHours() * 60 + now.getMinutes();
+      currentTime.getHours() * 60 +
+      currentTime.getMinutes();
 
     const classMinutes =
       getTimingMinutes(timing);
 
-    const twentyMinutesAfterClass =
-      classMinutes + 20;
+    const gracePeriodEnd =
+      classMinutes + 30;
 
-    return currentMinutes > twentyMinutesAfterClass;
+    return currentMinutes > gracePeriodEnd;
+
   };
+
 
   const processAttendance = async (
     memberId,
@@ -110,9 +145,12 @@ function CheckInPage() {
 
     if (!classTiming) {
 
-      toast.error("Please select a class timing first.");
+      toast.error(
+        "Please select a class timing first."
+      );
 
       return;
+
     }
 
     try {
@@ -126,6 +164,7 @@ function CheckInPage() {
         }
       );
 
+
       if (type === "CHECKIN") {
 
         toast.success("Checked in!");
@@ -136,6 +175,7 @@ function CheckInPage() {
 
       }
 
+
       setMembers(prevMembers =>
         prevMembers.map(member => {
 
@@ -144,7 +184,9 @@ function CheckInPage() {
             return {
               ...member,
               totalRemainingCredits:
-                Number(member.totalRemainingCredits) - 1
+                Number(
+                  member.totalRemainingCredits
+                ) - 1
             };
 
           }
@@ -153,6 +195,7 @@ function CheckInPage() {
 
         })
       );
+
 
       setAllMembers(prevMembers =>
         prevMembers.map(member => {
@@ -162,7 +205,9 @@ function CheckInPage() {
             return {
               ...member,
               totalRemainingCredits:
-                Number(member.totalRemainingCredits) - 1
+                Number(
+                  member.totalRemainingCredits
+                ) - 1
             };
 
           }
@@ -172,33 +217,45 @@ function CheckInPage() {
         })
       );
 
+
     } catch (error) {
 
       console.error(error);
 
-      const message = error.response?.data;
+      const message =
+        error.response?.data;
+
 
       if (message === "Credits expired") {
 
-        toast.error("Credits expired!");
+        toast.error(
+          "Credits expired!"
+        );
 
       } else {
 
-        toast.error("No Credits!");
+        toast.error(
+          "No Credits!"
+        );
 
       }
+
     }
+
   };
+
 
   const deleteMember = async (memberId) => {
 
-    const confirmed = window.confirm(
-      "Delete this member permanently?"
-    );
+    const confirmed =
+      window.confirm(
+        "Delete this member permanently?"
+      );
 
     if (!confirmed) {
       return;
     }
+
 
     try {
 
@@ -206,7 +263,10 @@ function CheckInPage() {
         `${API_BASE_URL}/members/${memberId}`
       );
 
-      toast.success("Member deleted");
+      toast.success(
+        "Member deleted"
+      );
+
 
       setMembers(currentMembers =>
         currentMembers.filter(
@@ -214,36 +274,58 @@ function CheckInPage() {
         )
       );
 
+
       setAllMembers(currentMembers =>
         currentMembers.filter(
           member => member.id !== memberId
         )
       );
 
+
     } catch (error) {
 
       console.error(error);
 
-      toast.error("Failed to delete member");
+      toast.error(
+        "Failed to delete member"
+      );
+
     }
+
   };
 
-  const isAdmin =
-    localStorage.getItem("isAdmin") === "true";
+
+  const formattedDate =
+    currentTime.toLocaleDateString(
+      "en-IN",
+      {
+        timeZone: "Asia/Kolkata",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }
+    );
+
 
   return (
 
     <div
       className="min-h-screen text-black p-8"
       onClick={() => {
+
         setMembers([]);
         setQuery("");
+
       }}
     >
 
       <div className="max-w-5xl mx-auto">
 
-        <div className="mb-12">
+
+        {/* Header */}
+
+        <div className="mb-10">
 
           <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
@@ -255,6 +337,33 @@ function CheckInPage() {
 
         </div>
 
+
+        {/* Date Display */}
+
+        <div
+          className="
+            mb-8
+            bg-black
+            text-white
+            rounded-3xl
+            p-6
+            text-center
+            shadow-2xl
+          "
+        >
+
+          <div className="text-3xl font-bold">
+            {formattedDate}
+          </div>
+
+          <div className="text-xl text-zinc-400 mt-2">
+            Select the class timing before checking in
+          </div>
+
+        </div>
+
+
+        {/* Search */}
 
         <input
           type="text"
@@ -279,12 +388,15 @@ function CheckInPage() {
         />
 
 
+        {/* Members */}
+
         <div className="mt-10 space-y-5">
 
           {members.map(member => {
 
             const selectedTiming =
               selectedTimings[member.id] || "";
+
 
             return (
 
@@ -295,7 +407,11 @@ function CheckInPage() {
                   e.stopPropagation();
 
                   if (isAdmin) {
-                    navigate(`/members/${member.id}`);
+
+                    navigate(
+                      `/members/${member.id}`
+                    );
+
                   }
 
                 }}
@@ -312,11 +428,15 @@ function CheckInPage() {
                 "
               >
 
+
+                {/* Member Information */}
+
                 <div className="flex-1">
 
                   <div className="text-4xl font-semibold text-white">
                     {member.name}
                   </div>
+
 
                   <div
                     className={`
@@ -329,15 +449,26 @@ function CheckInPage() {
                       }
                     `}
                   >
-                    {member.totalRemainingCredits} credits remaining
+                    {member.totalRemainingCredits}
+                    {" "}
+                    credits remaining
                   </div>
 
                 </div>
 
 
-                <div className="flex items-center gap-2">
+                {/* Actions */}
 
-                  {/* Class Timing */}
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+
+
+                  {/* Session */}
 
                   <select
                     value={selectedTiming}
@@ -345,10 +476,13 @@ function CheckInPage() {
 
                       e.stopPropagation();
 
-                      setSelectedTimings(prev => ({
-                        ...prev,
-                        [member.id]: e.target.value
-                      }));
+                      setSelectedTimings(
+                        prev => ({
+                          ...prev,
+                          [member.id]:
+                            e.target.value
+                        })
+                      );
 
                     }}
                     onClick={(e) =>
@@ -368,15 +502,18 @@ function CheckInPage() {
                   >
 
                     <option value="">
-                      Class Timing
+                      Session
                     </option>
+
 
                     {classTimings.map(timing => (
 
                       <option
                         key={timing}
                         value={timing}
-                        disabled={isTimingDisabled(timing)}
+                        disabled={isTimingDisabled(
+                          timing
+                        )}
                       >
                         {timing}
                       </option>
@@ -420,41 +557,45 @@ function CheckInPage() {
                   </button>
 
 
-                  {/* No Show */}
+                  {/* No Show - ADMIN ONLY */}
 
-                  <button
-                    disabled={!selectedTiming}
-                    onClick={(e) => {
+                  {isAdmin && (
 
-                      e.stopPropagation();
+                    <button
+                      disabled={!selectedTiming}
+                      onClick={(e) => {
 
-                      processAttendance(
-                        member.id,
-                        "NO_SHOW"
-                      );
+                        e.stopPropagation();
 
-                    }}
-                    className={`
-                      bg-zinc-700
-                      text-white
-                      px-5
-                      py-3
-                      rounded-2xl
-                      text-xl
-                      font-bold
-                      transition
-                      ${
-                        !selectedTiming
-                          ? "opacity-40 cursor-not-allowed"
-                          : "active:scale-95"
-                      }
-                    `}
-                  >
-                    No Show
-                  </button>
+                        processAttendance(
+                          member.id,
+                          "NO_SHOW"
+                        );
+
+                      }}
+                      className={`
+                        bg-zinc-700
+                        text-white
+                        px-5
+                        py-3
+                        rounded-2xl
+                        text-xl
+                        font-bold
+                        transition
+                        ${
+                          !selectedTiming
+                            ? "opacity-40 cursor-not-allowed"
+                            : "active:scale-95"
+                        }
+                      `}
+                    >
+                      No Show
+                    </button>
+
+                  )}
 
 
-                  {/* Delete */}
+                  {/* Delete - ADMIN ONLY */}
 
                   {isAdmin && (
 
@@ -463,7 +604,9 @@ function CheckInPage() {
 
                         e.stopPropagation();
 
-                        deleteMember(member.id);
+                        deleteMember(
+                          member.id
+                        );
 
                       }}
                       className="
