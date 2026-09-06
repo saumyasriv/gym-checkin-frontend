@@ -10,9 +10,7 @@ function CheckInPage() {
   const [query, setQuery] = useState("");
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
-
   const [selectedTimings, setSelectedTimings] = useState({});
-
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const classTimings = [
@@ -90,10 +88,11 @@ function CheckInPage() {
   };
 
   /*
-   * Session remains available until 30 minutes
-   * after the class starts.
+   * A session is available until 30 minutes
+   * after its start time.
    *
-   * Example at 5:59 PM:
+   * Example:
+   * 5:59 PM:
    * 5:00 PM -> disabled
    * 6:00 PM -> available
    * 7:00 PM -> available
@@ -227,6 +226,10 @@ function CheckInPage() {
     }
   };
 
+  /*
+   * Date and time are explicitly displayed
+   * in Indian Standard Time.
+   */
   const formattedDate =
     currentTime.toLocaleDateString(
       "en-IN",
@@ -280,25 +283,30 @@ function CheckInPage() {
             className="
               absolute
               right-0
-              top-1
+              top-0
               text-right
-              text-sm
-              font-medium
+              font-semibold
               leading-tight
             "
           >
-            <div>
+            <div className="text-xl">
               {formattedDate}
             </div>
 
-            <div className="mt-1 text-black/60">
+            <div
+              className="
+                text-xl
+                mt-2
+                text-black/70
+              "
+            >
               {formattedTime}
             </div>
           </div>
 
         </div>
 
-        {/* SEARCH */}
+        {/* SEARCH BAR */}
         <div
           className="relative"
           onClick={(e) =>
@@ -394,7 +402,7 @@ function CheckInPage() {
                 "
               >
 
-                {/* MEMBER INFO */}
+                {/* MEMBER INFORMATION */}
                 <div className="flex-1 min-w-0">
 
                   <div
@@ -445,9 +453,9 @@ function CheckInPage() {
                       flex-shrink-0
                     "
                     style={{
-                      width: "220px",
-                      minWidth: "220px",
-                      maxWidth: "220px"
+                      width: "125px",
+                      minWidth: "125px",
+                      maxWidth: "125px"
                     }}
                   >
 
@@ -466,23 +474,21 @@ function CheckInPage() {
                         appearance-none
                         bg-white
                         text-black
-                        w-full
-                        h-full
-                        pl-5
-                        pr-12
+                        h-12
                         rounded-2xl
                         text-lg
                         font-bold
                         outline-none
                         cursor-pointer
+                        pl-4
+                        pr-9
                       "
                       style={{
-                        width: "220px",
-                        minWidth: "220px",
-                        maxWidth: "220px"
+                        width: "125px",
+                        minWidth: "125px",
+                        maxWidth: "125px"
                       }}
                     >
-
                       <option value="">
                         Session
                       </option>
@@ -500,19 +506,18 @@ function CheckInPage() {
                           </option>
                         )
                       )}
-
                     </select>
 
-                    {/* LARGE ARROW */}
+                    {/* PROMINENT ARROW */}
                     <svg
                       className="
                         pointer-events-none
                         absolute
-                        right-4
+                        right-3
                         top-1/2
                         -translate-y-1/2
-                        w-7
-                        h-7
+                        w-5
+                        h-5
                         text-black
                       "
                       viewBox="0 0 24 24"
@@ -563,7 +568,7 @@ function CheckInPage() {
                     Check In
                   </button>
 
-                  {/* NO SHOW */}
+                  {/* NO SHOW — ADMIN ONLY */}
                   {isAdmin && (
                     <button
                       disabled={!selectedTiming}
@@ -601,7 +606,7 @@ function CheckInPage() {
                     </button>
                   )}
 
-                  {/* DELETE */}
+                  {/* DELETE — ADMIN ONLY */}
                   {isAdmin && (
                     <button
                       onClick={() =>
