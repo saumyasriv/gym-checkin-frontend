@@ -292,7 +292,6 @@ function CheckInPage() {
       font-bold
     "
   >
-    {formattedTime}
   </div>
 </div>
 
