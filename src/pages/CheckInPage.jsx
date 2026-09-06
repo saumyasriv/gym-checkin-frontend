@@ -21,9 +21,12 @@ function CheckInPage() {
   const classTimings = [
     "6:00 AM",
     "7:00 AM",
-    "8:15 AM",
+    "8:00 AM",
+    "9:00 AM",
+    "5:00 PM",
     "6:00 PM",
-    "10:00 PM"
+    "7:00 PM",
+    "8:00 PM"
   ];
 
   const isAdmin =
@@ -40,9 +43,7 @@ function CheckInPage() {
   useEffect(() => {
 
     const timer = setInterval(() => {
-
       setCurrentTime(new Date());
-
     }, 60000);
 
     return () => clearInterval(timer);
@@ -53,18 +54,16 @@ function CheckInPage() {
   useEffect(() => {
 
     if (!query.trim()) {
-
       setMembers([]);
-
       return;
-
     }
 
-    const filteredMembers = allMembers.filter(member =>
-      member.name
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    );
+    const filteredMembers =
+      allMembers.filter(member =>
+        member.name
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
 
     setMembers(filteredMembers);
 
@@ -102,7 +101,6 @@ function CheckInPage() {
     let [hours, minutes] =
       time.split(":").map(Number);
 
-
     if (period === "AM") {
 
       if (hours === 12) {
@@ -116,7 +114,6 @@ function CheckInPage() {
       }
 
     }
-
 
     return (
       hours * 60 +
@@ -135,12 +132,19 @@ function CheckInPage() {
     const classMinutes =
       getTimingMinutes(timing);
 
-    const gracePeriodEnd =
-      classMinutes + 30;
+    /*
+      Session is available from the class start
+      until 30 minutes after the class.
 
+      Example:
+      6:00 PM
+      Available: 6:00 PM - 6:30 PM
+      Disabled after 6:30 PM
+    */
 
     return (
-      currentMinutes > gracePeriodEnd
+      currentMinutes < classMinutes ||
+      currentMinutes > classMinutes + 30
     );
 
   };
@@ -153,7 +157,6 @@ function CheckInPage() {
 
     const classTiming =
       selectedTimings[memberId];
-
 
     if (!classTiming) {
 
@@ -235,7 +238,6 @@ function CheckInPage() {
       );
 
 
-      // Clear the selected session
       setSelectedTimings(prev => {
 
         const updated = {
@@ -287,7 +289,6 @@ function CheckInPage() {
         "Delete this member permanently?"
       );
 
-
     if (!confirmed) {
       return;
     }
@@ -298,7 +299,6 @@ function CheckInPage() {
       await axios.delete(
         `${API_BASE_URL}/members/${memberId}`
       );
-
 
       toast.success(
         "Member deleted"
@@ -383,7 +383,7 @@ function CheckInPage() {
       >
 
 
-        {/* Header */}
+        {/* HEADER */}
 
         <div
           className="
@@ -414,13 +414,13 @@ function CheckInPage() {
           </p>
 
 
-          {/* Date + Time */}
+          {/* SMALL DATE + TIME */}
 
           <div
             className="
               absolute
-              top-0
               right-0
+              top-1
               text-right
               text-sm
               font-medium
@@ -434,8 +434,8 @@ function CheckInPage() {
 
             <div
               className="
-                text-black/60
                 mt-1
+                text-black/60
               "
             >
               {formattedTime}
@@ -446,7 +446,7 @@ function CheckInPage() {
         </div>
 
 
-        {/* Search */}
+        {/* SEARCH */}
 
         <input
           type="text"
@@ -471,20 +471,19 @@ function CheckInPage() {
         />
 
 
-        {/* Members */}
+        {/* MEMBERS */}
 
         <div
           className="
             mt-10
-            space-y-5
+            space-y-4
           "
         >
 
           {members.map(member => {
 
             const selectedTiming =
-              selectedTimings[member.id] ||
-              "";
+              selectedTimings[member.id] || "";
 
 
             return (
@@ -507,8 +506,10 @@ function CheckInPage() {
                 className="
                   bg-black/80
                   backdrop-blur-md
-                  border border-black/10
-                  p-6
+                  border
+                  border-black/10
+                  px-5
+                  py-4
                   rounded-3xl
                   flex
                   items-center
@@ -518,17 +519,18 @@ function CheckInPage() {
               >
 
 
-                {/* Member Information */}
+                {/* MEMBER INFO */}
 
                 <div
                   className="
                     flex-1
+                    min-w-0
                   "
                 >
 
                   <div
                     className="
-                      text-4xl
+                      text-3xl
                       font-semibold
                       text-white
                     "
@@ -539,8 +541,8 @@ function CheckInPage() {
 
                   <div
                     className={`
-                      text-2xl
-                      mt-2
+                      text-xl
+                      mt-1
                       ${
                         member.totalRemainingCredits <= 4
                           ? "text-red-500 font-bold"
@@ -548,28 +550,27 @@ function CheckInPage() {
                       }
                     `}
                   >
-
                     {member.totalRemainingCredits}
                     {" "}
                     credits remaining
-
                   </div>
 
                 </div>
 
 
-                {/* Actions */}
+                {/* COMPACT CONTROLS */}
 
                 <div
                   className="
                     flex
                     items-center
                     gap-2
+                    flex-shrink-0
                   "
                 >
 
 
-                  {/* Session Dropdown */}
+                  {/* SESSION */}
 
                   <select
                     value={selectedTiming}
@@ -590,15 +591,13 @@ function CheckInPage() {
                       e.stopPropagation()
                     }
                     className="
-                      w-[190px]
-                      min-w-[190px]
-                      max-w-[190px]
-                      h-[58px]
+                      h-12
+                      w-[145px]
                       bg-white
                       text-black
-                      px-5
+                      px-4
                       rounded-2xl
-                      text-xl
+                      text-lg
                       font-bold
                       outline-none
                       cursor-pointer
@@ -608,7 +607,6 @@ function CheckInPage() {
                     <option value="">
                       Session
                     </option>
-
 
                     {classTimings.map(
                       timing => (
@@ -629,7 +627,7 @@ function CheckInPage() {
                   </select>
 
 
-                  {/* Check In */}
+                  {/* CHECK IN */}
 
                   <button
                     disabled={!selectedTiming}
@@ -644,21 +642,26 @@ function CheckInPage() {
 
                     }}
                     className={`
-                      w-[190px]
-                      min-w-[190px]
-                      max-w-[190px]
-                      h-[58px]
-                      bg-white
-                      text-black
+                      h-12
                       px-5
                       rounded-2xl
-                      text-xl
+                      text-lg
                       font-bold
+                      whitespace-nowrap
                       transition
                       ${
-                        !selectedTiming
-                          ? "opacity-40 cursor-not-allowed"
-                          : "active:scale-95"
+                        selectedTiming
+                          ? `
+                            bg-white
+                            text-black
+                            active:scale-95
+                            cursor-pointer
+                          `
+                          : `
+                            bg-white/40
+                            text-black/50
+                            cursor-not-allowed
+                          `
                       }
                     `}
                   >
@@ -666,7 +669,7 @@ function CheckInPage() {
                   </button>
 
 
-                  {/* No Show - ADMIN ONLY */}
+                  {/* NO SHOW — ADMIN ONLY */}
 
                   {isAdmin && (
 
@@ -683,21 +686,26 @@ function CheckInPage() {
 
                       }}
                       className={`
-                        w-[190px]
-                        min-w-[190px]
-                        max-w-[190px]
-                        h-[58px]
-                        bg-zinc-700
-                        text-white
+                        h-12
                         px-5
                         rounded-2xl
-                        text-xl
+                        text-lg
                         font-bold
+                        whitespace-nowrap
                         transition
                         ${
-                          !selectedTiming
-                            ? "opacity-40 cursor-not-allowed"
-                            : "active:scale-95"
+                          selectedTiming
+                            ? `
+                              bg-zinc-700
+                              text-white
+                              active:scale-95
+                              cursor-pointer
+                            `
+                            : `
+                              bg-zinc-700/40
+                              text-white/40
+                              cursor-not-allowed
+                            `
                         }
                       `}
                     >
@@ -707,7 +715,7 @@ function CheckInPage() {
                   )}
 
 
-                  {/* Delete - ADMIN ONLY */}
+                  {/* DELETE — ADMIN ONLY */}
 
                   {isAdmin && (
 
@@ -722,16 +730,14 @@ function CheckInPage() {
 
                       }}
                       className="
-                        w-[190px]
-                        min-w-[190px]
-                        max-w-[190px]
-                        h-[58px]
-                        bg-red-600
-                        text-white
+                        h-12
                         px-5
                         rounded-2xl
-                        text-xl
+                        text-lg
                         font-bold
+                        whitespace-nowrap
+                        bg-red-600
+                        text-white
                         active:scale-95
                         transition
                       "
