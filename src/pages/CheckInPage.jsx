@@ -16,12 +16,9 @@ function CheckInPage() {
   const classTimings = [
     "6:00 AM",
     "7:00 AM",
-    "8:00 AM",
-    "9:00 AM",
-    "5:00 PM",
+    "8:15 AM",
     "6:00 PM",
-    "7:00 PM",
-    "8:00 PM"
+    "10:00 PM"
   ];
 
   const isAdmin =
@@ -278,33 +275,32 @@ function CheckInPage() {
             Group class check-ins
           </p>
 
-          {/* DATE + TIME */}
-          <div
-            className="
-              absolute
-              right-0
-              top-0
-              text-right
-              font-semibold
-              leading-tight
-            "
-          >
-            <div className="text-xl">
-              {formattedDate}
-            </div>
+         {/* DAY + DATE + TIME */}
+<div
+  className="
+    absolute
+    right-0
+    top-0
+    text-right
+    font-bold
+    leading-tight
+  "
+>
+  <div className="text-2xl">
+    {formattedDate}
+  </div>
 
-            <div
-              className="
-                text-xl
-                mt-2
-                text-black/70
-              "
-            >
-              {formattedTime}
-            </div>
-          </div>
-
-        </div>
+  <div
+    className="
+      text-2xl
+      mt-2
+      text-black/70
+      font-bold
+    "
+  >
+    {formattedTime}
+  </div>
+</div>
 
         {/* SEARCH BAR */}
         <div
