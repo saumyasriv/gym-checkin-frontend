@@ -69,11 +69,6 @@ function CheckInPage() {
     }
   };
 
-  /*
-   * Convert a class timing such as:
-   * "6:00 AM" -> 360
-   * "6:00 PM" -> 1080
-   */
   const getTimingMinutes = (timing) => {
     const [time, period] = timing.split(" ");
 
@@ -95,18 +90,13 @@ function CheckInPage() {
   };
 
   /*
-   * A class can be selected before it starts
-   * and until 30 minutes after its start.
+   * Session remains available until 30 minutes
+   * after the class starts.
    *
-   * Example:
-   *
-   * 5:59 PM:
+   * Example at 5:59 PM:
    * 5:00 PM -> disabled
    * 6:00 PM -> available
    * 7:00 PM -> available
-   *
-   * 6:31 PM:
-   * 6:00 PM -> disabled
    */
   const isTimingDisabled = (timing) => {
     const currentMinutes =
@@ -447,13 +437,18 @@ function CheckInPage() {
                   }
                 >
 
-                  {/* SESSION DROPDOWN */}
+                  {/* SESSION */}
                   <div
                     className="
                       relative
                       h-12
-                      w-[220px]
+                      flex-shrink-0
                     "
+                    style={{
+                      width: "220px",
+                      minWidth: "220px",
+                      maxWidth: "220px"
+                    }}
                   >
 
                     <select
@@ -469,10 +464,10 @@ function CheckInPage() {
                       }}
                       className="
                         appearance-none
-                        w-full
-                        h-full
                         bg-white
                         text-black
+                        w-full
+                        h-full
                         pl-5
                         pr-12
                         rounded-2xl
@@ -481,7 +476,13 @@ function CheckInPage() {
                         outline-none
                         cursor-pointer
                       "
+                      style={{
+                        width: "220px",
+                        minWidth: "220px",
+                        maxWidth: "220px"
+                      }}
                     >
+
                       <option value="">
                         Session
                       </option>
@@ -499,9 +500,10 @@ function CheckInPage() {
                           </option>
                         )
                       )}
+
                     </select>
 
-                    {/* PROMINENT ARROW */}
+                    {/* LARGE ARROW */}
                     <svg
                       className="
                         pointer-events-none
@@ -509,8 +511,8 @@ function CheckInPage() {
                         right-4
                         top-1/2
                         -translate-y-1/2
-                        w-6
-                        h-6
+                        w-7
+                        h-7
                         text-black
                       "
                       viewBox="0 0 24 24"
@@ -561,7 +563,7 @@ function CheckInPage() {
                     Check In
                   </button>
 
-                  {/* NO SHOW — ADMIN ONLY */}
+                  {/* NO SHOW */}
                   {isAdmin && (
                     <button
                       disabled={!selectedTiming}
@@ -599,7 +601,7 @@ function CheckInPage() {
                     </button>
                   )}
 
-                  {/* DELETE — ADMIN ONLY */}
+                  {/* DELETE */}
                   {isAdmin && (
                     <button
                       onClick={() =>
