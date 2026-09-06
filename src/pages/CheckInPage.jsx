@@ -17,7 +17,8 @@ function CheckInPage() {
     "6:00 AM",
     "7:00 AM",
     "8:15 AM",
-    "6:00 PM"
+    "6:00 PM",
+    "11:00 PM"
   ];
 
   const isAdmin =
