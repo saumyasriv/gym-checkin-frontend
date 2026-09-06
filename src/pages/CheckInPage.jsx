@@ -21,12 +21,9 @@ function CheckInPage() {
   const classTimings = [
     "6:00 AM",
     "7:00 AM",
-    "8:00 AM",
-    "9:00 AM",
-    "5:00 PM",
+    "8:15 AM",
     "6:00 PM",
-    "7:00 PM",
-    "8:00 PM"
+    "10:00 PM"
   ];
 
   const isAdmin =
