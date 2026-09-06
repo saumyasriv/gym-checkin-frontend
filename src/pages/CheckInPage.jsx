@@ -83,26 +83,20 @@ function CheckInPage() {
     return hours * 60 + minutes;
   };
 
-  /*
-   * A session is available until 30 minutes
-   * after its start time.
-   *
-   * Example:
-   * 5:59 PM:
-   * 5:00 PM -> disabled
-   * 6:00 PM -> available
-   * 7:00 PM -> available
-   */
+  
   const isTimingDisabled = (timing) => {
-    const currentMinutes =
-      currentTime.getHours() * 60 +
-      currentTime.getMinutes();
+  const now = new Date();
 
-    const classMinutes =
-      getTimingMinutes(timing);
+  const currentMinutes =
+    now.getHours() * 60 + now.getMinutes();
 
-    return currentMinutes > classMinutes + 30;
-  };
+  const classMinutes = getTimingMinutes(timing);
+
+  return (
+    currentMinutes < classMinutes - 15 ||
+    currentMinutes >= classMinutes + 30
+  );
+};
 
   const processAttendance = async (
     memberId,
