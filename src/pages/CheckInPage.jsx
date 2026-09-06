@@ -17,7 +17,8 @@ function CheckInPage() {
     "6:00 AM",
     "7:00 AM",
     "8:15 AM",
-    "6:00 PM"
+    "6:00 PM",
+    "10:00 PM"
   ];
 
   const isAdmin =
@@ -269,6 +270,10 @@ function CheckInPage() {
           <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
           </h1>
+
+          <p className="text-black text-xl mt-3">
+           
+          </p>
 
           {/* DAY + DATE + TIME */}
 <div
