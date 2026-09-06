@@ -233,6 +233,17 @@ function CheckInPage() {
       }
     );
 
+  const formattedTime =
+    currentTime.toLocaleTimeString(
+      "en-IN",
+      {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }
+    );
+
   return (
     <div
       className="
@@ -281,6 +292,7 @@ function CheckInPage() {
       font-bold
     "
   >
+    {formattedTime}
   </div>
 </div>
 
