@@ -11,6 +11,18 @@ function CheckInPage() {
   const [query, setQuery] = useState("");
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
+  const [classTiming, setClassTiming] = useState("");
+
+  const classTimings = [
+    "6:00 AM",
+    "7:00 AM",
+    "8:00 AM",
+    "9:00 AM",
+    "5:00 PM",
+    "6:00 PM",
+    "7:00 PM",
+    "8:00 PM"
+  ];
 
   useEffect(() => {
     fetchAllMembers();
@@ -56,13 +68,21 @@ function CheckInPage() {
     type
   ) => {
 
+    if (!classTiming) {
+
+      toast.error("Please select a class timing first.");
+
+      return;
+    }
+
     try {
 
       await axios.post(
         `${API_BASE_URL}/checkins`,
         {
           memberId,
-          type
+          type,
+          classTiming
         }
       );
 
@@ -196,6 +216,55 @@ function CheckInPage() {
         </div>
 
 
+        <div
+          onClick={(e) =>
+            e.stopPropagation()
+          }
+          className="mb-6"
+        >
+
+          <label className="block text-2xl font-bold mb-3">
+            Class Timing
+          </label>
+
+          <select
+            value={classTiming}
+            onChange={(e) =>
+              setClassTiming(e.target.value)
+            }
+            className="
+              w-full
+              p-6
+              rounded-3xl
+              bg-white
+              text-black
+              text-3xl
+              outline-none
+              shadow-2xl
+              cursor-pointer
+            "
+          >
+
+            <option value="">
+              Select class timing
+            </option>
+
+            {classTimings.map(timing => (
+
+              <option
+                key={timing}
+                value={timing}
+              >
+                {timing}
+              </option>
+
+            ))}
+
+          </select>
+
+        </div>
+
+
         <input
           type="text"
           placeholder="Search member..."
@@ -273,6 +342,7 @@ function CheckInPage() {
               <div className="flex items-center gap-2">
 
                 <button
+                  disabled={!classTiming}
                   onClick={(e) => {
 
                     e.stopPropagation();
@@ -283,7 +353,7 @@ function CheckInPage() {
                     );
 
                   }}
-                  className="
+                  className={`
                     bg-white
                     text-black
                     px-5
@@ -291,15 +361,20 @@ function CheckInPage() {
                     rounded-2xl
                     text-xl
                     font-bold
-                    active:scale-95
                     transition
-                  "
+                    ${
+                      !classTiming
+                        ? "opacity-40 cursor-not-allowed"
+                        : "active:scale-95"
+                    }
+                  `}
                 >
                   Check In
                 </button>
 
 
                 <button
+                  disabled={!classTiming}
                   onClick={(e) => {
 
                     e.stopPropagation();
@@ -310,7 +385,7 @@ function CheckInPage() {
                     );
 
                   }}
-                  className="
+                  className={`
                     bg-zinc-700
                     text-white
                     px-5
@@ -318,9 +393,13 @@ function CheckInPage() {
                     rounded-2xl
                     text-xl
                     font-bold
-                    active:scale-95
                     transition
-                  "
+                    ${
+                      !classTiming
+                        ? "opacity-40 cursor-not-allowed"
+                        : "active:scale-95"
+                    }
+                  `}
                 >
                   No Show
                 </button>
