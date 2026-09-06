@@ -356,10 +356,6 @@ function CheckInPage() {
             {formattedDate}
           </div>
 
-          <div className="text-xl text-zinc-400 mt-2">
-            Select the class timing before checking in
-          </div>
-
         </div>
 
 
