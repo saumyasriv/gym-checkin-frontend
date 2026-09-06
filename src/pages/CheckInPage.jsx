@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
 function CheckInPage() {
-
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
@@ -14,9 +13,7 @@ function CheckInPage() {
 
   const [selectedTimings, setSelectedTimings] = useState({});
 
-  const [currentTime, setCurrentTime] = useState(
-    new Date()
-  );
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const classTimings = [
     "6:00 AM",
@@ -32,99 +29,92 @@ function CheckInPage() {
   const isAdmin =
     localStorage.getItem("isAdmin") === "true";
 
-
   useEffect(() => {
-
     fetchAllMembers();
-
   }, []);
 
-
+  /*
+   * Keep the clock updated every minute.
+   */
   useEffect(() => {
-
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
 
     return () => clearInterval(timer);
-
   }, []);
 
-
+  /*
+   * Filter members when searching.
+   */
   useEffect(() => {
-
     if (!query.trim()) {
       setMembers([]);
       return;
     }
 
-    const filteredMembers =
-      allMembers.filter(member =>
-        member.name
-          .toLowerCase()
-          .includes(query.toLowerCase())
-      );
+    const filteredMembers = allMembers.filter((member) =>
+      member.name
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    );
 
     setMembers(filteredMembers);
-
   }, [query, allMembers]);
 
-
   const fetchAllMembers = async () => {
-
     try {
-
       const response = await axios.get(
         `${API_BASE_URL}/members`
       );
 
       setAllMembers(response.data);
-
     } catch (error) {
-
       console.error(error);
-
-      toast.error(
-        "Failed to load members"
-      );
-
+      toast.error("Failed to load members");
     }
-
   };
 
-
+  /*
+   * Convert:
+   * "6:00 AM" -> 360
+   * "6:00 PM" -> 1080
+   */
   const getTimingMinutes = (timing) => {
+    const [time, period] = timing.split(" ");
 
-    const [time, period] =
-      timing.split(" ");
-
-    let [hours, minutes] =
-      time.split(":").map(Number);
+    let [hours, minutes] = time
+      .split(":")
+      .map(Number);
 
     if (period === "AM") {
-
       if (hours === 12) {
         hours = 0;
       }
-
     } else {
-
       if (hours !== 12) {
         hours += 12;
       }
-
     }
 
-    return (
-      hours * 60 +
-      minutes
-    );
-
+    return hours * 60 + minutes;
   };
 
-
+  /*
+   * A class remains selectable from before its start
+   * until 30 minutes after it starts.
+   *
+   * Example:
+   *
+   * 5:59 PM
+   * 5:00 PM -> disabled
+   * 6:00 PM -> enabled
+   * 7:00 PM -> enabled
+   *
+   * 6:31 PM
+   * 6:00 PM -> disabled
+   */
   const isTimingDisabled = (timing) => {
-
     const currentMinutes =
       currentTime.getHours() * 60 +
       currentTime.getMinutes();
@@ -132,45 +122,24 @@ function CheckInPage() {
     const classMinutes =
       getTimingMinutes(timing);
 
-    /*
-      Session is available from the class start
-      until 30 minutes after the class.
-
-      Example:
-      6:00 PM
-      Available: 6:00 PM - 6:30 PM
-      Disabled after 6:30 PM
-    */
-
-    return (
-      currentMinutes < classMinutes ||
-      currentMinutes > classMinutes + 30
-    );
-
+    return currentMinutes > classMinutes + 30;
   };
-
 
   const processAttendance = async (
     memberId,
     type
   ) => {
-
     const classTiming =
       selectedTimings[memberId];
 
     if (!classTiming) {
-
       toast.error(
         "Please select a class timing first."
       );
-
       return;
-
     }
 
-
     try {
-
       await axios.post(
         `${API_BASE_URL}/checkins`,
         {
@@ -180,27 +149,18 @@ function CheckInPage() {
         }
       );
 
-
       if (type === "CHECKIN") {
-
-        toast.success(
-          "Checked in!"
-        );
-
+        toast.success("Checked in!");
       } else {
-
-        toast.success(
-          "No show marked!"
-        );
-
+        toast.success("No show marked!");
       }
 
-
-      setMembers(prevMembers =>
-        prevMembers.map(member => {
-
+      /*
+       * Update the visible search results.
+       */
+      setMembers((prevMembers) =>
+        prevMembers.map((member) => {
           if (member.id === memberId) {
-
             return {
               ...member,
               totalRemainingCredits:
@@ -208,20 +168,18 @@ function CheckInPage() {
                   member.totalRemainingCredits
                 ) - 1
             };
-
           }
 
           return member;
-
         })
       );
 
-
-      setAllMembers(prevMembers =>
-        prevMembers.map(member => {
-
+      /*
+       * Update the master member list as well.
+       */
+      setAllMembers((prevMembers) =>
+        prevMembers.map((member) => {
           if (member.id === memberId) {
-
             return {
               ...member,
               totalRemainingCredits:
@@ -229,124 +187,89 @@ function CheckInPage() {
                   member.totalRemainingCredits
                 ) - 1
             };
-
           }
 
           return member;
-
         })
       );
 
-
-      setSelectedTimings(prev => {
-
-        const updated = {
-          ...prev
-        };
+      /*
+       * Clear selected session after attendance.
+       */
+      setSelectedTimings((prev) => {
+        const updated = { ...prev };
 
         delete updated[memberId];
 
         return updated;
-
       });
-
-
     } catch (error) {
-
       console.error(error);
 
       const message =
         error.response?.data;
 
-
-      if (
-        message === "Credits expired"
-      ) {
-
-        toast.error(
-          "Credits expired!"
-        );
-
+      if (message === "Credits expired") {
+        toast.error("Credits expired!");
       } else {
-
-        toast.error(
-          "No Credits!"
-        );
-
+        toast.error("No Credits!");
       }
-
     }
-
   };
 
-
-  const deleteMember = async (
-    memberId
-  ) => {
-
-    const confirmed =
-      window.confirm(
-        "Delete this member permanently?"
-      );
+  const deleteMember = async (memberId) => {
+    const confirmed = window.confirm(
+      "Delete this member permanently?"
+    );
 
     if (!confirmed) {
       return;
     }
 
-
     try {
-
       await axios.delete(
         `${API_BASE_URL}/members/${memberId}`
       );
 
-      toast.success(
-        "Member deleted"
-      );
+      toast.success("Member deleted");
 
-
-      setMembers(currentMembers =>
+      setMembers((currentMembers) =>
         currentMembers.filter(
-          member =>
+          (member) =>
             member.id !== memberId
         )
       );
 
-
-      setAllMembers(currentMembers =>
+      setAllMembers((currentMembers) =>
         currentMembers.filter(
-          member =>
+          (member) =>
             member.id !== memberId
         )
       );
-
-
     } catch (error) {
-
       console.error(error);
-
-      toast.error(
-        "Failed to delete member"
-      );
-
+      toast.error("Failed to delete member");
     }
-
   };
 
-
+  /*
+   * Date shown at top-right.
+   */
   const formattedDate =
     currentTime.toLocaleDateString(
       "en-IN",
       {
         timeZone: "Asia/Kolkata",
-        weekday: "long",
+        weekday: "short",
         day: "numeric",
-        month: "long",
+        month: "short",
         year: "numeric"
       }
     );
 
-
+  /*
+   * Time shown at top-right.
+   */
   const formattedTime =
     currentTime.toLocaleTimeString(
       "en-IN",
@@ -358,43 +281,28 @@ function CheckInPage() {
       }
     );
 
-
   return (
-
     <div
       className="
         min-h-screen
         text-black
-        p-8
+        px-14
+        py-6
       "
       onClick={() => {
-
         setMembers([]);
         setQuery("");
-
       }}
     >
-
-      <div
-        className="
-          max-w-5xl
-          mx-auto
-        "
-      >
-
+      <div className="w-full">
 
         {/* HEADER */}
-
-        <div
-          className="
-            mb-10
-            relative
-          "
-        >
+        <div className="relative mb-10">
 
           <h1
             className="
-              text-6xl
+              text-[72px]
+              leading-none
               font-bold
               tracking-tight
             "
@@ -402,115 +310,140 @@ function CheckInPage() {
             Member Check-In
           </h1>
 
-
           <p
             className="
-              text-black
-              text-xl
-              mt-3
+              text-[34px]
+              leading-none
+              mt-4
+              text-black/80
             "
           >
             Group class check-ins
           </p>
 
-
-          {/* SMALL DATE + TIME */}
-
+          {/* DATE + TIME */}
           <div
             className="
               absolute
-              right-0
-              top-1
+              right-2
+              top-2
               text-right
-              text-sm
-              font-medium
-              leading-tight
             "
           >
-
-            <div>
+            <div
+              className="
+                text-[30px]
+                font-medium
+                leading-tight
+              "
+            >
               {formattedDate}
             </div>
 
             <div
               className="
-                mt-1
-                text-black/60
+                text-[30px]
+                font-medium
+                leading-tight
+                mt-3
               "
             >
               {formattedTime}
             </div>
-
           </div>
-
         </div>
 
-
-        {/* SEARCH */}
-
-        <input
-          type="text"
-          placeholder="Search member..."
-          value={query}
-          onChange={(e) =>
-            setQuery(e.target.value)
-          }
+        {/* SEARCH BAR */}
+        <div
+          className="
+            relative
+            w-full
+            mb-6
+          "
           onClick={(e) =>
             e.stopPropagation()
           }
-          className="
-            w-full
-            p-6
-            rounded-3xl
-            bg-white
-            text-black
-            text-3xl
-            outline-none
-            shadow-2xl
-          "
-        />
-
-
-        {/* MEMBERS */}
-
-        <div
-          className="
-            mt-10
-            space-y-4
-          "
         >
+          {/* SEARCH ICON */}
+          <svg
+            className="
+              absolute
+              left-8
+              top-1/2
+              -translate-y-1/2
+              w-10
+              h-10
+              text-black
+            "
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="7"
+            />
+            <line
+              x1="16.65"
+              y1="16.65"
+              x2="21"
+              y2="21"
+            />
+          </svg>
 
-          {members.map(member => {
+          <input
+            type="text"
+            placeholder="Search member..."
+            value={query}
+            onChange={(e) =>
+              setQuery(e.target.value)
+            }
+            className="
+              w-full
+              h-[96px]
+              pl-24
+              pr-8
+              rounded-[32px]
+              bg-white
+              text-black
+              text-[32px]
+              outline-none
+              shadow-xl
+            "
+          />
+        </div>
 
+        {/* MEMBER RESULTS */}
+        <div className="space-y-6">
+
+          {members.map((member) => {
             const selectedTiming =
               selectedTimings[member.id] || "";
 
-
             return (
-
               <div
                 key={member.id}
                 onClick={(e) => {
-
                   e.stopPropagation();
 
                   if (isAdmin) {
-
                     navigate(
                       `/members/${member.id}`
                     );
-
                   }
-
                 }}
                 className="
+                  w-full
+                  min-h-[168px]
                   bg-black/80
                   backdrop-blur-md
-                  border
-                  border-black/10
-                  px-5
-                  py-4
-                  rounded-3xl
+                  px-9
+                  py-7
+                  rounded-[32px]
                   flex
                   items-center
                   shadow-xl
@@ -518,19 +451,13 @@ function CheckInPage() {
                 "
               >
 
-
-                {/* MEMBER INFO */}
-
-                <div
-                  className="
-                    flex-1
-                    min-w-0
-                  "
-                >
+                {/* MEMBER INFORMATION */}
+                <div className="flex-1 min-w-0">
 
                   <div
                     className="
-                      text-3xl
+                      text-[42px]
+                      leading-tight
                       font-semibold
                       text-white
                     "
@@ -538,79 +465,68 @@ function CheckInPage() {
                     {member.name}
                   </div>
 
-
                   <div
                     className={`
-                      text-xl
-                      mt-1
+                      text-[30px]
+                      leading-tight
+                      mt-3
                       ${
                         member.totalRemainingCredits <= 4
                           ? "text-red-500 font-bold"
-                          : "text-zinc-400"
+                          : "text-zinc-300"
                       }
                     `}
                   >
-                    {member.totalRemainingCredits}
-                    {" "}
+                    {member.totalRemainingCredits}{" "}
                     credits remaining
                   </div>
 
                 </div>
 
-
-                {/* COMPACT CONTROLS */}
-
+                {/* CONTROLS */}
                 <div
                   className="
                     flex
                     items-center
-                    gap-2
+                    gap-5
                     flex-shrink-0
                   "
+                  onClick={(e) =>
+                    e.stopPropagation()
+                  }
                 >
 
-
                   {/* SESSION */}
-
                   <select
                     value={selectedTiming}
                     onChange={(e) => {
-
-                      e.stopPropagation();
-
                       setSelectedTimings(
-                        prev => ({
+                        (prev) => ({
                           ...prev,
                           [member.id]:
                             e.target.value
                         })
                       );
-
                     }}
-                    onClick={(e) =>
-                      e.stopPropagation()
-                    }
                     className="
-                      h-12
-                      w-[145px]
+                      h-[92px]
+                      w-[218px]
                       bg-white
                       text-black
-                      px-4
-                      rounded-2xl
-                      text-lg
+                      px-8
+                      rounded-[24px]
+                      text-[28px]
                       font-bold
                       outline-none
                       cursor-pointer
                     "
                   >
-
                     <option value="">
                       Session
                     </option>
 
                     {classTimings.map(
-                      timing => (
-
+                      (timing) => (
                         <option
                           key={timing}
                           value={timing}
@@ -620,32 +536,24 @@ function CheckInPage() {
                         >
                           {timing}
                         </option>
-
                       )
                     )}
-
                   </select>
 
-
                   {/* CHECK IN */}
-
                   <button
                     disabled={!selectedTiming}
-                    onClick={(e) => {
-
-                      e.stopPropagation();
-
+                    onClick={() =>
                       processAttendance(
                         member.id,
                         "CHECKIN"
-                      );
-
-                    }}
+                      )
+                    }
                     className={`
-                      h-12
-                      px-5
-                      rounded-2xl
-                      text-lg
+                      h-[92px]
+                      px-9
+                      rounded-[24px]
+                      text-[28px]
                       font-bold
                       whitespace-nowrap
                       transition
@@ -659,7 +567,7 @@ function CheckInPage() {
                           `
                           : `
                             bg-white/40
-                            text-black/50
+                            text-black/40
                             cursor-not-allowed
                           `
                       }
@@ -668,28 +576,21 @@ function CheckInPage() {
                     Check In
                   </button>
 
-
                   {/* NO SHOW — ADMIN ONLY */}
-
                   {isAdmin && (
-
                     <button
                       disabled={!selectedTiming}
-                      onClick={(e) => {
-
-                        e.stopPropagation();
-
+                      onClick={() =>
                         processAttendance(
                           member.id,
                           "NO_SHOW"
-                        );
-
-                      }}
+                        )
+                      }
                       className={`
-                        h-12
-                        px-5
-                        rounded-2xl
-                        text-lg
+                        h-[92px]
+                        px-9
+                        rounded-[24px]
+                        text-[28px]
                         font-bold
                         whitespace-nowrap
                         transition
@@ -711,58 +612,43 @@ function CheckInPage() {
                     >
                       No Show
                     </button>
-
                   )}
 
-
                   {/* DELETE — ADMIN ONLY */}
-
                   {isAdmin && (
-
                     <button
-                      onClick={(e) => {
-
-                        e.stopPropagation();
-
+                      onClick={() =>
                         deleteMember(
                           member.id
-                        );
-
-                      }}
+                        )
+                      }
                       className="
-                        h-12
-                        px-5
-                        rounded-2xl
-                        text-lg
+                        h-[92px]
+                        px-10
+                        rounded-[24px]
+                        text-[28px]
                         font-bold
                         whitespace-nowrap
                         bg-red-600
                         text-white
                         active:scale-95
                         transition
+                        cursor-pointer
                       "
                     >
                       Delete
                     </button>
-
                   )}
 
                 </div>
-
               </div>
-
             );
-
           })}
 
         </div>
-
       </div>
-
     </div>
-
   );
-
 }
 
 export default CheckInPage;
