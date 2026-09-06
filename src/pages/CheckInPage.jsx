@@ -275,7 +275,7 @@ function CheckInPage() {
             Group class check-ins
           </p>
 
-         {/* DAY + DATE + TIME */}
+          {/* DAY + DATE + TIME */}
 <div
   className="
     absolute
@@ -301,6 +301,8 @@ function CheckInPage() {
     {formattedTime}
   </div>
 </div>
+
+        </div>
 
         {/* SEARCH BAR */}
         <div
