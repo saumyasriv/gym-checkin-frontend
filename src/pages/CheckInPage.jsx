@@ -85,7 +85,9 @@ function CheckInPage() {
 
       console.error(error);
 
-      toast.error("Failed to load members");
+      toast.error(
+        "Failed to load members"
+      );
 
     }
 
@@ -94,10 +96,12 @@ function CheckInPage() {
 
   const getTimingMinutes = (timing) => {
 
-    const [time, period] = timing.split(" ");
+    const [time, period] =
+      timing.split(" ");
 
     let [hours, minutes] =
       time.split(":").map(Number);
+
 
     if (period === "AM") {
 
@@ -113,7 +117,11 @@ function CheckInPage() {
 
     }
 
-    return hours * 60 + minutes;
+
+    return (
+      hours * 60 +
+      minutes
+    );
 
   };
 
@@ -130,7 +138,10 @@ function CheckInPage() {
     const gracePeriodEnd =
       classMinutes + 30;
 
-    return currentMinutes > gracePeriodEnd;
+
+    return (
+      currentMinutes > gracePeriodEnd
+    );
 
   };
 
@@ -143,6 +154,7 @@ function CheckInPage() {
     const classTiming =
       selectedTimings[memberId];
 
+
     if (!classTiming) {
 
       toast.error(
@@ -152,6 +164,7 @@ function CheckInPage() {
       return;
 
     }
+
 
     try {
 
@@ -167,11 +180,15 @@ function CheckInPage() {
 
       if (type === "CHECKIN") {
 
-        toast.success("Checked in!");
+        toast.success(
+          "Checked in!"
+        );
 
       } else {
 
-        toast.success("No show marked!");
+        toast.success(
+          "No show marked!"
+        );
 
       }
 
@@ -218,6 +235,20 @@ function CheckInPage() {
       );
 
 
+      // Clear the selected session
+      setSelectedTimings(prev => {
+
+        const updated = {
+          ...prev
+        };
+
+        delete updated[memberId];
+
+        return updated;
+
+      });
+
+
     } catch (error) {
 
       console.error(error);
@@ -226,7 +257,9 @@ function CheckInPage() {
         error.response?.data;
 
 
-      if (message === "Credits expired") {
+      if (
+        message === "Credits expired"
+      ) {
 
         toast.error(
           "Credits expired!"
@@ -245,12 +278,15 @@ function CheckInPage() {
   };
 
 
-  const deleteMember = async (memberId) => {
+  const deleteMember = async (
+    memberId
+  ) => {
 
     const confirmed =
       window.confirm(
         "Delete this member permanently?"
       );
+
 
     if (!confirmed) {
       return;
@@ -263,6 +299,7 @@ function CheckInPage() {
         `${API_BASE_URL}/members/${memberId}`
       );
 
+
       toast.success(
         "Member deleted"
       );
@@ -270,14 +307,16 @@ function CheckInPage() {
 
       setMembers(currentMembers =>
         currentMembers.filter(
-          member => member.id !== memberId
+          member =>
+            member.id !== memberId
         )
       );
 
 
       setAllMembers(currentMembers =>
         currentMembers.filter(
-          member => member.id !== memberId
+          member =>
+            member.id !== memberId
         )
       );
 
@@ -323,7 +362,11 @@ function CheckInPage() {
   return (
 
     <div
-      className="min-h-screen text-black p-8"
+      className="
+        min-h-screen
+        text-black
+        p-8
+      "
       onClick={() => {
 
         setMembers([]);
@@ -332,16 +375,43 @@ function CheckInPage() {
       }}
     >
 
-      <div className="max-w-5xl mx-auto">
+      <div
+        className="
+          max-w-5xl
+          mx-auto
+        "
+      >
 
 
         {/* Header */}
 
-        <div className="mb-10 relative">
+        <div
+          className="
+            mb-10
+            relative
+          "
+        >
 
-          <h1 className="text-6xl font-bold tracking-tight">
+          <h1
+            className="
+              text-6xl
+              font-bold
+              tracking-tight
+            "
+          >
             Member Check-In
           </h1>
+
+
+          <p
+            className="
+              text-black
+              text-xl
+              mt-3
+            "
+          >
+            Group class check-ins
+          </p>
 
 
           {/* Date + Time */}
@@ -362,7 +432,12 @@ function CheckInPage() {
               {formattedDate}
             </div>
 
-            <div className="text-black/60 mt-1">
+            <div
+              className="
+                text-black/60
+                mt-1
+              "
+            >
               {formattedTime}
             </div>
 
@@ -398,12 +473,18 @@ function CheckInPage() {
 
         {/* Members */}
 
-        <div className="mt-10 space-y-5">
+        <div
+          className="
+            mt-10
+            space-y-5
+          "
+        >
 
           {members.map(member => {
 
             const selectedTiming =
-              selectedTimings[member.id] || "";
+              selectedTimings[member.id] ||
+              "";
 
 
             return (
@@ -439,11 +520,22 @@ function CheckInPage() {
 
                 {/* Member Information */}
 
-                <div className="flex-1">
+                <div
+                  className="
+                    flex-1
+                  "
+                >
 
-                  <div className="text-4xl font-semibold text-white">
+                  <div
+                    className="
+                      text-4xl
+                      font-semibold
+                      text-white
+                    "
+                  >
                     {member.name}
                   </div>
+
 
                   <div
                     className={`
@@ -456,9 +548,11 @@ function CheckInPage() {
                       }
                     `}
                   >
+
                     {member.totalRemainingCredits}
                     {" "}
                     credits remaining
+
                   </div>
 
                 </div>
@@ -475,7 +569,7 @@ function CheckInPage() {
                 >
 
 
-                  {/* Session */}
+                  {/* Session Dropdown */}
 
                   <select
                     value={selectedTiming}
@@ -496,16 +590,18 @@ function CheckInPage() {
                       e.stopPropagation()
                     }
                     className="
+                      w-[190px]
+                      min-w-[190px]
+                      max-w-[190px]
+                      h-[58px]
                       bg-white
                       text-black
                       px-5
-                      py-3
                       rounded-2xl
                       text-xl
                       font-bold
                       outline-none
                       cursor-pointer
-                      h-[58px]
                     "
                   >
 
@@ -514,19 +610,21 @@ function CheckInPage() {
                     </option>
 
 
-                    {classTimings.map(timing => (
+                    {classTimings.map(
+                      timing => (
 
-                      <option
-                        key={timing}
-                        value={timing}
-                        disabled={isTimingDisabled(
-                          timing
-                        )}
-                      >
-                        {timing}
-                      </option>
+                        <option
+                          key={timing}
+                          value={timing}
+                          disabled={isTimingDisabled(
+                            timing
+                          )}
+                        >
+                          {timing}
+                        </option>
 
-                    ))}
+                      )
+                    )}
 
                   </select>
 
@@ -546,14 +644,16 @@ function CheckInPage() {
 
                     }}
                     className={`
+                      w-[190px]
+                      min-w-[190px]
+                      max-w-[190px]
+                      h-[58px]
                       bg-white
                       text-black
                       px-5
-                      py-3
                       rounded-2xl
                       text-xl
                       font-bold
-                      h-[58px]
                       transition
                       ${
                         !selectedTiming
@@ -583,14 +683,16 @@ function CheckInPage() {
 
                       }}
                       className={`
+                        w-[190px]
+                        min-w-[190px]
+                        max-w-[190px]
+                        h-[58px]
                         bg-zinc-700
                         text-white
                         px-5
-                        py-3
                         rounded-2xl
                         text-xl
                         font-bold
-                        h-[58px]
                         transition
                         ${
                           !selectedTiming
@@ -620,14 +722,16 @@ function CheckInPage() {
 
                       }}
                       className="
+                        w-[190px]
+                        min-w-[190px]
+                        max-w-[190px]
+                        h-[58px]
                         bg-red-600
                         text-white
                         px-5
-                        py-3
                         rounded-2xl
                         text-xl
                         font-bold
-                        h-[58px]
                         active:scale-95
                         transition
                       "
@@ -652,6 +756,7 @@ function CheckInPage() {
     </div>
 
   );
+
 }
 
 export default CheckInPage;
