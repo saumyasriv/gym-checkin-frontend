@@ -21,9 +21,12 @@ function CheckInPage() {
   const classTimings = [
     "6:00 AM",
     "7:00 AM",
-    "8:15 AM",
+    "8:00 AM",
+    "9:00 AM",
+    "5:00 PM",
     "6:00 PM",
-    "10:00 PM"
+    "7:00 PM",
+    "8:00 PM"
   ];
 
   const isAdmin =
@@ -308,6 +311,18 @@ function CheckInPage() {
     );
 
 
+  const formattedTime =
+    currentTime.toLocaleTimeString(
+      "en-IN",
+      {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }
+    );
+
+
   return (
 
     <div
@@ -325,35 +340,35 @@ function CheckInPage() {
 
         {/* Header */}
 
-        <div className="mb-10">
+        <div className="mb-10 relative">
 
           <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
           </h1>
 
-          <p className="text-black text-xl mt-3">
-            Group class check-ins
-          </p>
 
-        </div>
+          {/* Date + Time */}
 
+          <div
+            className="
+              absolute
+              top-0
+              right-0
+              text-right
+              text-sm
+              font-medium
+              leading-tight
+            "
+          >
 
-        {/* Date Display */}
+            <div>
+              {formattedDate}
+            </div>
 
-        <div
-          className="
-            mb-8
-            bg-black
-            text-white
-            rounded-3xl
-            p-6
-            text-center
-            shadow-2xl
-          "
-        >
+            <div className="text-black/60 mt-1">
+              {formattedTime}
+            </div>
 
-          <div className="text-3xl font-bold">
-            {formattedDate}
           </div>
 
         </div>
@@ -433,7 +448,6 @@ function CheckInPage() {
                     {member.name}
                   </div>
 
-
                   <div
                     className={`
                       text-2xl
@@ -485,16 +499,17 @@ function CheckInPage() {
                       e.stopPropagation()
                     }
                     className="
-  bg-white
-  text-black
-  h-[58px]
-  px-3
-  rounded-2xl
-  text-lg
-  font-bold
-  outline-none
-  cursor-pointer
-"
+                      bg-white
+                      text-black
+                      px-5
+                      py-3
+                      rounded-2xl
+                      text-xl
+                      font-bold
+                      outline-none
+                      cursor-pointer
+                      h-[58px]
+                    "
                   >
 
                     <option value="">
@@ -541,6 +556,7 @@ function CheckInPage() {
                       rounded-2xl
                       text-xl
                       font-bold
+                      h-[58px]
                       transition
                       ${
                         !selectedTiming
@@ -577,6 +593,7 @@ function CheckInPage() {
                         rounded-2xl
                         text-xl
                         font-bold
+                        h-[58px]
                         transition
                         ${
                           !selectedTiming
@@ -613,6 +630,7 @@ function CheckInPage() {
                         rounded-2xl
                         text-xl
                         font-bold
+                        h-[58px]
                         active:scale-95
                         transition
                       "
