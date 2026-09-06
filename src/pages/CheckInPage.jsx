@@ -33,9 +33,6 @@ function CheckInPage() {
     fetchAllMembers();
   }, []);
 
-  /*
-   * Keep the clock updated every minute.
-   */
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -44,9 +41,6 @@ function CheckInPage() {
     return () => clearInterval(timer);
   }, []);
 
-  /*
-   * Filter members when searching.
-   */
   useEffect(() => {
     if (!query.trim()) {
       setMembers([]);
@@ -76,7 +70,7 @@ function CheckInPage() {
   };
 
   /*
-   * Convert:
+   * Convert a class timing such as:
    * "6:00 AM" -> 360
    * "6:00 PM" -> 1080
    */
@@ -101,17 +95,17 @@ function CheckInPage() {
   };
 
   /*
-   * A class remains selectable from before its start
-   * until 30 minutes after it starts.
+   * A class can be selected before it starts
+   * and until 30 minutes after its start.
    *
    * Example:
    *
-   * 5:59 PM
+   * 5:59 PM:
    * 5:00 PM -> disabled
-   * 6:00 PM -> enabled
-   * 7:00 PM -> enabled
+   * 6:00 PM -> available
+   * 7:00 PM -> available
    *
-   * 6:31 PM
+   * 6:31 PM:
    * 6:00 PM -> disabled
    */
   const isTimingDisabled = (timing) => {
@@ -155,9 +149,6 @@ function CheckInPage() {
         toast.success("No show marked!");
       }
 
-      /*
-       * Update the visible search results.
-       */
       setMembers((prevMembers) =>
         prevMembers.map((member) => {
           if (member.id === memberId) {
@@ -174,9 +165,6 @@ function CheckInPage() {
         })
       );
 
-      /*
-       * Update the master member list as well.
-       */
       setAllMembers((prevMembers) =>
         prevMembers.map((member) => {
           if (member.id === memberId) {
@@ -193,9 +181,6 @@ function CheckInPage() {
         })
       );
 
-      /*
-       * Clear selected session after attendance.
-       */
       setSelectedTimings((prev) => {
         const updated = { ...prev };
 
@@ -252,9 +237,6 @@ function CheckInPage() {
     }
   };
 
-  /*
-   * Date shown at top-right.
-   */
   const formattedDate =
     currentTime.toLocaleDateString(
       "en-IN",
@@ -267,9 +249,6 @@ function CheckInPage() {
       }
     );
 
-  /*
-   * Time shown at top-right.
-   */
   const formattedTime =
     currentTime.toLocaleTimeString(
       "en-IN",
@@ -286,38 +265,23 @@ function CheckInPage() {
       className="
         min-h-screen
         text-black
-        px-14
-        py-6
+        p-8
       "
       onClick={() => {
         setMembers([]);
         setQuery("");
       }}
     >
-      <div className="w-full">
+      <div className="max-w-5xl mx-auto">
 
         {/* HEADER */}
-        <div className="relative mb-10">
+        <div className="mb-10 relative">
 
-          <h1
-            className="
-              text-[72px]
-              leading-none
-              font-bold
-              tracking-tight
-            "
-          >
+          <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
           </h1>
 
-          <p
-            className="
-              text-[34px]
-              leading-none
-              mt-4
-              text-black/80
-            "
-          >
+          <p className="text-black text-xl mt-3">
             Group class check-ins
           </p>
 
@@ -325,55 +289,44 @@ function CheckInPage() {
           <div
             className="
               absolute
-              right-2
-              top-2
+              right-0
+              top-1
               text-right
+              text-sm
+              font-medium
+              leading-tight
             "
           >
-            <div
-              className="
-                text-[30px]
-                font-medium
-                leading-tight
-              "
-            >
+            <div>
               {formattedDate}
             </div>
 
-            <div
-              className="
-                text-[30px]
-                font-medium
-                leading-tight
-                mt-3
-              "
-            >
+            <div className="mt-1 text-black/60">
               {formattedTime}
             </div>
           </div>
+
         </div>
 
-        {/* SEARCH BAR */}
+        {/* SEARCH */}
         <div
-          className="
-            relative
-            w-full
-            mb-6
-          "
+          className="relative"
           onClick={(e) =>
             e.stopPropagation()
           }
         >
+
           {/* SEARCH ICON */}
           <svg
             className="
               absolute
-              left-8
+              left-7
               top-1/2
               -translate-y-1/2
-              w-10
-              h-10
+              w-8
+              h-8
               text-black
+              pointer-events-none
             "
             viewBox="0 0 24 24"
             fill="none"
@@ -387,6 +340,7 @@ function CheckInPage() {
               cy="11"
               r="7"
             />
+
             <line
               x1="16.65"
               y1="16.65"
@@ -404,23 +358,24 @@ function CheckInPage() {
             }
             className="
               w-full
-              h-[96px]
-              pl-24
-              pr-8
-              rounded-[32px]
+              p-6
+              pl-20
+              rounded-3xl
               bg-white
               text-black
-              text-[32px]
+              text-3xl
               outline-none
-              shadow-xl
+              shadow-2xl
             "
           />
+
         </div>
 
         {/* MEMBER RESULTS */}
-        <div className="space-y-6">
+        <div className="mt-10 space-y-5">
 
           {members.map((member) => {
+
             const selectedTiming =
               selectedTimings[member.id] || "";
 
@@ -437,13 +392,11 @@ function CheckInPage() {
                   }
                 }}
                 className="
-                  w-full
-                  min-h-[168px]
                   bg-black/80
                   backdrop-blur-md
-                  px-9
-                  py-7
-                  rounded-[32px]
+                  border border-black/10
+                  p-6
+                  rounded-3xl
                   flex
                   items-center
                   shadow-xl
@@ -451,13 +404,12 @@ function CheckInPage() {
                 "
               >
 
-                {/* MEMBER INFORMATION */}
+                {/* MEMBER INFO */}
                 <div className="flex-1 min-w-0">
 
                   <div
                     className="
-                      text-[42px]
-                      leading-tight
+                      text-4xl
                       font-semibold
                       text-white
                     "
@@ -467,13 +419,12 @@ function CheckInPage() {
 
                   <div
                     className={`
-                      text-[30px]
-                      leading-tight
-                      mt-3
+                      text-2xl
+                      mt-2
                       ${
                         member.totalRemainingCredits <= 4
                           ? "text-red-500 font-bold"
-                          : "text-zinc-300"
+                          : "text-zinc-400"
                       }
                     `}
                   >
@@ -488,7 +439,7 @@ function CheckInPage() {
                   className="
                     flex
                     items-center
-                    gap-5
+                    gap-2
                     flex-shrink-0
                   "
                   onClick={(e) =>
@@ -496,49 +447,83 @@ function CheckInPage() {
                   }
                 >
 
-                  {/* SESSION */}
-                  <select
-                    value={selectedTiming}
-                    onChange={(e) => {
-                      setSelectedTimings(
-                        (prev) => ({
-                          ...prev,
-                          [member.id]:
-                            e.target.value
-                        })
-                      );
-                    }}
+                  {/* SESSION DROPDOWN */}
+                  <div
                     className="
-                      h-[92px]
-                      w-[218px]
-                      bg-white
-                      text-black
-                      px-8
-                      rounded-[24px]
-                      text-[28px]
-                      font-bold
-                      outline-none
-                      cursor-pointer
+                      relative
+                      h-12
+                      w-[220px]
                     "
                   >
-                    <option value="">
-                      Session
-                    </option>
 
-                    {classTimings.map(
-                      (timing) => (
-                        <option
-                          key={timing}
-                          value={timing}
-                          disabled={isTimingDisabled(
-                            timing
-                          )}
-                        >
-                          {timing}
-                        </option>
-                      )
-                    )}
-                  </select>
+                    <select
+                      value={selectedTiming}
+                      onChange={(e) => {
+                        setSelectedTimings(
+                          (prev) => ({
+                            ...prev,
+                            [member.id]:
+                              e.target.value
+                          })
+                        );
+                      }}
+                      className="
+                        appearance-none
+                        w-full
+                        h-full
+                        bg-white
+                        text-black
+                        pl-5
+                        pr-12
+                        rounded-2xl
+                        text-lg
+                        font-bold
+                        outline-none
+                        cursor-pointer
+                      "
+                    >
+                      <option value="">
+                        Session
+                      </option>
+
+                      {classTimings.map(
+                        (timing) => (
+                          <option
+                            key={timing}
+                            value={timing}
+                            disabled={isTimingDisabled(
+                              timing
+                            )}
+                          >
+                            {timing}
+                          </option>
+                        )
+                      )}
+                    </select>
+
+                    {/* PROMINENT ARROW */}
+                    <svg
+                      className="
+                        pointer-events-none
+                        absolute
+                        right-4
+                        top-1/2
+                        -translate-y-1/2
+                        w-6
+                        h-6
+                        text-black
+                      "
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+
+                  </div>
 
                   {/* CHECK IN */}
                   <button
@@ -550,10 +535,10 @@ function CheckInPage() {
                       )
                     }
                     className={`
-                      h-[92px]
-                      px-9
-                      rounded-[24px]
-                      text-[28px]
+                      h-12
+                      px-5
+                      rounded-2xl
+                      text-lg
                       font-bold
                       whitespace-nowrap
                       transition
@@ -567,7 +552,7 @@ function CheckInPage() {
                           `
                           : `
                             bg-white/40
-                            text-black/40
+                            text-black/50
                             cursor-not-allowed
                           `
                       }
@@ -587,10 +572,10 @@ function CheckInPage() {
                         )
                       }
                       className={`
-                        h-[92px]
-                        px-9
-                        rounded-[24px]
-                        text-[28px]
+                        h-12
+                        px-5
+                        rounded-2xl
+                        text-lg
                         font-bold
                         whitespace-nowrap
                         transition
@@ -623,10 +608,10 @@ function CheckInPage() {
                         )
                       }
                       className="
-                        h-[92px]
-                        px-10
-                        rounded-[24px]
-                        text-[28px]
+                        h-12
+                        px-5
+                        rounded-2xl
+                        text-lg
                         font-bold
                         whitespace-nowrap
                         bg-red-600
@@ -641,11 +626,13 @@ function CheckInPage() {
                   )}
 
                 </div>
+
               </div>
             );
           })}
 
         </div>
+
       </div>
     </div>
   );
