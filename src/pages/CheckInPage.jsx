@@ -266,7 +266,7 @@ function CheckInPage() {
         {/* HEADER */}
         <div className="mb-10 relative">
 
-          <h1 className="text-4xl font-bold tracking-tight">
+          <h1 className="text-6xl font-bold tracking-tight">
             Member Check-In
           </h1>
 
