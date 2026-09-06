@@ -11,7 +11,8 @@ function CheckInPage() {
   const [query, setQuery] = useState("");
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
-  const [classTiming, setClassTiming] = useState("");
+
+  const [selectedTimings, setSelectedTimings] = useState({});
 
   const classTimings = [
     "6:00 AM",
@@ -63,10 +64,52 @@ function CheckInPage() {
     }
   };
 
+  const getTimingMinutes = (timing) => {
+
+    const [time, period] = timing.split(" ");
+
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (period === "AM") {
+
+      if (hours === 12) {
+        hours = 0;
+      }
+
+    } else {
+
+      if (hours !== 12) {
+        hours += 12;
+      }
+
+    }
+
+    return hours * 60 + minutes;
+  };
+
+  const isTimingDisabled = (timing) => {
+
+    const now = new Date();
+
+    const currentMinutes =
+      now.getHours() * 60 + now.getMinutes();
+
+    const classMinutes =
+      getTimingMinutes(timing);
+
+    const twentyMinutesAfterClass =
+      classMinutes + 20;
+
+    return currentMinutes > twentyMinutesAfterClass;
+  };
+
   const processAttendance = async (
     memberId,
     type
   ) => {
+
+    const classTiming =
+      selectedTimings[memberId];
 
     if (!classTiming) {
 
@@ -216,55 +259,6 @@ function CheckInPage() {
         </div>
 
 
-        <div
-          onClick={(e) =>
-            e.stopPropagation()
-          }
-          className="mb-6"
-        >
-
-          <label className="block text-2xl font-bold mb-3">
-            Class Timing
-          </label>
-
-          <select
-            value={classTiming}
-            onChange={(e) =>
-              setClassTiming(e.target.value)
-            }
-            className="
-              w-full
-              p-6
-              rounded-3xl
-              bg-white
-              text-black
-              text-3xl
-              outline-none
-              shadow-2xl
-              cursor-pointer
-            "
-          >
-
-            <option value="">
-              Select class timing
-            </option>
-
-            {classTimings.map(timing => (
-
-              <option
-                key={timing}
-                value={timing}
-              >
-                {timing}
-              </option>
-
-            ))}
-
-          </select>
-
-        </div>
-
-
         <input
           type="text"
           placeholder="Search member..."
@@ -290,153 +284,215 @@ function CheckInPage() {
 
         <div className="mt-10 space-y-5">
 
-          {members.map(member => (
+          {members.map(member => {
 
-            <div
-              key={member.id}
-              onClick={(e) => {
+            const selectedTiming =
+              selectedTimings[member.id] || "";
 
-                e.stopPropagation();
+            return (
 
-                if (isAdmin) {
-                  navigate(`/members/${member.id}`);
-                }
+              <div
+                key={member.id}
+                onClick={(e) => {
 
-              }}
-              className="
-                bg-black/80
-                backdrop-blur-md
-                border border-black/10
-                p-6
-                rounded-3xl
-                flex
-                items-center
-                shadow-xl
-                cursor-pointer
-              "
-            >
+                  e.stopPropagation();
 
-              <div className="flex-1">
+                  if (isAdmin) {
+                    navigate(`/members/${member.id}`);
+                  }
 
-                <div className="text-4xl font-semibold text-white">
-                  {member.name}
+                }}
+                className="
+                  bg-black/80
+                  backdrop-blur-md
+                  border border-black/10
+                  p-6
+                  rounded-3xl
+                  flex
+                  items-center
+                  shadow-xl
+                  cursor-pointer
+                "
+              >
+
+                <div className="flex-1">
+
+                  <div className="text-4xl font-semibold text-white">
+                    {member.name}
+                  </div>
+
+                  <div
+                    className={`
+                      text-2xl
+                      mt-2
+                      ${
+                        member.totalRemainingCredits <= 4
+                          ? "text-red-500 font-bold"
+                          : "text-zinc-400"
+                      }
+                    `}
+                  >
+                    {member.totalRemainingCredits} credits remaining
+                  </div>
+
                 </div>
 
-                <div
-                  className={`
-                    text-2xl
-                    mt-2
-                    ${
-                      member.totalRemainingCredits <= 4
-                        ? "text-red-500 font-bold"
-                        : "text-zinc-400"
+
+                <div className="flex items-center gap-2">
+
+                  {/* Class Timing */}
+
+                  <select
+                    value={selectedTiming}
+                    onChange={(e) => {
+
+                      e.stopPropagation();
+
+                      setSelectedTimings(prev => ({
+                        ...prev,
+                        [member.id]: e.target.value
+                      }));
+
+                    }}
+                    onClick={(e) =>
+                      e.stopPropagation()
                     }
-                  `}
-                >
-                  {member.totalRemainingCredits} credits remaining
-                </div>
+                    className="
+                      bg-white
+                      text-black
+                      px-4
+                      py-3
+                      rounded-2xl
+                      text-xl
+                      font-bold
+                      outline-none
+                      cursor-pointer
+                    "
+                  >
 
-              </div>
+                    <option value="">
+                      Class Timing
+                    </option>
 
+                    {classTimings.map(timing => (
 
-              <div className="flex items-center gap-2">
+                      <option
+                        key={timing}
+                        value={timing}
+                        disabled={isTimingDisabled(timing)}
+                      >
+                        {timing}
+                      </option>
 
-                <button
-                  disabled={!classTiming}
-                  onClick={(e) => {
+                    ))}
 
-                    e.stopPropagation();
-
-                    processAttendance(
-                      member.id,
-                      "CHECKIN"
-                    );
-
-                  }}
-                  className={`
-                    bg-white
-                    text-black
-                    px-5
-                    py-3
-                    rounded-2xl
-                    text-xl
-                    font-bold
-                    transition
-                    ${
-                      !classTiming
-                        ? "opacity-40 cursor-not-allowed"
-                        : "active:scale-95"
-                    }
-                  `}
-                >
-                  Check In
-                </button>
+                  </select>
 
 
-                <button
-                  disabled={!classTiming}
-                  onClick={(e) => {
-
-                    e.stopPropagation();
-
-                    processAttendance(
-                      member.id,
-                      "NO_SHOW"
-                    );
-
-                  }}
-                  className={`
-                    bg-zinc-700
-                    text-white
-                    px-5
-                    py-3
-                    rounded-2xl
-                    text-xl
-                    font-bold
-                    transition
-                    ${
-                      !classTiming
-                        ? "opacity-40 cursor-not-allowed"
-                        : "active:scale-95"
-                    }
-                  `}
-                >
-                  No Show
-                </button>
-
-
-                {isAdmin && (
+                  {/* Check In */}
 
                   <button
+                    disabled={!selectedTiming}
                     onClick={(e) => {
 
                       e.stopPropagation();
 
-                      deleteMember(member.id);
+                      processAttendance(
+                        member.id,
+                        "CHECKIN"
+                      );
 
                     }}
-                    className="
-                      bg-red-600
+                    className={`
+                      bg-white
+                      text-black
+                      px-5
+                      py-3
+                      rounded-2xl
+                      text-xl
+                      font-bold
+                      transition
+                      ${
+                        !selectedTiming
+                          ? "opacity-40 cursor-not-allowed"
+                          : "active:scale-95"
+                      }
+                    `}
+                  >
+                    Check In
+                  </button>
+
+
+                  {/* No Show */}
+
+                  <button
+                    disabled={!selectedTiming}
+                    onClick={(e) => {
+
+                      e.stopPropagation();
+
+                      processAttendance(
+                        member.id,
+                        "NO_SHOW"
+                      );
+
+                    }}
+                    className={`
+                      bg-zinc-700
                       text-white
                       px-5
                       py-3
                       rounded-2xl
                       text-xl
                       font-bold
-                      active:scale-95
                       transition
-                    "
+                      ${
+                        !selectedTiming
+                          ? "opacity-40 cursor-not-allowed"
+                          : "active:scale-95"
+                      }
+                    `}
                   >
-                    Delete
+                    No Show
                   </button>
 
-                )}
+
+                  {/* Delete */}
+
+                  {isAdmin && (
+
+                    <button
+                      onClick={(e) => {
+
+                        e.stopPropagation();
+
+                        deleteMember(member.id);
+
+                      }}
+                      className="
+                        bg-red-600
+                        text-white
+                        px-5
+                        py-3
+                        rounded-2xl
+                        text-xl
+                        font-bold
+                        active:scale-95
+                        transition
+                      "
+                    >
+                      Delete
+                    </button>
+
+                  )}
+
+                </div>
 
               </div>
 
-            </div>
+            );
 
-          ))}
+          })}
 
         </div>
 
