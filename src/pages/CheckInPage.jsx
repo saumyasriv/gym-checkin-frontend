@@ -11,13 +11,13 @@ function CheckInPage() {
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
   const [selectedTimings, setSelectedTimings] = useState({});
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   const classTimings = [
     "6:00 AM",
     "7:00 AM",
     "8:15 AM",
-    "6:00 PM"
+    "6:00 PM",
+    "PT"
   ];
 
   const isAdmin =
@@ -25,14 +25,6 @@ function CheckInPage() {
 
   useEffect(() => {
     fetchAllMembers();
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-
-    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -62,41 +54,6 @@ function CheckInPage() {
       toast.error("Failed to load members");
     }
   };
-
-  const getTimingMinutes = (timing) => {
-    const [time, period] = timing.split(" ");
-
-    let [hours, minutes] = time
-      .split(":")
-      .map(Number);
-
-    if (period === "AM") {
-      if (hours === 12) {
-        hours = 0;
-      }
-    } else {
-      if (hours !== 12) {
-        hours += 12;
-      }
-    }
-
-    return hours * 60 + minutes;
-  };
-
-  
-  const isTimingDisabled = (timing) => {
-  const now = new Date();
-
-  const currentMinutes =
-    now.getHours() * 60 + now.getMinutes();
-
-  const classMinutes = getTimingMinutes(timing);
-
-  return (
-    currentMinutes < classMinutes - 15 ||
-    currentMinutes >= classMinutes + 30
-  );
-};
 
   const processAttendance = async (
     memberId,
@@ -216,33 +173,6 @@ function CheckInPage() {
     }
   };
 
-  /*
-   * Date and time are explicitly displayed
-   * in Indian Standard Time.
-   */
-  const formattedDate =
-    currentTime.toLocaleDateString(
-      "en-IN",
-      {
-        timeZone: "Asia/Kolkata",
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-      }
-    );
-
-  const formattedTime =
-    currentTime.toLocaleTimeString(
-      "en-IN",
-      {
-        timeZone: "Asia/Kolkata",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true
-      }
-    );
-
   return (
     <div
       className="
@@ -268,34 +198,6 @@ function CheckInPage() {
            
           </p>
 
-          {/* DAY + DATE + TIME */}
-<div
-  className="
-    absolute
-    right-0
-    top-0
-    text-right
-    font-bold
-    leading-tight
-  "
->
-  <div className="text-2xl">
-    {formattedDate}
-  </div>
-
-  <div
-    className="
-      text-2xl
-      mt-2
-      text-black/70
-      font-bold
-    "
-  >
-    {formattedTime}
-  </div>
-</div>
-
-        </div>
 
         {/* SEARCH BAR */}
         <div
@@ -489,9 +391,6 @@ function CheckInPage() {
                           <option
                             key={timing}
                             value={timing}
-                            disabled={isTimingDisabled(
-                              timing
-                            )}
                           >
                             {timing}
                           </option>
