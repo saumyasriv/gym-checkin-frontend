@@ -195,9 +195,9 @@ function CheckInPage() {
           </h1>
 
           <p className="text-black text-xl mt-3">
-           
           </p>
 
+        </div>
 
         {/* SEARCH BAR */}
         <div
