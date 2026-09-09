@@ -77,16 +77,49 @@ function Layout() {
         <div className="relative z-10">
 
           {/* Navbar */}
-          <div className="bg-black text-white p-5 flex items-center">
+          <div className="bg-black text-white px-6 py-4 flex items-center">
 
             {/* Left Side */}
-            <div className="flex items-center gap-35">
+            <div className="flex items-center gap-4">
 
+              {/* CHECK-IN HOME */}
               <Link
                 to="/"
-                className="text-2xl font-semibold"
+                className="
+                  flex
+                  items-center
+                  gap-3
+                  px-4
+                  py-2
+                  rounded-2xl
+                  text-2xl
+                  font-bold
+                  transition
+                  hover:bg-white/10
+                "
               >
-                Check-In
+
+                {/* Checkmark Icon */}
+                <div
+                  className="
+                    w-9
+                    h-9
+                    rounded-full
+                    bg-yellow-400
+                    text-black
+                    flex
+                    items-center
+                    justify-center
+                    font-bold
+                  "
+                >
+                  ✓
+                </div>
+
+                <span>
+                  Check-In
+                </span>
+
               </Link>
 
               {isAdmin && !isLoginPage && (
@@ -95,21 +128,45 @@ function Layout() {
 
                   <Link
                     to="/add-member"
-                    className="text-2xl font-semibold"
+                    className="
+                      px-4
+                      py-2
+                      rounded-2xl
+                      text-xl
+                      font-semibold
+                      transition
+                      hover:bg-white/10
+                    "
                   >
                     New Member
                   </Link>
 
                   <Link
                     to="/add-membership"
-                    className="text-2xl font-semibold"
+                    className="
+                      px-4
+                      py-2
+                      rounded-2xl
+                      text-xl
+                      font-semibold
+                      transition
+                      hover:bg-white/10
+                    "
                   >
                     Add New Membership
                   </Link>
 
                   <Link
                     to="/update-existing-member"
-                    className="text-2xl font-semibold"
+                    className="
+                      px-4
+                      py-2
+                      rounded-2xl
+                      text-xl
+                      font-semibold
+                      transition
+                      hover:bg-white/10
+                    "
                   >
                     Update Existing Member
                   </Link>
@@ -127,9 +184,28 @@ function Layout() {
 
                 <Link
                   to="/admin"
-                  className="text-2xl font-semibold"
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    px-5
+                    py-2
+                    rounded-2xl
+                    border
+                    border-white/30
+                    text-xl
+                    font-semibold
+                    transition
+                    hover:bg-white
+                    hover:text-black
+                  "
                 >
                   Login
+
+                  <span className="text-lg">
+                    →
+                  </span>
+
                 </Link>
 
               )}
@@ -145,7 +221,18 @@ function Layout() {
 
                     window.location.href = "/";
                   }}
-                  className="text-2xl font-semibold"
+                  className="
+                    px-5
+                    py-2
+                    rounded-2xl
+                    border
+                    border-white/30
+                    text-xl
+                    font-semibold
+                    transition
+                    hover:bg-white
+                    hover:text-black
+                  "
                 >
                   Logout
                 </button>
