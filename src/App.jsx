@@ -76,11 +76,20 @@ function Layout() {
 
         <div className="relative z-10">
 
-          {/* Navbar */}
-          <div className="bg-black text-white px-7 py-3 flex items-center min-h-[88px]">
+          {/* ================= NAVBAR ================= */}
+          <div
+            className="
+              bg-black
+              text-white
+              px-7
+              h-[88px]
+              flex
+              items-center
+            "
+          >
 
-            {/* Left Side */}
-            <div className="flex items-center gap-2">
+            {/* LEFT */}
+            <div className="flex items-center">
 
               {/* CHECK-IN HOME */}
               <Link
@@ -89,21 +98,19 @@ function Layout() {
                   flex
                   items-center
                   gap-3
-                  px-4
-                  py-3
-                  rounded-2xl
+                  pr-7
                   text-2xl
                   font-bold
                   whitespace-nowrap
                   transition
-                  hover:bg-white/10
+                  hover:opacity-80
                 "
               >
 
                 <div
                   className="
-                    w-10
-                    h-10
+                    w-11
+                    h-11
                     rounded-full
                     bg-yellow-400
                     text-black
@@ -124,74 +131,107 @@ function Layout() {
 
               </Link>
 
+
+              {/* DIVIDER */}
+              {isAdmin && !isLoginPage && (
+                <div
+                  className="
+                    h-10
+                    w-px
+                    bg-white/20
+                    mr-5
+                  "
+                />
+              )}
+
+
               {/* ADMIN NAVIGATION */}
               {isAdmin && !isLoginPage && (
 
-                <>
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-1
+                    bg-white/[0.06]
+                    p-1.5
+                    rounded-2xl
+                  "
+                >
 
+                  {/* NEW MEMBER */}
                   <Link
                     to="/add-member"
                     className="
                       flex
                       items-center
-                      h-14
+                      justify-center
+                      h-12
                       px-5
-                      rounded-2xl
-                      text-xl
+                      rounded-xl
+                      text-lg
                       font-semibold
                       whitespace-nowrap
-                      transition
+                      transition-all
                       hover:bg-white/10
                     "
                   >
                     New Member
                   </Link>
 
+
+                  {/* ADD MEMBERSHIP */}
                   <Link
                     to="/add-membership"
                     className="
                       flex
                       items-center
-                      h-14
+                      justify-center
+                      h-12
                       px-5
-                      rounded-2xl
-                      text-xl
+                      rounded-xl
+                      text-lg
                       font-semibold
                       whitespace-nowrap
-                      transition
+                      transition-all
                       hover:bg-white/10
                     "
                   >
                     Add New Membership
                   </Link>
 
+
+                  {/* UPDATE MEMBER */}
                   <Link
                     to="/update-existing-member"
                     className="
                       flex
                       items-center
-                      h-14
+                      justify-center
+                      h-12
                       px-5
-                      rounded-2xl
-                      text-xl
+                      rounded-xl
+                      text-lg
                       font-semibold
                       whitespace-nowrap
-                      transition
+                      transition-all
                       hover:bg-white/10
                     "
                   >
                     Update Existing Member
                   </Link>
 
-                </>
+                </div>
 
               )}
 
             </div>
 
-            {/* Right Side */}
-            <div className="ml-auto">
 
+            {/* RIGHT */}
+            <div className="ml-auto flex items-center">
+
+              {/* LOGIN */}
               {!isAdmin && !isLoginPage && (
 
                 <Link
@@ -200,22 +240,22 @@ function Layout() {
                     flex
                     items-center
                     gap-2
-                    h-14
+                    h-12
                     px-6
-                    rounded-2xl
+                    rounded-xl
                     border
                     border-white/30
-                    text-xl
+                    text-lg
                     font-bold
                     whitespace-nowrap
-                    transition
+                    transition-all
                     hover:bg-white
                     hover:text-black
                   "
                 >
                   Login
 
-                  <span className="text-xl">
+                  <span className="text-lg">
                     →
                   </span>
 
@@ -223,6 +263,8 @@ function Layout() {
 
               )}
 
+
+              {/* LOGOUT */}
               {isAdmin && !isLoginPage && (
 
                 <button
@@ -238,15 +280,15 @@ function Layout() {
                     flex
                     items-center
                     justify-center
-                    h-14
+                    h-12
                     px-6
-                    rounded-2xl
+                    rounded-xl
                     border
                     border-white/30
-                    text-xl
+                    text-lg
                     font-bold
                     whitespace-nowrap
-                    transition
+                    transition-all
                     hover:bg-white
                     hover:text-black
                   "
@@ -260,14 +302,16 @@ function Layout() {
 
           </div>
 
-          {/* Routes */}
+
+          {/* ================= ROUTES ================= */}
           <Routes>
 
-            {/* Check-In Type Selection */}
+            {/* Check-In Selection */}
             <Route
               path="/"
               element={<CheckInTypePage />}
             />
+
 
             {/* Group Class Check-In */}
             <Route
@@ -275,11 +319,13 @@ function Layout() {
               element={<CheckInPage />}
             />
 
+
             {/* PT Check-In */}
             <Route
               path="/check-in/pt"
               element={<PTCheckInPage />}
             />
+
 
             {/* Admin Routes */}
             {isAdmin && (
@@ -305,12 +351,15 @@ function Layout() {
 
                 <Route
                   path="/members/:id"
-                  element={<MemberDetailsPage />}
+                  element={
+                    <MemberDetailsPage />
+                  }
                 />
 
               </>
 
             )}
+
 
             {/* Admin Login */}
             <Route
@@ -328,13 +377,17 @@ function Layout() {
   );
 }
 
+
 function App() {
 
   return (
     <BrowserRouter>
+
       <Layout />
+
     </BrowserRouter>
   );
 }
+
 
 export default App;
