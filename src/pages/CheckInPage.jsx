@@ -193,46 +193,29 @@ function CheckInPage() {
         {/* HEADER */}
         <div className="mb-10">
 
-          <div className="flex items-center gap-4">
+          <h1
+            className="
+              text-5xl
+              md:text-6xl
+              font-black
+              tracking-tight
+              leading-none
+            "
+          >
+            Group Class Check-In
+          </h1>
 
-            <div
-              className="
-                w-3
-                h-14
-                rounded-full
-                bg-black
-              "
-            />
-
-            <div>
-
-              <h1
-                className="
-                  text-5xl
-                  md:text-6xl
-                  font-black
-                  tracking-tight
-                  leading-none
-                "
-              >
-                Member Check-In
-              </h1>
-
-              <p
-                className="
-                  text-lg
-                  md:text-xl
-                  mt-3
-                  text-black/60
-                  font-medium
-                "
-              >
-                Search for your name to check in
-              </p>
-
-            </div>
-
-          </div>
+          <p
+            className="
+              text-lg
+              md:text-xl
+              mt-3
+              text-black/60
+              font-medium
+            "
+          >
+            Search for your name to check in
+          </p>
 
         </div>
 
