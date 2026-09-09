@@ -88,7 +88,7 @@ function Layout() {
             "
           >
 
-            {/* LEFT */}
+            {/* LEFT SIDE */}
             <div className="flex items-center">
 
               {/* CHECK-IN HOME */}
@@ -98,7 +98,7 @@ function Layout() {
                   flex
                   items-center
                   gap-3
-                  pr-7
+                  pr-8
                   text-2xl
                   font-bold
                   whitespace-nowrap
@@ -139,7 +139,7 @@ function Layout() {
                     h-10
                     w-px
                     bg-white/20
-                    mr-5
+                    mx-4
                   "
                 />
               )}
@@ -152,10 +152,8 @@ function Layout() {
                   className="
                     flex
                     items-center
-                    gap-1
-                    bg-white/[0.06]
-                    p-1.5
-                    rounded-2xl
+                    gap-4
+                    ml-4
                   "
                 >
 
@@ -167,20 +165,21 @@ function Layout() {
                       items-center
                       justify-center
                       h-12
-                      px-5
+                      px-6
                       rounded-xl
+                      bg-white/[0.08]
                       text-lg
                       font-semibold
                       whitespace-nowrap
                       transition-all
-                      hover:bg-white/10
+                      hover:bg-white/[0.16]
                     "
                   >
                     New Member
                   </Link>
 
 
-                  {/* ADD MEMBERSHIP */}
+                  {/* MEMBERSHIP */}
                   <Link
                     to="/add-membership"
                     className="
@@ -188,13 +187,14 @@ function Layout() {
                       items-center
                       justify-center
                       h-12
-                      px-5
+                      px-6
                       rounded-xl
+                      bg-white/[0.08]
                       text-lg
                       font-semibold
                       whitespace-nowrap
                       transition-all
-                      hover:bg-white/10
+                      hover:bg-white/[0.16]
                     "
                   >
                     Add New Membership
@@ -209,13 +209,14 @@ function Layout() {
                       items-center
                       justify-center
                       h-12
-                      px-5
+                      px-6
                       rounded-xl
+                      bg-white/[0.08]
                       text-lg
                       font-semibold
                       whitespace-nowrap
                       transition-all
-                      hover:bg-white/10
+                      hover:bg-white/[0.16]
                     "
                   >
                     Update Existing Member
@@ -228,7 +229,7 @@ function Layout() {
             </div>
 
 
-            {/* RIGHT */}
+            {/* RIGHT SIDE */}
             <div className="ml-auto flex items-center">
 
               {/* LOGIN */}
