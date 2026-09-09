@@ -9,6 +9,7 @@ import {
 import { Toaster } from "react-hot-toast";
 
 import CheckInPage from "./pages/CheckInPage";
+import CheckInTypePage from "./pages/CheckInTypePage";
 import AddMemberPage from "./pages/AddMemberPage";
 import AddMembershipPage from "./pages/AddMembershipPage";
 import UpdateExistingMemberPage from "./pages/UpdateExistingMemberPage";
@@ -31,27 +32,27 @@ function Layout() {
 
     <>
 
-    <Toaster
-  position="top-center"
-  containerStyle={{
-    top: "50%",
-    transform: "translateY(-50%)"
-  }}
-  toastOptions={{
-    duration: 3000,
-    style: {
-      background: "#000",
-      color: "#fff",
-      fontSize: "24px",
-      fontWeight: "bold",
-      padding: "28px 40px",
-      borderRadius: "24px",
-      minWidth: "420px",
-      textAlign: "center",
-      boxShadow: "0 10px 40px rgba(0, 0, 0, 0.4)"
-    }
-  }}
-/>
+      <Toaster
+        position="top-center"
+        containerStyle={{
+          top: "50%",
+          transform: "translateY(-50%)"
+        }}
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#000",
+            color: "#fff",
+            fontSize: "24px",
+            fontWeight: "bold",
+            padding: "28px 40px",
+            borderRadius: "24px",
+            minWidth: "420px",
+            textAlign: "center",
+            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.4)"
+          }
+        }}
+      />
 
       <div className="min-h-screen bg-yellow-400 relative overflow-hidden">
 
@@ -156,8 +157,15 @@ function Layout() {
           {/* Routes */}
           <Routes>
 
+            {/* Check-In selection page */}
             <Route
               path="/"
+              element={<CheckInTypePage />}
+            />
+
+            {/* Group Class Check-In */}
+            <Route
+              path="/check-in/group"
               element={<CheckInPage />}
             />
 
@@ -212,7 +220,7 @@ function App() {
     <BrowserRouter>
       <Layout />
     </BrowserRouter>
-  )
+  );
 }
 
 export default App;
