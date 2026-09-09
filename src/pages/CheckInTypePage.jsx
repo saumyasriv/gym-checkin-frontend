@@ -7,12 +7,6 @@ function CheckInTypePage() {
     <div className="min-h-screen text-black p-8">
       <div className="max-w-5xl mx-auto">
 
-        <div className="mb-16">
-          <h1 className="text-6xl font-bold tracking-tight">
-            Check In
-          </h1>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
           {/* GROUP CLASS */}
@@ -33,8 +27,6 @@ function CheckInTypePage() {
             "
           >
             Group Class
-            <br />
-            Check In
           </button>
 
           {/* PT */}
@@ -54,9 +46,8 @@ function CheckInTypePage() {
               hover:bg-zinc-800
             "
           >
-            PT
-            <br />
-            Check In
+            One on One
+            
           </button>
 
         </div>
