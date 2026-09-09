@@ -77,10 +77,10 @@ function Layout() {
         <div className="relative z-10">
 
           {/* Navbar */}
-          <div className="bg-black text-white px-6 py-4 flex items-center">
+          <div className="bg-black text-white px-7 py-3 flex items-center min-h-[88px]">
 
             {/* Left Side */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
 
               {/* CHECK-IN HOME */}
               <Link
@@ -90,27 +90,29 @@ function Layout() {
                   items-center
                   gap-3
                   px-4
-                  py-2
+                  py-3
                   rounded-2xl
                   text-2xl
                   font-bold
+                  whitespace-nowrap
                   transition
                   hover:bg-white/10
                 "
               >
 
-                {/* Checkmark Icon */}
                 <div
                   className="
-                    w-9
-                    h-9
+                    w-10
+                    h-10
                     rounded-full
                     bg-yellow-400
                     text-black
                     flex
                     items-center
                     justify-center
-                    font-bold
+                    text-2xl
+                    font-black
+                    flex-shrink-0
                   "
                 >
                   ✓
@@ -122,6 +124,7 @@ function Layout() {
 
               </Link>
 
+              {/* ADMIN NAVIGATION */}
               {isAdmin && !isLoginPage && (
 
                 <>
@@ -129,11 +132,14 @@ function Layout() {
                   <Link
                     to="/add-member"
                     className="
-                      px-4
-                      py-2
+                      flex
+                      items-center
+                      h-14
+                      px-5
                       rounded-2xl
                       text-xl
                       font-semibold
+                      whitespace-nowrap
                       transition
                       hover:bg-white/10
                     "
@@ -144,11 +150,14 @@ function Layout() {
                   <Link
                     to="/add-membership"
                     className="
-                      px-4
-                      py-2
+                      flex
+                      items-center
+                      h-14
+                      px-5
                       rounded-2xl
                       text-xl
                       font-semibold
+                      whitespace-nowrap
                       transition
                       hover:bg-white/10
                     "
@@ -159,11 +168,14 @@ function Layout() {
                   <Link
                     to="/update-existing-member"
                     className="
-                      px-4
-                      py-2
+                      flex
+                      items-center
+                      h-14
+                      px-5
                       rounded-2xl
                       text-xl
                       font-semibold
+                      whitespace-nowrap
                       transition
                       hover:bg-white/10
                     "
@@ -188,13 +200,14 @@ function Layout() {
                     flex
                     items-center
                     gap-2
-                    px-5
-                    py-2
+                    h-14
+                    px-6
                     rounded-2xl
                     border
                     border-white/30
                     text-xl
-                    font-semibold
+                    font-bold
+                    whitespace-nowrap
                     transition
                     hover:bg-white
                     hover:text-black
@@ -202,7 +215,7 @@ function Layout() {
                 >
                   Login
 
-                  <span className="text-lg">
+                  <span className="text-xl">
                     →
                   </span>
 
@@ -222,13 +235,17 @@ function Layout() {
                     window.location.href = "/";
                   }}
                   className="
-                    px-5
-                    py-2
+                    flex
+                    items-center
+                    justify-center
+                    h-14
+                    px-6
                     rounded-2xl
                     border
                     border-white/30
                     text-xl
-                    font-semibold
+                    font-bold
+                    whitespace-nowrap
                     transition
                     hover:bg-white
                     hover:text-black
