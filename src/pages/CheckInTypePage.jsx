@@ -12,7 +12,7 @@ function CheckInTypePage() {
         <div className="text-center mb-12">
 
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-            Choose Check-In
+            Check-In
           </h1>
 
           <p className="text-xl mt-3 text-black/70 font-medium">

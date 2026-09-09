@@ -124,6 +124,7 @@ function CheckInPage() {
 
         return updated;
       });
+
     } catch (error) {
       console.error(error);
 
@@ -178,30 +179,69 @@ function CheckInPage() {
       className="
         min-h-screen
         text-black
-        p-8
+        px-8
+        py-10
       "
       onClick={() => {
         setMembers([]);
         setQuery("");
       }}
     >
+
       <div className="max-w-5xl mx-auto">
 
         {/* HEADER */}
-        <div className="mb-10 relative">
+        <div className="mb-10">
 
-          <h1 className="text-6xl font-bold tracking-tight">
-            Member Check-In
-          </h1>
+          <div className="flex items-center gap-4">
 
-          <p className="text-black text-xl mt-3">
-          </p>
+            <div
+              className="
+                w-3
+                h-14
+                rounded-full
+                bg-black
+              "
+            />
+
+            <div>
+
+              <h1
+                className="
+                  text-5xl
+                  md:text-6xl
+                  font-black
+                  tracking-tight
+                  leading-none
+                "
+              >
+                Member Check-In
+              </h1>
+
+              <p
+                className="
+                  text-lg
+                  md:text-xl
+                  mt-3
+                  text-black/60
+                  font-medium
+                "
+              >
+                Search for your name to check in
+              </p>
+
+            </div>
+
+          </div>
 
         </div>
 
         {/* SEARCH BAR */}
         <div
-          className="relative"
+          className="
+            relative
+            group
+          "
           onClick={(e) =>
             e.stopPropagation()
           }
@@ -218,11 +258,13 @@ function CheckInPage() {
               h-8
               text-black
               pointer-events-none
+              transition
+              group-focus-within:scale-110
             "
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
@@ -249,14 +291,21 @@ function CheckInPage() {
             }
             className="
               w-full
-              p-6
+              h-24
               pl-20
-              rounded-3xl
+              pr-8
+              rounded-[28px]
               bg-white
               text-black
               text-3xl
+              font-medium
               outline-none
-              shadow-2xl
+              shadow-[0_12px_35px_rgba(0,0,0,0.14)]
+              border-2
+              border-transparent
+              focus:border-black
+              transition
+              placeholder:text-black/40
             "
           />
 
@@ -283,15 +332,17 @@ function CheckInPage() {
                   }
                 }}
                 className="
-                  bg-black/80
-                  backdrop-blur-md
-                  border border-black/10
+                  bg-black
+                  border
+                  border-black/10
                   p-6
-                  rounded-3xl
+                  rounded-[28px]
                   flex
                   items-center
-                  shadow-xl
+                  shadow-[0_12px_30px_rgba(0,0,0,0.20)]
                   cursor-pointer
+                  transition
+                  hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)]
                 "
               >
 
@@ -300,8 +351,10 @@ function CheckInPage() {
 
                   <div
                     className="
-                      text-4xl
-                      font-semibold
+                      text-3xl
+                      md:text-4xl
+                      font-bold
+                      tracking-tight
                       text-white
                     "
                   >
@@ -310,8 +363,9 @@ function CheckInPage() {
 
                   <div
                     className={`
-                      text-2xl
+                      text-xl
                       mt-2
+                      font-medium
                       ${
                         member.totalRemainingCredits <= 4
                           ? "text-red-500 font-bold"
@@ -330,7 +384,7 @@ function CheckInPage() {
                   className="
                     flex
                     items-center
-                    gap-2
+                    gap-3
                     flex-shrink-0
                   "
                   onClick={(e) =>
@@ -338,7 +392,7 @@ function CheckInPage() {
                   }
                 >
 
-                  {/* SESSION */}
+                  {/* SESSION DROPDOWN */}
                   <div
                     className="
                       relative
@@ -346,9 +400,7 @@ function CheckInPage() {
                       flex-shrink-0
                     "
                     style={{
-                      width: "125px",
-                      minWidth: "125px",
-                      maxWidth: "125px"
+                      width: "140px"
                     }}
                   >
 
@@ -367,6 +419,7 @@ function CheckInPage() {
                         appearance-none
                         bg-white
                         text-black
+                        w-full
                         h-12
                         rounded-2xl
                         text-lg
@@ -374,14 +427,15 @@ function CheckInPage() {
                         outline-none
                         cursor-pointer
                         pl-4
-                        pr-9
+                        pr-10
+                        border-2
+                        border-transparent
+                        hover:border-black/20
+                        focus:border-black
+                        transition
                       "
-                      style={{
-                        width: "125px",
-                        minWidth: "125px",
-                        maxWidth: "125px"
-                      }}
                     >
+
                       <option value="">
                         Session
                       </option>
@@ -396,9 +450,10 @@ function CheckInPage() {
                           </option>
                         )
                       )}
+
                     </select>
 
-                    {/* PROMINENT ARROW */}
+                    {/* DROPDOWN ARROW */}
                     <svg
                       className="
                         pointer-events-none
@@ -433,23 +488,25 @@ function CheckInPage() {
                     }
                     className={`
                       h-12
-                      px-5
+                      px-6
                       rounded-2xl
                       text-lg
                       font-bold
                       whitespace-nowrap
-                      transition
+                      transition-all
                       ${
                         selectedTiming
                           ? `
-                            bg-white
+                            bg-yellow-400
                             text-black
+                            shadow-md
+                            hover:bg-yellow-300
                             active:scale-95
                             cursor-pointer
                           `
                           : `
-                            bg-white/40
-                            text-black/50
+                            bg-white/30
+                            text-white/40
                             cursor-not-allowed
                           `
                       }
@@ -475,12 +532,13 @@ function CheckInPage() {
                         text-lg
                         font-bold
                         whitespace-nowrap
-                        transition
+                        transition-all
                         ${
                           selectedTiming
                             ? `
                               bg-zinc-700
                               text-white
+                              hover:bg-zinc-600
                               active:scale-95
                               cursor-pointer
                             `
@@ -513,6 +571,7 @@ function CheckInPage() {
                         whitespace-nowrap
                         bg-red-600
                         text-white
+                        hover:bg-red-500
                         active:scale-95
                         transition
                         cursor-pointer
@@ -531,6 +590,7 @@ function CheckInPage() {
         </div>
 
       </div>
+
     </div>
   );
 }
