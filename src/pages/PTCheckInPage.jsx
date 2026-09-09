@@ -15,25 +15,42 @@ function PTCheckInPage() {
   const isAdmin =
     localStorage.getItem("isAdmin") === "true";
 
-  const hours = Array.from(
-    { length: 24 },
-    (_, index) => index
-  );
+  /*
+   * PT timings:
+   * 6:00 AM
+   * 6:30 AM
+   * 7:00 AM
+   * ...
+   * 8:00 PM
+   * 8:30 PM
+   */
+  const ptTimings = [];
 
-  const minutes = [
-    "00",
-    "05",
-    "10",
-    "15",
-    "20",
-    "25",
-    "30",
-    "35",
-    "40",
-    "45",
-    "50",
-    "55"
-  ];
+  for (
+    let minutes = 6 * 60;
+    minutes <= 20 * 60 + 30;
+    minutes += 30
+  ) {
+    const hour24 = Math.floor(minutes / 60);
+    const minute = minutes % 60;
+
+    const period =
+      hour24 >= 12 ? "PM" : "AM";
+
+    const hour12 =
+      hour24 === 0
+        ? 12
+        : hour24 > 12
+        ? hour24 - 12
+        : hour24;
+
+    const formattedMinute =
+      minute === 0 ? "00" : "30";
+
+    ptTimings.push(
+      `${hour12}:${formattedMinute} ${period}`
+    );
+  }
 
   useEffect(() => {
     fetchAllMembers();
@@ -45,11 +62,12 @@ function PTCheckInPage() {
       return;
     }
 
-    const filteredMembers = allMembers.filter((member) =>
-      member.name
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    );
+    const filteredMembers =
+      allMembers.filter((member) =>
+        member.name
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
 
     setMembers(filteredMembers);
   }, [query, allMembers]);
@@ -61,6 +79,7 @@ function PTCheckInPage() {
       );
 
       setAllMembers(response.data);
+
     } catch (error) {
       console.error(error);
       toast.error("Failed to load members");
@@ -71,6 +90,7 @@ function PTCheckInPage() {
     memberId,
     type
   ) => {
+
     const selectedTime =
       selectedTimes[memberId];
 
@@ -82,6 +102,7 @@ function PTCheckInPage() {
     }
 
     try {
+
       await axios.post(
         `${API_BASE_URL}/checkins`,
         {
@@ -99,6 +120,7 @@ function PTCheckInPage() {
 
       setMembers((prevMembers) =>
         prevMembers.map((member) => {
+
           if (member.id === memberId) {
             return {
               ...member,
@@ -115,6 +137,7 @@ function PTCheckInPage() {
 
       setAllMembers((prevMembers) =>
         prevMembers.map((member) => {
+
           if (member.id === memberId) {
             return {
               ...member,
@@ -138,6 +161,7 @@ function PTCheckInPage() {
       });
 
     } catch (error) {
+
       console.error(error);
 
       const message =
@@ -152,6 +176,7 @@ function PTCheckInPage() {
   };
 
   const deleteMember = async (memberId) => {
+
     const confirmed = window.confirm(
       "Delete this member permanently?"
     );
@@ -161,6 +186,7 @@ function PTCheckInPage() {
     }
 
     try {
+
       await axios.delete(
         `${API_BASE_URL}/members/${memberId}`
       );
@@ -180,48 +206,68 @@ function PTCheckInPage() {
             member.id !== memberId
         )
       );
+
     } catch (error) {
+
       console.error(error);
-      toast.error("Failed to delete member");
+      toast.error(
+        "Failed to delete member"
+      );
     }
   };
 
-  const formatHour = (hour) => {
-    if (hour === 0) return "12";
-    if (hour > 12) return String(hour - 12);
-    return String(hour);
-  };
-
-  const getPeriod = (hour) => {
-    return hour >= 12 ? "PM" : "AM";
-  };
-
   return (
+
     <div
       className="
         min-h-screen
         text-black
-        p-8
+        px-8
+        py-10
       "
       onClick={() => {
         setMembers([]);
         setQuery("");
       }}
     >
+
       <div className="max-w-5xl mx-auto">
 
         {/* HEADER */}
-        <div className="mb-10 relative">
+        <div className="mb-10">
 
-          <h1 className="text-6xl font-bold tracking-tight">
+          <h1
+            className="
+              text-5xl
+              md:text-6xl
+              font-black
+              tracking-tight
+              leading-none
+            "
+          >
             PT Check-In
           </h1>
+
+          <p
+            className="
+              text-lg
+              md:text-xl
+              mt-3
+              text-black/60
+              font-medium
+            "
+          >
+            Search for your name to check in
+          </p>
 
         </div>
 
         {/* SEARCH BAR */}
         <div
-          className="relative"
+          className="
+            relative
+            group
+          "
           onClick={(e) =>
             e.stopPropagation()
           }
@@ -238,11 +284,13 @@ function PTCheckInPage() {
               h-8
               text-black
               pointer-events-none
+              transition
+              group-focus-within:scale-110
             "
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
@@ -269,14 +317,21 @@ function PTCheckInPage() {
             }
             className="
               w-full
-              p-6
+              h-24
               pl-20
-              rounded-3xl
+              pr-8
+              rounded-[28px]
               bg-white
               text-black
               text-3xl
+              font-medium
               outline-none
-              shadow-2xl
+              shadow-[0_12px_35px_rgba(0,0,0,0.14)]
+              border-2
+              border-transparent
+              focus:border-black
+              transition
+              placeholder:text-black/40
             "
           />
 
@@ -288,15 +343,14 @@ function PTCheckInPage() {
           {members.map((member) => {
 
             const selectedTime =
-              selectedTimes[member.id] || {
-                hour: "",
-                minute: ""
-              };
+              selectedTimes[member.id] || "";
 
             return (
+
               <div
                 key={member.id}
                 onClick={(e) => {
+
                   e.stopPropagation();
 
                   if (isAdmin) {
@@ -304,17 +358,20 @@ function PTCheckInPage() {
                       `/members/${member.id}`
                     );
                   }
+
                 }}
                 className="
-                  bg-black/80
-                  backdrop-blur-md
-                  border border-black/10
+                  bg-black
+                  border
+                  border-black/10
                   p-6
-                  rounded-3xl
+                  rounded-[28px]
                   flex
                   items-center
-                  shadow-xl
+                  shadow-[0_12px_30px_rgba(0,0,0,0.20)]
                   cursor-pointer
+                  transition
+                  hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)]
                 "
               >
 
@@ -323,8 +380,10 @@ function PTCheckInPage() {
 
                   <div
                     className="
-                      text-4xl
-                      font-semibold
+                      text-3xl
+                      md:text-4xl
+                      font-bold
+                      tracking-tight
                       text-white
                     "
                   >
@@ -333,8 +392,9 @@ function PTCheckInPage() {
 
                   <div
                     className={`
-                      text-2xl
+                      text-xl
                       mt-2
+                      font-medium
                       ${
                         member.totalRemainingCredits <= 4
                           ? "text-red-500 font-bold"
@@ -353,7 +413,7 @@ function PTCheckInPage() {
                   className="
                     flex
                     items-center
-                    gap-2
+                    gap-3
                     flex-shrink-0
                   "
                   onClick={(e) =>
@@ -361,97 +421,96 @@ function PTCheckInPage() {
                   }
                 >
 
-                  {/* HOUR */}
-                  <select
-                    value={selectedTime.hour}
-                    onChange={(e) => {
-                      setSelectedTimes(
-                        (prev) => ({
-                          ...prev,
-                          [member.id]: {
-                            hour: e.target.value,
-                            minute:
-                              prev[member.id]?.minute || ""
-                          }
-                        })
-                      );
-                    }}
+                  {/* PT TIMING DROPDOWN */}
+                  <div
                     className="
-                      bg-white
-                      text-black
+                      relative
                       h-12
-                      w-24
-                      rounded-2xl
-                      text-lg
-                      font-bold
-                      outline-none
-                      cursor-pointer
-                      px-3
+                      flex-shrink-0
                     "
-                  >
-                    <option value="">
-                      Hour
-                    </option>
-
-                    {hours.map((hour) => (
-                      <option
-                        key={hour}
-                        value={hour}
-                      >
-                        {formatHour(hour)}{" "}
-                        {getPeriod(hour)}
-                      </option>
-                    ))}
-                  </select>
-
-                  {/* MINUTES */}
-                  <select
-                    value={selectedTime.minute}
-                    onChange={(e) => {
-                      setSelectedTimes(
-                        (prev) => ({
-                          ...prev,
-                          [member.id]: {
-                            hour:
-                              prev[member.id]?.hour || "",
-                            minute: e.target.value
-                          }
-                        })
-                      );
+                    style={{
+                      width: "140px"
                     }}
-                    className="
-                      bg-white
-                      text-black
-                      h-12
-                      w-24
-                      rounded-2xl
-                      text-lg
-                      font-bold
-                      outline-none
-                      cursor-pointer
-                      px-3
-                    "
                   >
-                    <option value="">
-                      Min
-                    </option>
 
-                    {minutes.map((minute) => (
-                      <option
-                        key={minute}
-                        value={minute}
-                      >
-                        :{minute}
+                    <select
+                      value={selectedTime}
+                      onChange={(e) => {
+
+                        setSelectedTimes(
+                          (prev) => ({
+                            ...prev,
+                            [member.id]:
+                              e.target.value
+                          })
+                        );
+
+                      }}
+                      className="
+                        appearance-none
+                        bg-white
+                        text-black
+                        w-full
+                        h-12
+                        rounded-2xl
+                        text-lg
+                        font-bold
+                        outline-none
+                        cursor-pointer
+                        pl-4
+                        pr-10
+                        border-2
+                        border-transparent
+                        hover:border-black/20
+                        focus:border-black
+                        transition
+                      "
+                    >
+
+                      <option value="">
+                        PT Time
                       </option>
-                    ))}
-                  </select>
+
+                      {ptTimings.map(
+                        (timing) => (
+                          <option
+                            key={timing}
+                            value={timing}
+                          >
+                            {timing}
+                          </option>
+                        )
+                      )}
+
+                    </select>
+
+                    {/* DROPDOWN ARROW */}
+                    <svg
+                      className="
+                        pointer-events-none
+                        absolute
+                        right-3
+                        top-1/2
+                        -translate-y-1/2
+                        w-5
+                        h-5
+                        text-black
+                      "
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+
+                  </div>
 
                   {/* CHECK IN */}
                   <button
-                    disabled={
-                      !selectedTime.hour ||
-                      !selectedTime.minute
-                    }
+                    disabled={!selectedTime}
                     onClick={() =>
                       processAttendance(
                         member.id,
@@ -460,24 +519,25 @@ function PTCheckInPage() {
                     }
                     className={`
                       h-12
-                      px-5
+                      px-6
                       rounded-2xl
                       text-lg
                       font-bold
                       whitespace-nowrap
-                      transition
+                      transition-all
                       ${
-                        selectedTime.hour &&
-                        selectedTime.minute
+                        selectedTime
                           ? `
-                            bg-white
+                            bg-yellow-400
                             text-black
+                            shadow-md
+                            hover:bg-yellow-300
                             active:scale-95
                             cursor-pointer
                           `
                           : `
-                            bg-white/40
-                            text-black/50
+                            bg-white/30
+                            text-white/40
                             cursor-not-allowed
                           `
                       }
@@ -488,11 +548,9 @@ function PTCheckInPage() {
 
                   {/* NO SHOW — ADMIN ONLY */}
                   {isAdmin && (
+
                     <button
-                      disabled={
-                        !selectedTime.hour ||
-                        !selectedTime.minute
-                      }
+                      disabled={!selectedTime}
                       onClick={() =>
                         processAttendance(
                           member.id,
@@ -506,13 +564,13 @@ function PTCheckInPage() {
                         text-lg
                         font-bold
                         whitespace-nowrap
-                        transition
+                        transition-all
                         ${
-                          selectedTime.hour &&
-                          selectedTime.minute
+                          selectedTime
                             ? `
                               bg-zinc-700
                               text-white
+                              hover:bg-zinc-600
                               active:scale-95
                               cursor-pointer
                             `
@@ -526,10 +584,12 @@ function PTCheckInPage() {
                     >
                       No Show
                     </button>
+
                   )}
 
                   {/* DELETE — ADMIN ONLY */}
                   {isAdmin && (
+
                     <button
                       onClick={() =>
                         deleteMember(
@@ -545,6 +605,7 @@ function PTCheckInPage() {
                         whitespace-nowrap
                         bg-red-600
                         text-white
+                        hover:bg-red-500
                         active:scale-95
                         transition
                         cursor-pointer
@@ -552,18 +613,23 @@ function PTCheckInPage() {
                     >
                       Delete
                     </button>
+
                   )}
 
                 </div>
 
               </div>
+
             );
+
           })}
 
         </div>
 
       </div>
+
     </div>
+
   );
 }
 
