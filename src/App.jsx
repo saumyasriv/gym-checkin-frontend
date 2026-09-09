@@ -8,8 +8,9 @@ import {
 
 import { Toaster } from "react-hot-toast";
 
-import CheckInPage from "./pages/CheckInPage";
 import CheckInTypePage from "./pages/CheckInTypePage";
+import CheckInPage from "./pages/CheckInPage";
+import PTCheckInPage from "./pages/PTCheckInPage";
 import AddMemberPage from "./pages/AddMemberPage";
 import AddMembershipPage from "./pages/AddMembershipPage";
 import UpdateExistingMemberPage from "./pages/UpdateExistingMemberPage";
@@ -49,7 +50,8 @@ function Layout() {
             borderRadius: "24px",
             minWidth: "420px",
             textAlign: "center",
-            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.4)"
+            boxShadow:
+              "0 10px 40px rgba(0, 0, 0, 0.4)"
           }
         }}
       />
@@ -157,7 +159,7 @@ function Layout() {
           {/* Routes */}
           <Routes>
 
-            {/* Check-In selection page */}
+            {/* Check-In Type Selection */}
             <Route
               path="/"
               element={<CheckInTypePage />}
@@ -169,6 +171,13 @@ function Layout() {
               element={<CheckInPage />}
             />
 
+            {/* PT Check-In */}
+            <Route
+              path="/check-in/pt"
+              element={<PTCheckInPage />}
+            />
+
+            {/* Admin Routes */}
             {isAdmin && (
 
               <>
@@ -199,6 +208,7 @@ function Layout() {
 
             )}
 
+            {/* Admin Login */}
             <Route
               path="/admin"
               element={<LoginPage />}
