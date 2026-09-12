@@ -8,6 +8,15 @@ function AddMembershipPage() {
   const [members, setMembers] = useState([]);
   const [memberId, setMemberId] = useState("");
   const [packageName, setPackageName] = useState("");
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+
+    return `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${String(
+      today.getDate()
+    ).padStart(2, "0")}`;
+  });
   const [amountPaid, setAmountPaid] = useState("");
 
   useEffect(() => {
@@ -47,6 +56,7 @@ function AddMembershipPage() {
         {
           memberId,
           packageName,
+          startDate,
           amountPaid
         }
       );
@@ -57,6 +67,17 @@ function AddMembershipPage() {
 
       setMemberId("");
       setPackageName("");
+
+      const today = new Date();
+
+      setStartDate(
+        `${today.getFullYear()}-${String(
+          today.getMonth() + 1
+        ).padStart(2, "0")}-${String(
+          today.getDate()
+        ).padStart(2, "0")}`
+      );
+
       setAmountPaid("");
 
     } catch (error) {
@@ -283,6 +304,54 @@ function AddMembershipPage() {
 
 
             {/* ================================================= */}
+            {/* START DATE */}
+            {/* ================================================= */}
+
+            <div>
+
+              <label
+                className="
+                  block
+                  text-sm
+                  uppercase
+                  tracking-wider
+                  font-bold
+                  text-zinc-400
+                  mb-2
+                  ml-1
+                "
+              >
+                Start Date
+              </label>
+
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) =>
+                  setStartDate(e.target.value)
+                }
+                className="
+                  w-full
+                  h-16
+                  px-5
+                  rounded-2xl
+                  text-black
+                  text-xl
+                  font-medium
+                  bg-white
+                  outline-none
+                  border-2
+                  border-transparent
+                  focus:border-yellow-400
+                  transition
+                  cursor-pointer
+                "
+              />
+
+            </div>
+
+
+            {/* ================================================= */}
             {/* AMOUNT */}
             {/* ================================================= */}
 
@@ -397,6 +466,7 @@ function AddMembershipPage() {
     </div>
 
   );
+
 }
 
 export default AddMembershipPage;
