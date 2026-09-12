@@ -154,6 +154,44 @@ function MemberDetailsPage() {
     });
   };
 
+  const getMembershipStartDate = (membership) => {
+
+  // New memberships already have a stored start date
+  if (membership.startDate) {
+    return membership.startDate;
+  }
+
+  // Old memberships need to be calculated
+  if (!membership.expiryDate || !membership.packageName) {
+    return null;
+  }
+
+  const weeksByPackage = {
+    "8 Sessions": 5,
+    "12 Sessions": 5,
+    "24 Sessions": 10,
+    "36 Sessions": 15
+  };
+
+  const weeks = weeksByPackage[membership.packageName];
+
+  if (!weeks) {
+    return null;
+  }
+
+  const expiryDate = new Date(
+    `${membership.expiryDate}T00:00:00`
+  );
+
+  expiryDate.setDate(
+    expiryDate.getDate() - (weeks * 7)
+  );
+
+  return expiryDate
+    .toISOString()
+    .split("T")[0];
+};
+
 
   if (!member) {
 
@@ -175,28 +213,22 @@ function MemberDetailsPage() {
   }
 
 
-  /*
-   * Sort memberships by expiry date.
-   *
-   * Latest expiry = top
-   * Oldest expiry = bottom
-   *
-   * Later, when startDate is added to the backend,
-   * we can switch this to startDate sorting.
-   */
   const sortedMemberships = [
-    ...(member.memberships || [])
-  ].sort((a, b) => {
+  ...(member.memberships || [])
+].sort((a, b) => {
 
-    if (!a.expiryDate) return 1;
-    if (!b.expiryDate) return -1;
+  const aStartDate = getMembershipStartDate(a);
+  const bStartDate = getMembershipStartDate(b);
 
-    return (
-      new Date(b.expiryDate) -
-      new Date(a.expiryDate)
-    );
+  if (!aStartDate) return 1;
+  if (!bStartDate) return -1;
 
-  });
+  return (
+    new Date(bStartDate) -
+    new Date(aStartDate)
+  );
+
+});
 
 
   return (
@@ -508,24 +540,24 @@ function MemberDetailsPage() {
 
 
                         {/* START DATE */}
-                        {membership.startDate && (
+{getMembershipStartDate(membership) && (
 
-                          <div
-                            className="
-                              text-lg
-                              text-zinc-400
-                              mt-2
-                            "
-                          >
-                            <span className="text-zinc-500">
-                              Started:
-                            </span>{" "}
-                            {formatDate(
-                              membership.startDate
-                            )}
-                          </div>
+  <div
+    className="
+      text-lg
+      text-zinc-400
+      mt-2
+    "
+  >
+    <span className="text-zinc-500">
+      Started:
+    </span>{" "}
+    {formatDate(
+      getMembershipStartDate(membership)
+    )}
+  </div>
 
-                        )}
+)}
 
 
                         {/* EXPIRY */}
