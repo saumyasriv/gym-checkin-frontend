@@ -1,512 +1,978 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 
-export default function MemberDetailsPage() {
-    const { id } = useParams();
-    const navigate = useNavigate();
+function MemberDetailsPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-    const [member, setMember] = useState(null);
-    const [openMemberships, setOpenMemberships] = useState({});
+  const [member, setMember] = useState(null);
+  const [openMemberships, setOpenMemberships] = useState({});
 
-    useEffect(() => {
-        fetchMember();
-    }, [id]);
+  useEffect(() => {
+    fetchMember();
+  }, [id]);
 
-    const fetchMember = async () => {
-        try {
-            const response = await axios.get(
-                `${API_BASE_URL}/members/${id}`
-            );
+  // ============================================================
+  // FETCH MEMBER
+  // ============================================================
 
-            setMember(response.data);
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to load member details");
-        }
-    };
+  const fetchMember = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/members/${id}`
+      );
 
-    const toggleMembership = (membershipId) => {
-        setOpenMemberships((prev) => ({
-            ...prev,
-            [membershipId]: !prev[membershipId],
-        }));
-    };
+      setMember(response.data);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load member");
+    }
+  };
 
-    const formatCheckinTime = (dateTime) => {
-        if (!dateTime) return "";
+  // ============================================================
+  // MEMBERSHIP CHECK-IN DROPDOWN
+  // ============================================================
 
-        const date = new Date(dateTime);
+  const toggleMembership = (membershipId) => {
+    setOpenMemberships((prev) => ({
+      ...prev,
+      [membershipId]: !prev[membershipId],
+    }));
+  };
 
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
+  // ============================================================
+  // DATE / TIME HELPERS
+  // ============================================================
 
-        const isToday =
-            date.toDateString() === today.toDateString();
+  const formatCheckinTime = (time) => {
+    if (!time) return "";
 
-        const isYesterday =
-            date.toDateString() === yesterday.toDateString();
+    const date = new Date(time);
 
-        const time = date.toLocaleTimeString("en-IN", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-            timeZone: "Asia/Kolkata",
-        });
+    const formattedTime = date.toLocaleTimeString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
 
-        if (isToday) {
-            return `Today, ${time}`;
-        }
+    const dateInIndia = date.toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
 
-        if (isYesterday) {
-            return `Yesterday, ${time}`;
-        }
+    const todayInIndia = new Date().toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
 
-        const formattedDate = date.toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            timeZone: "Asia/Kolkata",
-        });
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
 
-        return `${formattedDate}, ${time}`;
-    };
+    const yesterdayInIndia =
+      yesterdayDate.toLocaleDateString("en-IN", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
 
-    const getToday = () => {
-        const today = new Date();
-
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, "0");
-        const day = String(today.getDate()).padStart(2, "0");
-
-        return `${year}-${month}-${day}`;
-    };
-
-    const saveNotes = async () => {
-        try {
-            await axios.put(
-                `${API_BASE_URL}/members/${id}/notes`,
-                {
-                    notes: member.notes || "",
-                }
-            );
-
-            toast.success("Notes saved");
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to save notes");
-        }
-    };
-
-    const formatDate = (date) => {
-        if (!date) return "—";
-
-        const parsedDate = new Date(`${date}T00:00:00`);
-
-        return parsedDate.toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        });
-    };
-
-    const getMembershipStartDate = (membership) => {
-        if (membership.startDate) {
-            return membership.startDate;
-        }
-
-        // Safety fallback for any old data
-        if (!membership.expiryDate || !membership.packageName) {
-            return null;
-        }
-
-        const weeksByPackage = {
-            "8 Sessions": 5,
-            "12 Sessions": 5,
-            "24 Sessions": 10,
-            "36 Sessions": 15,
-        };
-
-        const weeks =
-            weeksByPackage[membership.packageName];
-
-        if (!weeks) return null;
-
-        const expiryDate = new Date(
-            `${membership.expiryDate}T00:00:00`
-        );
-
-        expiryDate.setDate(
-            expiryDate.getDate() - weeks * 7
-        );
-
-        return expiryDate
-            .toISOString()
-            .split("T")[0];
-    };
-
-    const isActiveMembership = (membership) => {
-        if (!membership.remainingCredits) {
-            return false;
-        }
-
-        if (!membership.expiryDate) {
-            return false;
-        }
-
-        const today = getToday();
-
-        return (
-            membership.remainingCredits > 0 &&
-            membership.expiryDate >= today
-        );
-    };
-
-    if (!member) {
-        return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                <div className="text-zinc-500">
-                    Loading member...
-                </div>
-            </div>
-        );
+    if (dateInIndia === todayInIndia) {
+      return `Today • ${formattedTime}`;
     }
 
-    const sortedMemberships = [...(member.memberships || [])].sort(
-        (a, b) => {
-            const dateA =
-                getMembershipStartDate(a) || "";
-            const dateB =
-                getMembershipStartDate(b) || "";
+    if (dateInIndia === yesterdayInIndia) {
+      return `Yesterday • ${formattedTime}`;
+    }
 
-            return dateB.localeCompare(dateA);
-        }
+    const formattedDate = date.toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    return `${formattedDate} • ${formattedTime}`;
+  };
+
+  const getToday = () => {
+    const today = new Date();
+
+    return `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${String(
+      today.getDate()
+    ).padStart(2, "0")}`;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "";
+
+    return new Date(`${date}T00:00:00`).toLocaleDateString(
+      "en-IN",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
+  // ============================================================
+  // MEMBERSHIP HELPERS
+  // ============================================================
+
+  const getMembershipStartDate = (membership) => {
+    // All new memberships have a stored start date.
+    if (membership.startDate) {
+      return membership.startDate;
+    }
+
+    // Fallback for any old membership without a start date.
+    if (!membership.expiryDate || !membership.packageName) {
+      return null;
+    }
+
+    const weeksByPackage = {
+      "8 Sessions": 5,
+      "12 Sessions": 5,
+      "24 Sessions": 10,
+      "36 Sessions": 15,
+    };
+
+    const weeks = weeksByPackage[membership.packageName];
+
+    if (!weeks) {
+      return null;
+    }
+
+    const expiryDate = new Date(
+      `${membership.expiryDate}T00:00:00`
     );
 
+    expiryDate.setDate(
+      expiryDate.getDate() - weeks * 7
+    );
+
+    return expiryDate.toISOString().split("T")[0];
+  };
+
+  const isMembershipExpired = (membership) => {
+    return membership.expiryDate < getToday();
+  };
+
+  const isMembershipActive = (membership) => {
     return (
-        <div className="min-h-screen bg-black text-white px-6 py-10">
-            <div className="max-w-5xl mx-auto">
+      !isMembershipExpired(membership) &&
+      membership.remainingCredits > 0
+    );
+  };
 
-                {/* Back */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="mb-8 text-zinc-400 hover:text-white transition flex items-center gap-2"
+  const getMembershipCheckins = (membership) => {
+    return (member.checkins || []).filter(
+      (checkin) =>
+        String(checkin.membershipId) ===
+        String(membership.id)
+    );
+  };
+
+  // ============================================================
+  // NOTES
+  // ============================================================
+
+  const saveNotes = async () => {
+    try {
+      await axios.put(
+        `${API_BASE_URL}/members/${id}/notes`,
+        {
+          notes: member.notes || "",
+        }
+      );
+
+      toast.success("Notes saved successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save notes.");
+    }
+  };
+
+  // ============================================================
+  // LOADING STATE
+  // ============================================================
+
+  if (!member) {
+    return (
+      <div
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          text-3xl
+          font-bold
+        "
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  // ============================================================
+  // SORT MEMBERSHIPS
+  // ============================================================
+
+  const sortedMemberships = [...(member.memberships || [])].sort(
+    (a, b) => {
+      const aStartDate = getMembershipStartDate(a);
+      const bStartDate = getMembershipStartDate(b);
+
+      if (!aStartDate) return 1;
+      if (!bStartDate) return -1;
+
+      return (
+        new Date(bStartDate) -
+        new Date(aStartDate)
+      );
+    }
+  );
+
+  // ============================================================
+  // PAGE
+  // ============================================================
+
+  return (
+    <div
+      className="
+        min-h-screen
+        text-black
+        px-8
+        py-10
+        pb-20
+      "
+    >
+      <div className="max-w-5xl mx-auto">
+
+        {/* ================================================== */}
+        {/* BACK */}
+        {/* ================================================== */}
+
+        <button
+          onClick={() => navigate(-1)}
+          className="
+            mb-8
+            text-black/50
+            hover:text-black
+            transition
+            flex
+            items-center
+            gap-2
+            text-lg
+          "
+        >
+          ← Back
+        </button>
+
+        {/* ================================================== */}
+        {/* MEMBER HEADER */}
+        {/* ================================================== */}
+
+        <div className="mb-12">
+          <div
+            className="
+              bg-black
+              text-white
+              rounded-[32px]
+              p-8
+              md:p-10
+              shadow-[0_16px_40px_rgba(0,0,0,0.20)]
+            "
+          >
+            <div
+              className="
+                flex
+                flex-col
+                md:flex-row
+                md:items-end
+                md:justify-between
+                gap-8
+              "
+            >
+
+              {/* MEMBER INFO */}
+
+              <div>
+                <div
+                  className="
+                    text-sm
+                    uppercase
+                    tracking-[0.2em]
+                    text-yellow-400
+                    font-bold
+                    mb-3
+                  "
                 >
-                    ← Back
-                </button>
-
-                {/* Member Header */}
-                <div className="mb-10">
-                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-
-                        <div>
-                            <h1 className="text-4xl font-black tracking-tight">
-                                {member.name}
-                            </h1>
-
-                            <div className="mt-3 space-y-1 text-zinc-400">
-                                {member.phone && (
-                                    <div>
-                                        {member.phone}
-                                    </div>
-                                )}
-
-                                {member.email && (
-                                    <div>
-                                        {member.email}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Total Active Credits */}
-                        <div className="bg-zinc-900 border border-white/10 rounded-2xl px-6 py-5 min-w-[210px]">
-                            <div className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                                Active Credits
-                            </div>
-
-                            <div className="text-3xl font-black text-yellow-400 mt-1">
-                                {member.totalRemainingCredits ?? 0}
-                            </div>
-                        </div>
-                    </div>
+                  Member
                 </div>
 
-                {/* Memberships */}
-                <section>
-                    <div className="flex items-center justify-between mb-5">
-                        <h2 className="text-xl font-black">
-                            Memberships
-                        </h2>
+                <h1
+                  className="
+                    text-5xl
+                    md:text-6xl
+                    font-black
+                    tracking-tight
+                    leading-none
+                  "
+                >
+                  {member.name}
+                </h1>
 
-                        <div className="text-sm text-zinc-500">
-                            {sortedMemberships.length}{" "}
-                            {sortedMemberships.length === 1
-                                ? "membership"
-                                : "memberships"}
-                        </div>
-                    </div>
+                <div
+                  className="
+                    text-xl
+                    text-zinc-400
+                    mt-5
+                  "
+                >
+                  {member.phone}
+                </div>
 
-                    <div className="space-y-5">
-                        {sortedMemberships.map(
-                            (membership, index) => {
-                                const membershipId =
-                                    membership.id;
+                {member.email && (
+                  <div
+                    className="
+                      text-xl
+                      text-zinc-400
+                      mt-1
+                    "
+                  >
+                    {member.email}
+                  </div>
+                )}
+              </div>
 
-                                const membershipCheckins =
-                                    (member.checkins || []).filter(
-                                        (checkin) =>
-                                            String(
-                                                checkin.membershipId
-                                            ) ===
-                                            String(
-                                                membershipId
-                                            )
-                                    );
+              {/* TOTAL ACTIVE CREDITS */}
 
-                                const isOpen =
-                                    openMemberships[
-                                        membershipId
-                                    ];
+              <div
+                className="
+                  bg-yellow-400
+                  text-black
+                  rounded-3xl
+                  px-7
+                  py-5
+                  min-w-[220px]
+                "
+              >
+                <div
+                  className="
+                    text-sm
+                    uppercase
+                    tracking-wider
+                    font-bold
+                    opacity-70
+                  "
+                >
+                  Credits
+                </div>
 
-                                const active =
-                                    isActiveMembership(
-                                        membership
-                                    );
+                <div
+                  className={`
+                    text-4xl
+                    font-black
+                    mt-1
+                    ${
+                      member.totalRemainingCredits <= 4
+                        ? "text-red-600"
+                        : "text-black"
+                    }
+                  `}
+                >
+                  {member.totalRemainingCredits}
+                </div>
 
-                                return (
-                                    <div
-                                        key={
-                                            membershipId ??
-                                            `${membership.packageName}-${index}`
-                                        }
-                                        className="bg-zinc-950 border border-white/10 rounded-3xl p-6"
-                                    >
-                                        {/* Membership top row */}
-                                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
-
-                                            <div>
-                                                <div className="flex items-center gap-3 flex-wrap">
-                                                    <h3 className="text-2xl font-black">
-                                                        {
-                                                            membership.packageName
-                                                        }
-                                                    </h3>
-
-                                                    {active ? (
-                                                        <span className="px-3 py-1 rounded-full bg-yellow-400/15 text-yellow-400 text-xs font-bold uppercase tracking-wider">
-                                                            Active
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider">
-                                                            Expired
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="text-right">
-                                                <div className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                                                    Remaining
-                                                </div>
-
-                                                <div
-                                                    className={`text-3xl font-black mt-1 ${
-                                                        active
-                                                            ? "text-yellow-400"
-                                                            : "text-zinc-500"
-                                                    }`}
-                                                >
-                                                    {membership.remainingCredits ??
-                                                        0}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Dates */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-
-                                            <div className="bg-white/[0.04] rounded-2xl px-5 py-4">
-                                                <div className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                                                    Started
-                                                </div>
-
-                                                <div className="mt-1 font-bold">
-                                                    {formatDate(
-                                                        getMembershipStartDate(
-                                                            membership
-                                                        )
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-white/[0.04] rounded-2xl px-5 py-4">
-                                                <div className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                                                    Expires
-                                                </div>
-
-                                                <div className="mt-1 font-bold">
-                                                    {formatDate(
-                                                        membership.expiryDate
-                                                    )}
-                                                </div>
-
-                                                {!active &&
-                                                    membership.expiryDate && (
-                                                        <div className="text-sm text-zinc-500 mt-1">
-                                                            Expired:{" "}
-                                                            {formatDate(
-                                                                membership.expiryDate
-                                                            )}
-                                                        </div>
-                                                    )}
-                                            </div>
-                                        </div>
-
-                                        {/* Check-ins dropdown */}
-                                        <button
-                                            onClick={() =>
-                                                toggleMembership(
-                                                    membershipId
-                                                )
-                                            }
-                                            className="mt-6 w-full flex items-center justify-between bg-white/[0.05] hover:bg-white/[0.08] border border-white/5 rounded-2xl px-5 py-4 transition text-left"
-                                        >
-                                            <div>
-                                                <div className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                                                    Check-ins
-                                                </div>
-
-                                                <div className="text-base font-bold mt-1">
-                                                    {
-                                                        membershipCheckins.length
-                                                    }{" "}
-                                                    {membershipCheckins.length ===
-                                                    1
-                                                        ? "check-in"
-                                                        : "check-ins"}
-                                                </div>
-                                            </div>
-
-                                            <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-yellow-400 font-bold">
-                                                {isOpen
-                                                    ? "▲"
-                                                    : "▼"}
-                                            </div>
-                                        </button>
-
-                                        {/* Check-ins list */}
-                                        {isOpen && (
-                                            <div className="mt-3 space-y-3">
-                                                {membershipCheckins.length ===
-                                                0 ? (
-                                                    <div className="bg-white/[0.03] rounded-2xl px-5 py-5 text-sm text-zinc-500 text-center">
-                                                        No check-ins recorded
-                                                        for this membership.
-                                                    </div>
-                                                ) : (
-                                                    membershipCheckins.map(
-                                                        (
-                                                            checkin,
-                                                            checkinIndex
-                                                        ) => {
-                                                            const isNoShow =
-                                                                checkin.type ===
-                                                                "NO_SHOW";
-
-                                                            return (
-                                                                <div
-                                                                    key={
-                                                                        checkin.id ??
-                                                                        checkinIndex
-                                                                    }
-                                                                    className="bg-zinc-900 border border-white/5 rounded-2xl px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-                                                                >
-                                                                    <div>
-                                                                        <div className="font-bold">
-                                                                            {formatCheckinTime(
-                                                                                checkin.checkinTime
-                                                                            )}
-                                                                        </div>
-
-                                                                        {checkin.classTiming && (
-                                                                            <div className="text-sm text-zinc-500 mt-1">
-                                                                                Class:{" "}
-                                                                                {
-                                                                                    checkin.classTiming
-                                                                                }
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-
-                                                                    <div>
-                                                                        {isNoShow ? (
-                                                                            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-red-500/10 text-red-400 text-xs font-bold uppercase tracking-wider">
-                                                                                No Show
-                                                                            </span>
-                                                                        ) : (
-                                                                            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-yellow-400/10 text-yellow-400 text-xs font-bold uppercase tracking-wider">
-                                                                                ✓ Check In
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        }
-                                                    )
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            }
-                        )}
-                    </div>
-
-                    {sortedMemberships.length === 0 && (
-                        <div className="bg-zinc-950 border border-white/10 rounded-3xl p-8 text-center text-zinc-500">
-                            No memberships found.
-                        </div>
-                    )}
-                </section>
-
-                {/* Notes */}
-                <section className="mt-10">
-                    <div className="flex items-center justify-between mb-5">
-                        <h2 className="text-xl font-black">
-                            Notes
-                        </h2>
-                    </div>
-
-                    <div className="bg-zinc-950 border border-white/10 rounded-3xl p-6">
-                        <textarea
-                            value={member.notes || ""}
-                            onChange={(e) =>
-                                setMember({
-                                    ...member,
-                                    notes: e.target.value,
-                                })
-                            }
-                            placeholder="Add notes about this member..."
-                            rows={5}
-                            className="w-full bg-black border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-zinc-600 outline-none focus:border-yellow-400/50 resize-none"
-                        />
-
-                        <div className="flex justify-end mt-4">
-                            <button
-                                onClick={saveNotes}
-                                className="bg-yellow-400 hover:bg-yellow-300 text-black font-black px-6 py-3 rounded-xl transition"
-                            >
-                                Save Notes
-                            </button>
-                        </div>
-                    </div>
-                </section>
+                <div
+                  className="
+                    text-base
+                    font-semibold
+                    opacity-70
+                  "
+                >
+                  Remaining
+                </div>
+              </div>
 
             </div>
+          </div>
         </div>
-    );
+
+        {/* ================================================== */}
+        {/* MEMBERSHIPS */}
+        {/* ================================================== */}
+
+        <div className="mb-16">
+
+          {/* SECTION HEADER */}
+
+          <div
+            className="
+              flex
+              items-end
+              justify-between
+              mb-6
+            "
+          >
+            <div>
+              <h2
+                className="
+                  text-4xl
+                  md:text-5xl
+                  font-black
+                  tracking-tight
+                "
+              >
+                Memberships
+              </h2>
+
+              <p
+                className="
+                  text-lg
+                  text-black/50
+                  mt-2
+                  font-medium
+                "
+              >
+                Latest membership first
+              </p>
+            </div>
+
+            <div
+              className="
+                hidden
+                md:block
+                text-sm
+                uppercase
+                tracking-wider
+                font-bold
+                text-black/40
+              "
+            >
+              {sortedMemberships.length}{" "}
+              {sortedMemberships.length === 1
+                ? "Membership"
+                : "Memberships"}
+            </div>
+          </div>
+
+          {/* MEMBERSHIP CARDS */}
+
+          <div className="space-y-5">
+
+            {sortedMemberships.map(
+              (membership, index) => {
+                const membershipId = membership.id;
+
+                const isExpired =
+                  isMembershipExpired(membership);
+
+                const isCurrent =
+                  isMembershipActive(membership);
+
+                const membershipCheckins =
+                  getMembershipCheckins(membership);
+
+                const isOpen =
+                  openMemberships[membershipId];
+
+                return (
+                  <div
+                    key={
+                      membershipId ||
+                      `${membership.packageName}-${membership.expiryDate}-${index}`
+                    }
+                    className="
+                      bg-black
+                      text-white
+                      rounded-[28px]
+                      p-7
+                      md:p-8
+                      shadow-[0_12px_30px_rgba(0,0,0,0.18)]
+                      transition
+                      hover:shadow-[0_16px_40px_rgba(0,0,0,0.24)]
+                    "
+                  >
+
+                    {/* ---------------------------------------- */}
+                    {/* MEMBERSHIP SUMMARY */}
+                    {/* ---------------------------------------- */}
+
+                    <div
+                      className="
+                        flex
+                        flex-col
+                        md:flex-row
+                        md:items-center
+                        md:justify-between
+                        gap-6
+                      "
+                    >
+
+                      {/* PACKAGE + DATES */}
+
+                      <div>
+                        <div
+                          className="
+                            flex
+                            items-center
+                            gap-3
+                            mb-3
+                            flex-wrap
+                          "
+                        >
+                          <h3
+                            className="
+                              text-3xl
+                              md:text-4xl
+                              font-black
+                            "
+                          >
+                            {membership.packageName}
+                          </h3>
+
+                          {isCurrent && (
+                            <span
+                              className="
+                                bg-yellow-400
+                                text-black
+                                px-3
+                                py-1
+                                rounded-full
+                                text-sm
+                                font-bold
+                                uppercase
+                              "
+                            >
+                              Active
+                            </span>
+                          )}
+
+                          {isExpired && (
+                            <span
+                              className="
+                                bg-red-500
+                                text-white
+                                px-3
+                                py-1
+                                rounded-full
+                                text-sm
+                                font-bold
+                                uppercase
+                              "
+                            >
+                              Expired
+                            </span>
+                          )}
+                        </div>
+
+                        {/* START DATE */}
+
+                        {getMembershipStartDate(
+                          membership
+                        ) && (
+                          <div
+                            className="
+                              text-lg
+                              text-zinc-400
+                              mt-2
+                            "
+                          >
+                            <span className="text-zinc-500">
+                              Started:
+                            </span>{" "}
+                            {formatDate(
+                              getMembershipStartDate(
+                                membership
+                              )
+                            )}
+                          </div>
+                        )}
+
+                        {/* EXPIRY DATE */}
+
+                        <div
+                          className="
+                            text-lg
+                            text-zinc-400
+                            mt-1
+                          "
+                        >
+                          <span className="text-zinc-500">
+                            {isExpired
+                              ? "Expired:"
+                              : "Expires:"}
+                          </span>{" "}
+                          {formatDate(
+                            membership.expiryDate
+                          )}
+                        </div>
+                      </div>
+
+                      {/* REMAINING CREDITS */}
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          bg-white/[0.08]
+                          rounded-2xl
+                          px-5
+                          py-4
+                          self-start
+                          md:self-auto
+                        "
+                      >
+                        <div>
+                          <div
+                            className="
+                              text-sm
+                              uppercase
+                              tracking-wider
+                              text-zinc-500
+                              font-bold
+                            "
+                          >
+                            Remaining
+                          </div>
+
+                          <div
+                            className="
+                              text-3xl
+                              font-black
+                            "
+                          >
+                            {membership.remainingCredits}
+                          </div>
+                        </div>
+
+                        <div
+                          className="
+                            text-lg
+                            text-zinc-500
+                          "
+                        >
+                          credits
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* ---------------------------------------- */}
+                    {/* CHECK-INS DROPDOWN */}
+                    {/* ---------------------------------------- */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toggleMembership(
+                          membershipId
+                        )
+                      }
+                      className="
+                        mt-7
+                        w-full
+                        flex
+                        items-center
+                        justify-between
+                        gap-4
+                        bg-white/[0.08]
+                        hover:bg-white/[0.12]
+                        rounded-2xl
+                        px-5
+                        py-4
+                        text-left
+                        transition
+                      "
+                    >
+                      <div>
+                        <div
+                          className="
+                            text-sm
+                            uppercase
+                            tracking-wider
+                            text-zinc-500
+                            font-bold
+                          "
+                        >
+                          Check-ins
+                        </div>
+
+                        <div
+                          className="
+                            text-lg
+                            font-bold
+                            mt-1
+                          "
+                        >
+                          {membershipCheckins.length}{" "}
+                          {membershipCheckins.length === 1
+                            ? "check-in"
+                            : "check-ins"}
+                        </div>
+                      </div>
+
+                      <div
+                        className="
+                          w-10
+                          h-10
+                          rounded-full
+                          bg-black
+                          flex
+                          items-center
+                          justify-center
+                          text-yellow-400
+                          text-lg
+                          font-black
+                          shrink-0
+                        "
+                      >
+                        {isOpen ? "▲" : "▼"}
+                      </div>
+                    </button>
+
+                    {/* ---------------------------------------- */}
+                    {/* CHECK-INS LIST */}
+                    {/* ---------------------------------------- */}
+
+                    {isOpen && (
+                      <div className="mt-4 space-y-3">
+
+                        {membershipCheckins.length === 0 ? (
+                          <div
+                            className="
+                              bg-white/[0.05]
+                              rounded-2xl
+                              px-5
+                              py-5
+                              text-center
+                              text-zinc-500
+                            "
+                          >
+                            No check-ins recorded
+                            for this membership.
+                          </div>
+                        ) : (
+                          membershipCheckins.map(
+                            (checkin, checkinIndex) => {
+                              const isNoShow =
+                                checkin.type ===
+                                "NO_SHOW";
+
+                              return (
+                                <div
+                                  key={checkinIndex}
+                                  className="
+                                    bg-zinc-900
+                                    rounded-2xl
+                                    px-5
+                                    py-4
+                                    flex
+                                    flex-col
+                                    md:flex-row
+                                    md:items-center
+                                    md:justify-between
+                                    gap-4
+                                  "
+                                >
+
+                                  {/* DATE + CLASS */}
+
+                                  <div>
+                                    <div
+                                      className="
+                                        text-xl
+                                        font-bold
+                                      "
+                                    >
+                                      {formatCheckinTime(
+                                        checkin.checkinTime
+                                      )}
+                                    </div>
+
+                                    <div
+                                      className="
+                                        text-base
+                                        text-zinc-500
+                                        mt-2
+                                      "
+                                    >
+                                      Class:{" "}
+                                      <span className="text-zinc-300">
+                                        {checkin.classTiming ||
+                                          "Not recorded"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* TYPE */}
+
+                                  <div
+                                    className={`
+                                      px-4
+                                      py-2
+                                      rounded-full
+                                      text-base
+                                      font-bold
+                                      whitespace-nowrap
+                                      self-start
+                                      md:self-auto
+                                      ${
+                                        isNoShow
+                                          ? `
+                                            bg-red-500/15
+                                            text-red-400
+                                          `
+                                          : `
+                                            bg-yellow-400
+                                            text-black
+                                          `
+                                      }
+                                    `}
+                                  >
+                                    {isNoShow
+                                      ? "⚠ No Show"
+                                      : "✓ Check In"}
+                                  </div>
+
+                                </div>
+                              );
+                            }
+                          )
+                        )}
+
+                      </div>
+                    )}
+
+                  </div>
+                );
+              }
+            )}
+
+          </div>
+
+          {/* NO MEMBERSHIPS */}
+
+          {sortedMemberships.length === 0 && (
+            <div
+              className="
+                bg-black
+                text-white
+                rounded-[28px]
+                p-8
+                text-center
+              "
+            >
+              No memberships found.
+            </div>
+          )}
+
+        </div>
+
+        {/* ================================================== */}
+        {/* NOTES */}
+        {/* ================================================== */}
+
+        <div className="mb-16">
+
+          <div className="mb-6">
+            <h2
+              className="
+                text-4xl
+                md:text-5xl
+                font-black
+                tracking-tight
+              "
+            >
+              Notes
+            </h2>
+
+            <p
+              className="
+                text-lg
+                text-black/50
+                mt-2
+                font-medium
+              "
+            >
+              Internal notes about this member
+            </p>
+          </div>
+
+          <div
+            className="
+              bg-black
+              rounded-[28px]
+              p-6
+              shadow-[0_12px_30px_rgba(0,0,0,0.18)]
+            "
+          >
+            <textarea
+              value={member.notes || ""}
+              onChange={(e) =>
+                setMember((prev) => ({
+                  ...prev,
+                  notes: e.target.value,
+                }))
+              }
+              placeholder="Add notes about this member..."
+              className="
+                w-full
+                min-h-[220px]
+                p-5
+                rounded-2xl
+                bg-zinc-900
+                text-white
+                text-xl
+                outline-none
+                resize-y
+                border
+                border-white/10
+                focus:border-yellow-400
+                transition
+                placeholder:text-zinc-600
+              "
+            />
+
+            <button
+              onClick={saveNotes}
+              className="
+                mt-4
+                bg-yellow-400
+                text-black
+                px-7
+                py-3
+                rounded-2xl
+                text-lg
+                font-black
+                shadow-md
+                hover:bg-yellow-300
+                active:scale-95
+                transition
+              "
+            >
+              Save Notes
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
 }
+
+export default MemberDetailsPage;
