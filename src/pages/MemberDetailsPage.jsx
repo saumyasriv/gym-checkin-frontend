@@ -10,6 +10,7 @@ function MemberDetailsPage() {
 
   const [member, setMember] = useState(null);
   const [openMemberships, setOpenMemberships] = useState({});
+  const [processingMembership, setProcessingMembership] = useState(null);
 
   useEffect(() => {
     fetchMember();
@@ -41,6 +42,52 @@ function MemberDetailsPage() {
       ...prev,
       [membershipId]: !prev[membershipId],
     }));
+  };
+
+  // ============================================================
+  // PAUSE / UNPAUSE MEMBERSHIP
+  // ============================================================
+
+  const togglePauseMembership = async (membership) => {
+    if (!membership?.id) {
+      toast.error("Membership ID is missing.");
+      return;
+    }
+
+    const membershipId = membership.id;
+
+    try {
+      setProcessingMembership(membershipId);
+
+      if (membership.paused) {
+        await axios.post(
+          `${API_BASE_URL}/memberships/${membershipId}/unpause`
+        );
+
+        toast.success("Membership unpaused successfully!");
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/memberships/${membershipId}/pause`
+        );
+
+        toast.success("Membership paused successfully!");
+      }
+
+      // Refresh everything from the backend so the UI
+      // reflects the actual database values.
+      await fetchMember();
+
+    } catch (error) {
+      console.error(error);
+
+      const message =
+        error.response?.data ||
+        "Failed to update membership.";
+
+      toast.error(message);
+    } finally {
+      setProcessingMembership(null);
+    }
   };
 
   // ============================================================
@@ -170,6 +217,7 @@ function MemberDetailsPage() {
 
   const isMembershipActive = (membership) => {
     return (
+      !membership.paused &&
       !isMembershipExpired(membership) &&
       membership.remainingCredits > 0
     );
@@ -479,6 +527,9 @@ function MemberDetailsPage() {
                 const isExpired =
                   isMembershipExpired(membership);
 
+                const isPaused =
+                  membership.paused === true;
+
                 const isCurrent =
                   isMembershipActive(membership);
 
@@ -487,6 +538,9 @@ function MemberDetailsPage() {
 
                 const isOpen =
                   openMemberships[membershipId];
+
+                const isProcessing =
+                  processingMembership === membershipId;
 
                 return (
                   <div
@@ -543,7 +597,24 @@ function MemberDetailsPage() {
                             {membership.packageName}
                           </h3>
 
-                          {isCurrent && (
+                          {isPaused && (
+                            <span
+                              className="
+                                bg-orange-400
+                                text-black
+                                px-3
+                                py-1
+                                rounded-full
+                                text-sm
+                                font-bold
+                                uppercase
+                              "
+                            >
+                              Paused
+                            </span>
+                          )}
+
+                          {!isPaused && isCurrent && (
                             <span
                               className="
                                 bg-yellow-400
@@ -560,7 +631,7 @@ function MemberDetailsPage() {
                             </span>
                           )}
 
-                          {isExpired && (
+                          {!isPaused && isExpired && (
                             <span
                               className="
                                 bg-red-500
@@ -619,6 +690,26 @@ function MemberDetailsPage() {
                             membership.expiryDate
                           )}
                         </div>
+
+                        {/* PAUSE START DATE */}
+
+                        {isPaused &&
+                          membership.pauseStartDate && (
+                            <div
+                              className="
+                                text-lg
+                                text-orange-300
+                                mt-1
+                              "
+                            >
+                              <span className="text-zinc-500">
+                                Paused since:
+                              </span>{" "}
+                              {formatDate(
+                                membership.pauseStartDate
+                              )}
+                            </div>
+                          )}
                       </div>
 
                       {/* REMAINING CREDITS */}
@@ -670,6 +761,52 @@ function MemberDetailsPage() {
                       </div>
 
                     </div>
+
+                    {/* ---------------------------------------- */}
+                    {/* PAUSE / UNPAUSE BUTTON */}
+                    {/* ---------------------------------------- */}
+
+                    {!isExpired && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          togglePauseMembership(membership)
+                        }
+                        disabled={isProcessing}
+                        className={`
+                          mt-6
+                          w-full
+                          rounded-2xl
+                          px-5
+                          py-4
+                          text-lg
+                          font-black
+                          transition
+                          active:scale-[0.99]
+                          disabled:opacity-50
+                          disabled:cursor-not-allowed
+                          ${
+                            isPaused
+                              ? `
+                                bg-yellow-400
+                                text-black
+                                hover:bg-yellow-300
+                              `
+                              : `
+                                bg-white/[0.08]
+                                text-white
+                                hover:bg-white/[0.14]
+                              `
+                          }
+                        `}
+                      >
+                        {isProcessing
+                          ? "Updating..."
+                          : isPaused
+                            ? "Unpause Membership"
+                            : "Pause Membership"}
+                      </button>
+                    )}
 
                     {/* ---------------------------------------- */}
                     {/* CHECK-INS DROPDOWN */}
