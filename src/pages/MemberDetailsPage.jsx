@@ -65,16 +65,16 @@ function MemberDetailsPage() {
         );
 
         toast.success("Membership Unpaused successfully!", {
-  duration: 1500,
-});
+          duration: 1500,
+        });
       } else {
         await axios.post(
           `${API_BASE_URL}/memberships/${membershipId}/pause`
         );
 
         toast.success("Membership paused successfully!", {
-  duration: 1500,
-});
+          duration: 1500,
+        });
       }
 
       // Refresh everything from the backend so the UI
@@ -720,44 +720,48 @@ function MemberDetailsPage() {
 
                       <div
                         className="
-                          flex
-                          items-center
-                          gap-3
+                          w-full
+                          md:w-[150px]
+                          shrink-0
                           bg-white/[0.08]
                           rounded-2xl
                           px-5
                           py-4
-                          self-start
-                          md:self-auto
+                          flex
+                          flex-col
+                          items-center
+                          justify-center
+                          text-center
                         "
                       >
-                        <div>
-                          <div
-                            className="
-                              text-sm
-                              uppercase
-                              tracking-wider
-                              text-zinc-500
-                              font-bold
-                            "
-                          >
-                            Remaining
-                          </div>
-
-                          <div
-                            className="
-                              text-3xl
-                              font-black
-                            "
-                          >
-                            {membership.remainingCredits}
-                          </div>
+                        <div
+                          className="
+                            text-xs
+                            uppercase
+                            tracking-wider
+                            text-zinc-500
+                            font-bold
+                          "
+                        >
+                          Remaining
                         </div>
 
                         <div
                           className="
-                            text-lg
+                            text-3xl
+                            font-black
+                            leading-none
+                            mt-2
+                          "
+                        >
+                          {membership.remainingCredits}
+                        </div>
+
+                        <div
+                          className="
+                            text-sm
                             text-zinc-500
+                            mt-1
                           "
                         >
                           credits
@@ -767,49 +771,50 @@ function MemberDetailsPage() {
                     </div>
 
                     {/* ---------------------------------------- */}
-                    {/* PAUSE / UNPAUSE BUTTON */}
+                    {/* PAUSE / UNPAUSE MEMBERSHIP */}
                     {/* ---------------------------------------- */}
 
                     {!isExpired && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          togglePauseMembership(membership)
-                        }
-                        disabled={isProcessing}
-                        className={`
-                          mt-6
-                          w-full
-                          rounded-2xl
-                          px-5
-                          py-4
-                          text-lg
-                          font-black
-                          transition
-                          active:scale-[0.99]
-                          disabled:opacity-50
-                          disabled:cursor-not-allowed
-                          ${
-                            isPaused
-                              ? `
-                                bg-yellow-400
-                                text-black
-                                hover:bg-yellow-300
-                              `
-                              : `
-                                bg-white/[0.08]
-                                text-white
-                                hover:bg-white/[0.14]
-                              `
+                      <div className="mt-5 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePauseMembership(membership)
                           }
-                        `}
-                      >
-                        {isProcessing
-                          ? "Updating..."
-                          : isPaused
-                            ? "Unpause Membership"
-                            : "Pause Membership"}
-                      </button>
+                          disabled={isProcessing}
+                          className={`
+                            px-5
+                            py-2.5
+                            rounded-xl
+                            text-sm
+                            font-bold
+                            transition
+                            active:scale-95
+                            disabled:opacity-50
+                            disabled:cursor-not-allowed
+                            ${
+                              isPaused
+                                ? `
+                                  bg-yellow-400
+                                  text-black
+                                  hover:bg-yellow-300
+                                `
+                                : `
+                                  bg-white/[0.08]
+                                  text-zinc-300
+                                  hover:bg-white/[0.14]
+                                  hover:text-white
+                                `
+                            }
+                          `}
+                        >
+                          {isProcessing
+                            ? "Updating..."
+                            : isPaused
+                              ? "Unpause Membership"
+                              : "Pause Membership"}
+                        </button>
+                      </div>
                     )}
 
                     {/* ---------------------------------------- */}
