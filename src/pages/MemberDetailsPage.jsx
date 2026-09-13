@@ -64,13 +64,17 @@ function MemberDetailsPage() {
           `${API_BASE_URL}/memberships/${membershipId}/unpause`
         );
 
-        toast.success("Membership unpaused successfully!");
+        toast.success("Membership Unpaused successfully!", {
+  duration: 1500,
+});
       } else {
         await axios.post(
           `${API_BASE_URL}/memberships/${membershipId}/pause`
         );
 
-        toast.success("Membership paused successfully!");
+        toast.success("Membership paused successfully!", {
+  duration: 1500,
+});
       }
 
       // Refresh everything from the backend so the UI
