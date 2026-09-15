@@ -55,10 +55,63 @@ function CheckInPage() {
     }
   };
 
+  // ============================================================
+  // CHECK WHETHER MEMBER HAS A USABLE MEMBERSHIP
+  // ============================================================
+
+  const hasUsableMembership = (member) => {
+    const today = new Date()
+      .toISOString()
+      .split("T")[0];
+
+    return (member.memberships || []).some(
+      (membership) =>
+        !membership.paused &&
+        membership.remainingCredits > 0 &&
+        membership.expiryDate &&
+        membership.expiryDate >= today
+    );
+  };
+
+  const hasPausedMembershipOnly = (member) => {
+    const memberships = member.memberships || [];
+
+    if (memberships.length === 0) {
+      return false;
+    }
+
+    const hasUsable = hasUsableMembership(member);
+
+    const hasPausedWithCredits = memberships.some(
+      (membership) =>
+        membership.paused === true &&
+        membership.remainingCredits > 0
+    );
+
+    return !hasUsable && hasPausedWithCredits;
+  };
+
+  // ============================================================
+  // PROCESS ATTENDANCE
+  // ============================================================
+
   const processAttendance = async (
     memberId,
     type
   ) => {
+    const member = allMembers.find(
+      (member) => member.id === memberId
+    );
+
+    if (member && !hasUsableMembership(member)) {
+      if (hasPausedMembershipOnly(member)) {
+        toast.error("Membership is paused.");
+      } else {
+        toast.error("No active membership.");
+      }
+      return;
+    }
+
     const classTiming =
       selectedTimings[memberId];
 
@@ -133,11 +186,17 @@ function CheckInPage() {
 
       if (message === "Credits expired") {
         toast.error("Credits expired!");
+      } else if (message === "Membership is paused") {
+        toast.error("Membership is paused.");
       } else {
         toast.error("No Credits!");
       }
     }
   };
+
+  // ============================================================
+  // DELETE MEMBER
+  // ============================================================
 
   const deleteMember = async (memberId) => {
     const confirmed = window.confirm(
@@ -168,6 +227,7 @@ function CheckInPage() {
             member.id !== memberId
         )
       );
+
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete member");
@@ -187,12 +247,11 @@ function CheckInPage() {
         setQuery("");
       }}
     >
-
       <div className="max-w-5xl mx-auto">
 
         {/* HEADER */}
-        <div className="mb-10">
 
+        <div className="mb-10">
           <h1
             className="
               text-5xl
@@ -216,10 +275,10 @@ function CheckInPage() {
           >
             Search for your name to check in
           </p>
-
         </div>
 
         {/* SEARCH BAR */}
+
         <div
           className="
             relative
@@ -229,8 +288,8 @@ function CheckInPage() {
             e.stopPropagation()
           }
         >
-
           {/* SEARCH ICON */}
+
           <svg
             className="
               absolute
@@ -291,16 +350,25 @@ function CheckInPage() {
               placeholder:text-black/40
             "
           />
-
         </div>
 
         {/* MEMBER RESULTS */}
+
         <div className="mt-10 space-y-5">
 
           {members.map((member) => {
 
             const selectedTiming =
               selectedTimings[member.id] || "";
+
+            const usable =
+              hasUsableMembership(member);
+
+            const paused =
+              hasPausedMembershipOnly(member);
+
+            const attendanceDisabled =
+              !usable;
 
             return (
               <div
@@ -330,6 +398,7 @@ function CheckInPage() {
               >
 
                 {/* MEMBER INFORMATION */}
+
                 <div className="flex-1 min-w-0">
 
                   <div
@@ -344,25 +413,39 @@ function CheckInPage() {
                     {member.name}
                   </div>
 
-                  <div
-                    className={`
-                      text-xl
-                      mt-2
-                      font-medium
-                      ${
-                        member.totalRemainingCredits <= 4
-                          ? "text-red-500 font-bold"
-                          : "text-zinc-400"
-                      }
-                    `}
-                  >
-                    {member.totalRemainingCredits}{" "}
-                    credits remaining
-                  </div>
+                  {paused ? (
+                    <div
+                      className="
+                        text-xl
+                        mt-2
+                        font-bold
+                        text-orange-400
+                      "
+                    >
+                      Membership Paused
+                    </div>
+                  ) : (
+                    <div
+                      className={`
+                        text-xl
+                        mt-2
+                        font-medium
+                        ${
+                          member.totalRemainingCredits <= 4
+                            ? "text-red-500 font-bold"
+                            : "text-zinc-400"
+                        }
+                      `}
+                    >
+                      {member.totalRemainingCredits}{" "}
+                      credits remaining
+                    </div>
+                  )}
 
                 </div>
 
                 {/* CONTROLS */}
+
                 <div
                   className="
                     flex
@@ -376,6 +459,7 @@ function CheckInPage() {
                 >
 
                   {/* SESSION DROPDOWN */}
+
                   <div
                     className="
                       relative
@@ -386,9 +470,9 @@ function CheckInPage() {
                       width: "140px"
                     }}
                   >
-
                     <select
                       value={selectedTiming}
+                      disabled={attendanceDisabled}
                       onChange={(e) => {
                         setSelectedTimings(
                           (prev) => ({
@@ -398,71 +482,90 @@ function CheckInPage() {
                           })
                         );
                       }}
-                      className="
+                      className={`
                         appearance-none
-                        bg-white
-                        text-black
                         w-full
                         h-12
                         rounded-2xl
                         text-lg
                         font-bold
                         outline-none
-                        cursor-pointer
                         pl-4
                         pr-10
                         border-2
-                        border-transparent
-                        hover:border-black/20
-                        focus:border-black
                         transition
-                      "
-                    >
 
+                        ${
+                          attendanceDisabled
+                            ? `
+                              bg-white/20
+                              text-white/30
+                              border-transparent
+                              cursor-not-allowed
+                            `
+                            : `
+                              bg-white
+                              text-black
+                              border-transparent
+                              hover:border-black/20
+                              focus:border-black
+                              cursor-pointer
+                            `
+                        }
+                      `}
+                    >
                       <option value="">
-                        Session
+                        {paused
+                          ? "Paused"
+                          : "Session"}
                       </option>
 
-                      {classTimings.map(
-                        (timing) => (
-                          <option
-                            key={timing}
-                            value={timing}
-                          >
-                            {timing}
-                          </option>
-                        )
-                      )}
-
+                      {!attendanceDisabled &&
+                        classTimings.map(
+                          (timing) => (
+                            <option
+                              key={timing}
+                              value={timing}
+                            >
+                              {timing}
+                            </option>
+                          )
+                        )}
                     </select>
 
                     {/* DROPDOWN ARROW */}
-                    <svg
-                      className="
-                        pointer-events-none
-                        absolute
-                        right-3
-                        top-1/2
-                        -translate-y-1/2
-                        w-5
-                        h-5
-                        text-black
-                      "
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
 
+                    {!attendanceDisabled && (
+                      <svg
+                        className="
+                          pointer-events-none
+                          absolute
+                          right-3
+                          top-1/2
+                          -translate-y-1/2
+                          w-5
+                          h-5
+                          text-black
+                        "
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    )}
                   </div>
 
                   {/* CHECK IN */}
+
                   <button
-                    disabled={!selectedTiming}
+                    disabled={
+                      attendanceDisabled ||
+                      !selectedTiming
+                    }
                     onClick={() =>
                       processAttendance(
                         member.id,
@@ -477,9 +580,16 @@ function CheckInPage() {
                       font-bold
                       whitespace-nowrap
                       transition-all
+
                       ${
-                        selectedTiming
+                        attendanceDisabled ||
+                        !selectedTiming
                           ? `
+                            bg-white/20
+                            text-white/30
+                            cursor-not-allowed
+                          `
+                          : `
                             bg-yellow-400
                             text-black
                             shadow-md
@@ -487,21 +597,22 @@ function CheckInPage() {
                             active:scale-95
                             cursor-pointer
                           `
-                          : `
-                            bg-white/30
-                            text-white/40
-                            cursor-not-allowed
-                          `
                       }
                     `}
                   >
-                    Check In
+                    {paused
+                      ? "Paused"
+                      : "Check In"}
                   </button>
 
                   {/* NO SHOW — ADMIN ONLY */}
+
                   {isAdmin && (
                     <button
-                      disabled={!selectedTiming}
+                      disabled={
+                        attendanceDisabled ||
+                        !selectedTiming
+                      }
                       onClick={() =>
                         processAttendance(
                           member.id,
@@ -516,19 +627,21 @@ function CheckInPage() {
                         font-bold
                         whitespace-nowrap
                         transition-all
+
                         ${
-                          selectedTiming
+                          attendanceDisabled ||
+                          !selectedTiming
                             ? `
+                              bg-zinc-700/30
+                              text-white/30
+                              cursor-not-allowed
+                            `
+                            : `
                               bg-zinc-700
                               text-white
                               hover:bg-zinc-600
                               active:scale-95
                               cursor-pointer
-                            `
-                            : `
-                              bg-zinc-700/40
-                              text-white/40
-                              cursor-not-allowed
                             `
                         }
                       `}
@@ -538,6 +651,7 @@ function CheckInPage() {
                   )}
 
                   {/* DELETE — ADMIN ONLY */}
+
                   {isAdmin && (
                     <button
                       onClick={() =>
@@ -573,7 +687,6 @@ function CheckInPage() {
         </div>
 
       </div>
-
     </div>
   );
 }
