@@ -84,11 +84,16 @@ function MemberDetailsPage() {
     } catch (error) {
       console.error(error);
 
-      const message =
-        error.response?.data ||
-        "Failed to update membership.";
+      const responseData = error.response?.data;
 
-      toast.error(message);
+const message =
+  typeof responseData === "string"
+    ? responseData
+    : responseData?.message
+      ? responseData.message
+      : "Failed to update membership.";
+
+toast.error(message);
     } finally {
       setProcessingMembership(null);
     }
