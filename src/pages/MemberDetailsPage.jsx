@@ -480,17 +480,40 @@ function MemberDetailsPage() {
                   Member
                 </div>
 
-                <h1
-                  className="
-                    text-5xl
-                    md:text-6xl
-                    font-black
-                    tracking-tight
-                    leading-none
-                  "
-                >
-                  {member.name}
-                </h1>
+                <div className="flex items-center gap-4 flex-wrap">
+  <h1
+    className="
+      text-5xl
+      md:text-6xl
+      font-black
+      tracking-tight
+      leading-none
+    "
+  >
+    {member.name}
+  </h1>
+
+  {member.memberType && (
+    <span
+      className={`
+        px-4
+        py-2
+        rounded-full
+        text-sm
+        font-black
+        tracking-wider
+        uppercase
+        ${
+          member.memberType === "PT"
+            ? "bg-purple-400 text-black"
+            : "bg-yellow-400 text-black"
+        }
+      `}
+    >
+      {member.memberType}
+    </span>
+  )}
+</div>
 
                 <div
                   className="
