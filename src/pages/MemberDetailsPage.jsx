@@ -235,6 +235,14 @@ function MemberDetailsPage() {
     );
   };
 
+  const getPauseHistory = (membership) => {
+    return [...(membership.pauseHistory || [])].sort(
+      (a, b) =>
+        new Date(b.pauseStartDate) -
+        new Date(a.pauseStartDate)
+    );
+  };
+
   // ============================================================
   // NOTES
   // ============================================================
@@ -814,6 +822,191 @@ function MemberDetailsPage() {
                               ? "Unpause Membership"
                               : "Pause Membership"}
                         </button>
+                      </div>
+                    )}
+
+                    {/* ---------------------------------------- */}
+                    {/* PAUSE HISTORY */}
+                    {/* ---------------------------------------- */}
+
+                    {getPauseHistory(membership).length > 0 && (
+                      <div className="mt-6">
+                        <div
+                          className="
+                            bg-white/[0.05]
+                            rounded-2xl
+                            border
+                            border-white/[0.06]
+                            overflow-hidden
+                          "
+                        >
+                          <div
+                            className="
+                              px-5
+                              py-4
+                              flex
+                              items-center
+                              justify-between
+                              gap-4
+                            "
+                          >
+                            <div>
+                              <div
+                                className="
+                                  text-sm
+                                  uppercase
+                                  tracking-wider
+                                  text-zinc-500
+                                  font-bold
+                                "
+                              >
+                                Pause History
+                              </div>
+
+                              <div className="text-sm text-zinc-400 mt-1">
+                                {getPauseHistory(membership).length}{" "}
+                                {getPauseHistory(membership).length === 1
+                                  ? "pause"
+                                  : "pauses"}{" "}
+                                recorded
+                              </div>
+                            </div>
+
+                            <div
+                              className="
+                                w-9
+                                h-9
+                                rounded-full
+                                bg-white/[0.06]
+                                flex
+                                items-center
+                                justify-center
+                                text-orange-300
+                                text-base
+                              "
+                            >
+                              ◷
+                            </div>
+                          </div>
+
+                          <div className="px-5 pb-5 space-y-3">
+                            {getPauseHistory(membership).map(
+                              (pause, pauseIndex) => {
+                                const isCurrentPause =
+                                  pause.pauseEndDate == null;
+
+                                return (
+                                  <div
+                                    key={
+                                      pause.id ||
+                                      `${pause.pauseStartDate}-${pauseIndex}`
+                                    }
+                                    className="
+                                      bg-zinc-900
+                                      rounded-xl
+                                      px-4
+                                      py-4
+                                      border
+                                      border-white/[0.05]
+                                    "
+                                  >
+                                    <div
+                                      className="
+                                        flex
+                                        flex-col
+                                        md:flex-row
+                                        md:items-center
+                                        md:justify-between
+                                        gap-4
+                                      "
+                                    >
+                                      <div>
+                                        <div className="text-base font-bold">
+                                          {isCurrentPause
+                                            ? "Currently Paused"
+                                            : `${formatDate(
+                                                pause.pauseStartDate
+                                              )} → ${formatDate(
+                                                pause.pauseEndDate
+                                              )}`}
+                                        </div>
+
+                                        <div className="text-sm text-zinc-500 mt-1">
+                                          Started{" "}
+                                          {formatDate(
+                                            pause.pauseStartDate
+                                          )}
+
+                                          {isCurrentPause
+                                            ? " • Still active"
+                                            : ` • Ended ${formatDate(
+                                                pause.pauseEndDate
+                                              )}`}
+                                        </div>
+                                      </div>
+
+                                      <div
+                                        className="
+                                          flex
+                                          flex-wrap
+                                          gap-2
+                                          md:justify-end
+                                        "
+                                      >
+                                        <div
+                                          className="
+                                            bg-white/[0.06]
+                                            rounded-lg
+                                            px-3
+                                            py-2
+                                            text-center
+                                          "
+                                        >
+                                          <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+                                            Duration
+                                          </div>
+
+                                          <div className="text-sm font-bold mt-1">
+                                            {isCurrentPause
+                                              ? "Ongoing"
+                                              : `${pause.pausedDays ?? 0} ${
+                                                  pause.pausedDays === 1
+                                                    ? "day"
+                                                    : "days"
+                                                }`}
+                                          </div>
+                                        </div>
+
+                                        {!isCurrentPause && (
+                                          <div
+                                            className="
+                                              bg-yellow-400/10
+                                              rounded-lg
+                                              px-3
+                                              py-2
+                                              text-center
+                                            "
+                                          >
+                                            <div className="text-[10px] uppercase tracking-wider text-yellow-500 font-bold">
+                                              Expiry Added
+                                            </div>
+
+                                            <div className="text-sm font-bold text-yellow-300 mt-1">
+                                              +{pause.daysAddedToExpiry ?? 0}{" "}
+                                              {pause.daysAddedToExpiry === 1
+                                                ? "day"
+                                                : "days"}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
 
