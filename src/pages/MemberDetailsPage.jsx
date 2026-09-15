@@ -10,6 +10,7 @@ function MemberDetailsPage() {
 
   const [member, setMember] = useState(null);
   const [openMemberships, setOpenMemberships] = useState({});
+  const [openPauseHistories, setOpenPauseHistories] = useState({});
   const [processingMembership, setProcessingMembership] = useState(null);
   const [, setTodayTick] = useState(0);
 
@@ -49,6 +50,13 @@ function MemberDetailsPage() {
 
   const toggleMembership = (membershipId) => {
     setOpenMemberships((prev) => ({
+      ...prev,
+      [membershipId]: !prev[membershipId],
+    }));
+  };
+
+  const togglePauseHistory = (membershipId) => {
+    setOpenPauseHistories((prev) => ({
       ...prev,
       [membershipId]: !prev[membershipId],
     }));
@@ -992,207 +1000,6 @@ function MemberDetailsPage() {
                     )}
 
                     {/* ---------------------------------------- */}
-                    {/* PAUSE HISTORY */}
-                    {/* ---------------------------------------- */}
-
-                    {getPauseHistory(membership).length > 0 && (
-                      <div className="mt-6">
-                        <div
-                          className="
-                            bg-white/[0.05]
-                            rounded-2xl
-                            border
-                            border-white/[0.06]
-                            overflow-hidden
-                          "
-                        >
-                          <div
-                            className="
-                              px-5
-                              py-4
-                              flex
-                              items-center
-                              justify-between
-                              gap-4
-                            "
-                          >
-                            <div>
-                              <div
-                                className="
-                                  text-sm
-                                  uppercase
-                                  tracking-wider
-                                  text-zinc-500
-                                  font-bold
-                                "
-                              >
-                                Pause History
-                              </div>
-
-                              <div className="text-sm text-zinc-400 mt-1">
-                                {getPauseHistory(membership).length}{" "}
-                                {getPauseHistory(membership).length === 1
-                                  ? "pause"
-                                  : "pauses"}{" "}
-                                recorded
-                              </div>
-                            </div>
-
-                            <div
-                              className="
-                                w-9
-                                h-9
-                                rounded-full
-                                bg-white/[0.06]
-                                flex
-                                items-center
-                                justify-center
-                                text-orange-300
-                                text-base
-                              "
-                            >
-                              ◷
-                            </div>
-                          </div>
-
-                          <div className="px-5 pb-5 space-y-3">
-                            {getPauseHistory(membership).map(
-                              (pause, pauseIndex) => {
-                                const isCurrentPause =
-                                  pause.pauseEndDate == null;
-
-                                return (
-                                  <div
-                                    key={
-                                      pause.id ||
-                                      `${pause.pauseStartDate}-${pauseIndex}`
-                                    }
-                                    className="
-                                      bg-zinc-900
-                                      rounded-xl
-                                      px-4
-                                      py-4
-                                      border
-                                      border-white/[0.05]
-                                    "
-                                  >
-                                    <div
-                                      className="
-                                        flex
-                                        flex-col
-                                        md:flex-row
-                                        md:items-center
-                                        md:justify-between
-                                        gap-4
-                                      "
-                                    >
-                                      <div>
-                                        <div className="text-base font-bold">
-                                          {isCurrentPause
-                                            ? "Currently Paused"
-                                            : `${formatDate(
-                                                pause.pauseStartDate
-                                              )} → ${formatDate(
-                                                pause.pauseEndDate
-                                              )}`}
-                                        </div>
-
-                                        <div className="text-sm text-zinc-500 mt-1">
-                                          Started{" "}
-                                          {formatDate(
-                                            pause.pauseStartDate
-                                          )}
-
-                                          {isCurrentPause
-                                            ? ` • Paused for ${getCurrentPauseDays(
-                                                pause.pauseStartDate
-                                              )} ${
-                                                getCurrentPauseDays(
-                                                  pause.pauseStartDate
-                                                ) === 1
-                                                  ? "day"
-                                                  : "days"
-                                              }`
-                                            : ` • Ended ${formatDate(
-                                                pause.pauseEndDate
-                                              )}`}
-                                        </div>
-                                      </div>
-
-                                      <div
-                                        className="
-                                          flex
-                                          flex-wrap
-                                          gap-2
-                                          md:justify-end
-                                        "
-                                      >
-                                        <div
-                                          className="
-                                            bg-white/[0.06]
-                                            rounded-lg
-                                            px-3
-                                            py-2
-                                            text-center
-                                          "
-                                        >
-                                          <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
-                                            Duration
-                                          </div>
-
-                                          <div className="text-sm font-bold mt-1">
-                                            {isCurrentPause
-                                              ? `${getCurrentPauseDays(
-                                                  pause.pauseStartDate
-                                                )} ${
-                                                  getCurrentPauseDays(
-                                                    pause.pauseStartDate
-                                                  ) === 1
-                                                    ? "day"
-                                                    : "days"
-                                                }`
-                                              : `${pause.pausedDays ?? 0} ${
-                                                  pause.pausedDays === 1
-                                                    ? "day"
-                                                    : "days"
-                                                }`}
-                                          </div>
-                                        </div>
-
-                                        {!isCurrentPause && (
-                                          <div
-                                            className="
-                                              bg-yellow-400/10
-                                              rounded-lg
-                                              px-3
-                                              py-2
-                                              text-center
-                                            "
-                                          >
-                                            <div className="text-[10px] uppercase tracking-wider text-yellow-500 font-bold">
-                                              Expiry Added
-                                            </div>
-
-                                            <div className="text-sm font-bold text-yellow-300 mt-1">
-                                              +{pause.daysAddedToExpiry ?? 0}{" "}
-                                              {pause.daysAddedToExpiry === 1
-                                                ? "day"
-                                                : "days"}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              }
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* ---------------------------------------- */}
                     {/* CHECK-INS DROPDOWN */}
                     {/* ---------------------------------------- */}
 
@@ -1376,6 +1183,220 @@ function MemberDetailsPage() {
                         )}
 
                       </div>
+                    )}
+
+                    {/* ---------------------------------------- */}
+                    {/* PAUSE HISTORY DROPDOWN */}
+                    {/* ---------------------------------------- */}
+
+                    {getPauseHistory(membership).length > 0 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePauseHistory(membershipId)
+                          }
+                          className="
+                            mt-4
+                            w-full
+                            flex
+                            items-center
+                            justify-between
+                            gap-4
+                            bg-white/[0.08]
+                            hover:bg-white/[0.12]
+                            rounded-2xl
+                            px-5
+                            py-4
+                            text-left
+                            transition
+                          "
+                        >
+                          <div>
+                            <div
+                              className="
+                                text-sm
+                                uppercase
+                                tracking-wider
+                                text-zinc-500
+                                font-bold
+                              "
+                            >
+                              Pause History
+                            </div>
+
+                            <div
+                              className="
+                                text-lg
+                                font-bold
+                                mt-1
+                              "
+                            >
+                              {getPauseHistory(membership).length}{" "}
+                              {getPauseHistory(membership).length === 1
+                                ? "pause"
+                                : "pauses"}{" "}
+                              recorded
+                            </div>
+                          </div>
+
+                          <div
+                            className="
+                              w-10
+                              h-10
+                              rounded-full
+                              bg-black
+                              flex
+                              items-center
+                              justify-center
+                              text-orange-300
+                              text-lg
+                              font-black
+                              shrink-0
+                            "
+                          >
+                            {openPauseHistories[membershipId]
+                              ? "▲"
+                              : "▼"}
+                          </div>
+                        </button>
+
+                        {openPauseHistories[membershipId] && (
+                          <div className="mt-4 space-y-3">
+                            {getPauseHistory(membership).map(
+                              (pause, pauseIndex) => {
+                                const isCurrentPause =
+                                  pause.pauseEndDate == null;
+
+                                return (
+                                  <div
+                                    key={
+                                      pause.id ||
+                                      `${pause.pauseStartDate}-${pauseIndex}`
+                                    }
+                                    className="
+                                      bg-white/[0.05]
+                                      rounded-xl
+                                      px-4
+                                      py-4
+                                      border
+                                      border-white/[0.06]
+                                    "
+                                  >
+                                    <div
+                                      className="
+                                        flex
+                                        flex-col
+                                        md:flex-row
+                                        md:items-center
+                                        md:justify-between
+                                        gap-4
+                                      "
+                                    >
+                                      <div>
+                                        <div className="text-base font-bold">
+                                          {isCurrentPause
+                                            ? "Currently Paused"
+                                            : `${formatDate(
+                                                pause.pauseStartDate
+                                              )} → ${formatDate(
+                                                pause.pauseEndDate
+                                              )}`}
+                                        </div>
+
+                                        <div className="text-sm text-zinc-500 mt-1">
+                                          Started{" "}
+                                          {formatDate(
+                                            pause.pauseStartDate
+                                          )}
+
+                                          {isCurrentPause
+                                            ? ` • Paused for ${getCurrentPauseDays(
+                                                pause.pauseStartDate
+                                              )} ${
+                                                getCurrentPauseDays(
+                                                  pause.pauseStartDate
+                                                ) === 1
+                                                  ? "day"
+                                                  : "days"
+                                              }`
+                                            : ` • Ended ${formatDate(
+                                                pause.pauseEndDate
+                                              )}`}
+                                        </div>
+                                      </div>
+
+                                      <div
+                                        className="
+                                          flex
+                                          flex-wrap
+                                          gap-2
+                                          md:justify-end
+                                        "
+                                      >
+                                        <div
+                                          className="
+                                            bg-white/[0.06]
+                                            rounded-lg
+                                            px-3
+                                            py-2
+                                            text-center
+                                          "
+                                        >
+                                          <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+                                            Duration
+                                          </div>
+
+                                          <div className="text-sm font-bold mt-1">
+                                            {isCurrentPause
+                                              ? `${getCurrentPauseDays(
+                                                  pause.pauseStartDate
+                                                )} ${
+                                                  getCurrentPauseDays(
+                                                    pause.pauseStartDate
+                                                  ) === 1
+                                                    ? "day"
+                                                    : "days"
+                                                }`
+                                              : `${pause.pausedDays ?? 0} ${
+                                                  pause.pausedDays === 1
+                                                    ? "day"
+                                                    : "days"
+                                                }`}
+                                          </div>
+                                        </div>
+
+                                        {!isCurrentPause && (
+                                          <div
+                                            className="
+                                              bg-yellow-400/10
+                                              rounded-lg
+                                              px-3
+                                              py-2
+                                              text-center
+                                            "
+                                          >
+                                            <div className="text-[10px] uppercase tracking-wider text-yellow-500 font-bold">
+                                              Expiry Added
+                                            </div>
+
+                                            <div className="text-sm font-bold text-yellow-300 mt-1">
+                                              +{pause.daysAddedToExpiry ?? 0}{" "}
+                                              {pause.daysAddedToExpiry === 1
+                                                ? "day"
+                                                : "days"}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )}
+                          </div>
+                        )}
+                      </>
                     )}
 
                   </div>
