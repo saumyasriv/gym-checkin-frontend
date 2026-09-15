@@ -105,6 +105,55 @@ function MemberDetailsPage() {
   };
 
   // ============================================================
+  // REMOVE / RESTORE EXPIRY
+  // ============================================================
+
+  const toggleExpiry = async (membership) => {
+    if (!membership?.id) {
+      toast.error("Membership ID is missing.");
+      return;
+    }
+
+    const membershipId = membership.id;
+
+    try {
+      setProcessingMembership(membershipId);
+
+      if (membership.expiryRemoved) {
+        await axios.post(
+          `${API_BASE_URL}/memberships/${membershipId}/restore-expiry`
+        );
+
+        toast.success("Expiry restored successfully!", {
+          duration: 1500,
+        });
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/memberships/${membershipId}/remove-expiry`
+        );
+
+        toast.success("Expiry removed successfully!", {
+          duration: 1500,
+        });
+      }
+
+      // Refresh everything from the backend so the UI
+      // reflects the actual database values.
+      await fetchMember();
+    } catch (error) {
+      console.error(error);
+
+      const message =
+        error.response?.data ||
+        "Failed to update expiry.";
+
+      toast.error(message);
+    } finally {
+      setProcessingMembership(null);
+    }
+  };
+
+  // ============================================================
   // DATE / TIME HELPERS
   // ============================================================
 
@@ -226,6 +275,15 @@ function MemberDetailsPage() {
   };
 
   const isMembershipExpired = (membership) => {
+    // A membership with expiry removed is never considered expired.
+    if (membership.expiryRemoved) {
+      return false;
+    }
+
+    if (!membership.expiryDate) {
+      return false;
+    }
+
     return membership.expiryDate < getToday();
   };
 
@@ -575,6 +633,9 @@ function MemberDetailsPage() {
                 const isPaused =
                   membership.paused === true;
 
+                const isExpiryRemoved =
+                  membership.expiryRemoved === true;
+
                 const isCurrent =
                   isMembershipActive(membership);
 
@@ -676,6 +737,23 @@ function MemberDetailsPage() {
                             </span>
                           )}
 
+                          {!isPaused && isExpiryRemoved && (
+                            <span
+                              className="
+                                bg-green-400
+                                text-black
+                                px-3
+                                py-1
+                                rounded-full
+                                text-sm
+                                font-bold
+                                uppercase
+                              "
+                            >
+                              No Expiry
+                            </span>
+                          )}
+
                           {!isPaused && isExpired && (
                             <span
                               className="
@@ -726,13 +804,24 @@ function MemberDetailsPage() {
                             mt-1
                           "
                         >
-                          <span className="text-zinc-500">
-                            {isExpired
-                              ? "Expired:"
-                              : "Expires:"}
-                          </span>{" "}
-                          {formatDate(
-                            membership.expiryDate
+                          {isExpiryRemoved ? (
+                            <>
+                              <span className="text-zinc-500">
+                                Expiry:
+                              </span>{" "}
+                              No Expiry
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-zinc-500">
+                                {isExpired
+                                  ? "Expired:"
+                                  : "Expires:"}
+                              </span>{" "}
+                              {formatDate(
+                                membership.expiryDate
+                              )}
+                            </>
                           )}
                         </div>
 
@@ -812,49 +901,93 @@ function MemberDetailsPage() {
                     </div>
 
                     {/* ---------------------------------------- */}
-                    {/* PAUSE / UNPAUSE MEMBERSHIP */}
+                    {/* PAUSE / UNPAUSE + REMOVE / RESTORE EXPIRY */}
                     {/* ---------------------------------------- */}
 
-                    {!isExpired && (
-                      <div className="mt-5 flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            togglePauseMembership(membership)
-                          }
-                          disabled={isProcessing}
-                          className={`
-                            px-5
-                            py-2.5
-                            rounded-xl
-                            text-sm
-                            font-bold
-                            transition
-                            active:scale-95
-                            disabled:opacity-50
-                            disabled:cursor-not-allowed
-                            ${
-                              isPaused
-                                ? `
-                                  bg-yellow-400
-                                  text-black
-                                  hover:bg-yellow-300
-                                `
-                                : `
-                                  bg-white/[0.08]
-                                  text-zinc-300
-                                  hover:bg-white/[0.14]
-                                  hover:text-white
-                                `
+                    {(!isExpired || isPaused) && (
+                      <div className="mt-5 flex justify-end gap-3 flex-wrap">
+                        {!isExpiryRemoved && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              togglePauseMembership(membership)
                             }
-                          `}
-                        >
-                          {isProcessing
-                            ? "Updating..."
-                            : isPaused
-                              ? "Unpause Membership"
-                              : "Pause Membership"}
-                        </button>
+                            disabled={isProcessing}
+                            className={`
+                              px-5
+                              py-2.5
+                              rounded-xl
+                              text-sm
+                              font-bold
+                              transition
+                              active:scale-95
+                              disabled:opacity-50
+                              disabled:cursor-not-allowed
+                              ${
+                                isPaused
+                                  ? `
+                                    bg-yellow-400
+                                    text-black
+                                    hover:bg-yellow-300
+                                  `
+                                  : `
+                                    bg-white/[0.08]
+                                    text-zinc-300
+                                    hover:bg-white/[0.14]
+                                    hover:text-white
+                                  `
+                              }
+                            `}
+                          >
+                            {isProcessing
+                              ? "Updating..."
+                              : isPaused
+                                ? "Unpause Membership"
+                                : "Pause Membership"}
+                          </button>
+                        )}
+
+                        {!isPaused &&
+                          (isCurrent || isExpiryRemoved) && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                toggleExpiry(membership)
+                              }
+                              disabled={isProcessing}
+                              className={`
+                                px-5
+                                py-2.5
+                                rounded-xl
+                                text-sm
+                                font-bold
+                                transition
+                                active:scale-95
+                                disabled:opacity-50
+                                disabled:cursor-not-allowed
+                                ${
+                                  isExpiryRemoved
+                                    ? `
+                                      bg-green-400
+                                      text-black
+                                      hover:bg-green-300
+                                    `
+                                    : `
+                                      bg-white/[0.08]
+                                      text-zinc-300
+                                      hover:bg-white/[0.14]
+                                      hover:text-white
+                                    `
+                                }
+                              `}
+                            >
+                              {isProcessing
+                                ? "Updating..."
+                                : isExpiryRemoved
+                                  ? "Restore Expiry"
+                                  : "Remove Expiry"}
+                            </button>
+                          )}
                       </div>
                     )}
 
