@@ -504,27 +504,35 @@ function MemberDetailsPage() {
                   {member.name}
                 </h1>
 
-                {memberTypeDisplay && (
+                {(memberTypeDisplay || member.phone) && (
                   <div
                     className="
+                      flex
+                      items-center
+                      gap-3
+                      mt-4
                       text-lg
-                      text-zinc-400
-                      mt-3
                     "
                   >
-                    {memberTypeDisplay}
+                    {memberTypeDisplay && (
+                      <span className="font-semibold text-zinc-300">
+                        {memberTypeDisplay}
+                      </span>
+                    )}
+
+                    {memberTypeDisplay && member.phone && (
+                      <span className="text-zinc-600">
+                        •
+                      </span>
+                    )}
+
+                    {member.phone && (
+                      <span className="text-zinc-500">
+                        {member.phone}
+                      </span>
+                    )}
                   </div>
                 )}
-
-                <div
-                  className="
-                    text-xl
-                    text-zinc-400
-                    mt-5
-                  "
-                >
-                  {member.phone}
-                </div>
 
                 {member.email && (
                   <div
