@@ -11,10 +11,20 @@ function MemberDetailsPage() {
   const [member, setMember] = useState(null);
   const [openMemberships, setOpenMemberships] = useState({});
   const [processingMembership, setProcessingMembership] = useState(null);
+  const [, setTodayTick] = useState(0);
 
   useEffect(() => {
     fetchMember();
   }, [id]);
+
+  // Refresh the current pause duration automatically as the date changes.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTodayTick((value) => value + 1);
+    }, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // ============================================================
   // FETCH MEMBER
@@ -84,16 +94,11 @@ function MemberDetailsPage() {
     } catch (error) {
       console.error(error);
 
-      const responseData = error.response?.data;
+      const message =
+        error.response?.data ||
+        "Failed to update membership.";
 
-const message =
-  typeof responseData === "string"
-    ? responseData
-    : responseData?.message
-      ? responseData.message
-      : "Failed to update membership.";
-
-toast.error(message);
+      toast.error(message);
     } finally {
       setProcessingMembership(null);
     }
@@ -241,11 +246,34 @@ toast.error(message);
   };
 
   const getPauseHistory = (membership) => {
-    return [...(membership.pauseHistory || [])].sort(
-      (a, b) =>
+    return [...(membership.pauseHistory || [])].sort((a, b) => {
+      const aIsCurrent = a.pauseEndDate == null;
+      const bIsCurrent = b.pauseEndDate == null;
+
+      // Always keep the currently active pause at the top.
+      if (aIsCurrent && !bIsCurrent) return -1;
+      if (!aIsCurrent && bIsCurrent) return 1;
+
+      return (
         new Date(b.pauseStartDate) -
         new Date(a.pauseStartDate)
-    );
+      );
+    });
+  };
+
+  const getCurrentPauseDays = (pauseStartDate) => {
+    if (!pauseStartDate) return 0;
+
+    const start = new Date(`${pauseStartDate}T00:00:00`);
+    const today = new Date(`${getToday()}T00:00:00`);
+
+    const difference =
+      Math.floor(
+        (today.getTime() - start.getTime()) /
+        (1000 * 60 * 60 * 24)
+      );
+
+    return Math.max(0, difference);
   };
 
   // ============================================================
@@ -943,7 +971,15 @@ toast.error(message);
                                           )}
 
                                           {isCurrentPause
-                                            ? " • Still active"
+                                            ? ` • Paused for ${getCurrentPauseDays(
+                                                pause.pauseStartDate
+                                              )} ${
+                                                getCurrentPauseDays(
+                                                  pause.pauseStartDate
+                                                ) === 1
+                                                  ? "day"
+                                                  : "days"
+                                              }`
                                             : ` • Ended ${formatDate(
                                                 pause.pauseEndDate
                                               )}`}
@@ -973,7 +1009,15 @@ toast.error(message);
 
                                           <div className="text-sm font-bold mt-1">
                                             {isCurrentPause
-                                              ? "Ongoing"
+                                              ? `${getCurrentPauseDays(
+                                                  pause.pauseStartDate
+                                                )} ${
+                                                  getCurrentPauseDays(
+                                                    pause.pauseStartDate
+                                                  ) === 1
+                                                    ? "day"
+                                                    : "days"
+                                                }`
                                               : `${pause.pausedDays ?? 0} ${
                                                   pause.pausedDays === 1
                                                     ? "day"
