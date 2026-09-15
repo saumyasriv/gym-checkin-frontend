@@ -63,10 +63,12 @@ function PTCheckInPage() {
     }
 
     const filteredMembers =
-      allMembers.filter((member) =>
-        member.name
-          .toLowerCase()
-          .includes(query.toLowerCase())
+      allMembers.filter(
+        (member) =>
+          member.memberType === "PT" &&
+          member.name
+            .toLowerCase()
+            .includes(query.toLowerCase())
       );
 
     setMembers(filteredMembers);
@@ -85,6 +87,10 @@ function PTCheckInPage() {
       toast.error("Failed to load members");
     }
   };
+
+  // ============================================================
+  // PROCESS ATTENDANCE
+  // ============================================================
 
   const processAttendance = async (
     memberId,
@@ -108,7 +114,8 @@ function PTCheckInPage() {
         {
           memberId,
           type,
-          classTiming: selectedTime
+          classTiming: selectedTime,
+    memberType: "GROUP"
         }
       );
 
@@ -175,6 +182,10 @@ function PTCheckInPage() {
     }
   };
 
+  // ============================================================
+  // DELETE MEMBER
+  // ============================================================
+
   const deleteMember = async (memberId) => {
 
     const confirmed = window.confirm(
@@ -210,6 +221,7 @@ function PTCheckInPage() {
     } catch (error) {
 
       console.error(error);
+
       toast.error(
         "Failed to delete member"
       );
@@ -234,6 +246,7 @@ function PTCheckInPage() {
       <div className="max-w-5xl mx-auto">
 
         {/* HEADER */}
+
         <div className="mb-10">
 
           <h1
@@ -262,7 +275,9 @@ function PTCheckInPage() {
 
         </div>
 
+
         {/* SEARCH BAR */}
+
         <div
           className="
             relative
@@ -274,6 +289,7 @@ function PTCheckInPage() {
         >
 
           {/* SEARCH ICON */}
+
           <svg
             className="
               absolute
@@ -294,6 +310,7 @@ function PTCheckInPage() {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
+
             <circle
               cx="11"
               cy="11"
@@ -306,6 +323,7 @@ function PTCheckInPage() {
               x2="21"
               y2="21"
             />
+
           </svg>
 
           <input
@@ -337,7 +355,9 @@ function PTCheckInPage() {
 
         </div>
 
+
         {/* MEMBER RESULTS */}
+
         <div className="mt-10 space-y-5">
 
           {members.map((member) => {
@@ -376,6 +396,7 @@ function PTCheckInPage() {
               >
 
                 {/* MEMBER INFORMATION */}
+
                 <div className="flex-1 min-w-0">
 
                   <div
@@ -408,7 +429,9 @@ function PTCheckInPage() {
 
                 </div>
 
+
                 {/* CONTROLS */}
+
                 <div
                   className="
                     flex
@@ -422,6 +445,7 @@ function PTCheckInPage() {
                 >
 
                   {/* PT TIMING DROPDOWN */}
+
                   <div
                     className="
                       relative
@@ -484,7 +508,9 @@ function PTCheckInPage() {
 
                     </select>
 
+
                     {/* DROPDOWN ARROW */}
+
                     <svg
                       className="
                         pointer-events-none
@@ -503,12 +529,16 @@ function PTCheckInPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
+
                       <polyline points="6 9 12 15 18 9" />
+
                     </svg>
 
                   </div>
 
+
                   {/* CHECK IN */}
+
                   <button
                     disabled={!selectedTime}
                     onClick={() =>
@@ -525,6 +555,7 @@ function PTCheckInPage() {
                       font-bold
                       whitespace-nowrap
                       transition-all
+
                       ${
                         selectedTime
                           ? `
@@ -546,7 +577,9 @@ function PTCheckInPage() {
                     Check In
                   </button>
 
+
                   {/* NO SHOW — ADMIN ONLY */}
+
                   {isAdmin && (
 
                     <button
@@ -565,6 +598,7 @@ function PTCheckInPage() {
                         font-bold
                         whitespace-nowrap
                         transition-all
+
                         ${
                           selectedTime
                             ? `
@@ -587,7 +621,9 @@ function PTCheckInPage() {
 
                   )}
 
+
                   {/* DELETE — ADMIN ONLY */}
+
                   {isAdmin && (
 
                     <button

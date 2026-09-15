@@ -9,11 +9,17 @@ function AddMemberPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
+  const [memberType, setMemberType] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addMember = async () => {
 
     if (isSubmitting) {
+      return;
+    }
+
+    if (!memberType) {
+      toast.error("Please select Group or PT.");
       return;
     }
 
@@ -28,6 +34,7 @@ function AddMemberPage() {
           phone,
           email,
           notes,
+          memberType,
         }
       );
 
@@ -37,6 +44,7 @@ function AddMemberPage() {
       setPhone("");
       setEmail("");
       setNotes("");
+      setMemberType("");
 
     } catch (error) {
 
@@ -215,6 +223,71 @@ function AddMemberPage() {
                   placeholder:text-black/35
                 "
               />
+
+            </div>
+
+
+            {/* MEMBER TYPE */}
+            <div>
+
+              <label
+                className="
+                  block
+                  text-sm
+                  uppercase
+                  tracking-wider
+                  font-bold
+                  text-zinc-400
+                  mb-2
+                  ml-1
+                "
+              >
+                Member Type
+              </label>
+
+              <div className="grid grid-cols-2 gap-4">
+
+                <button
+                  type="button"
+                  onClick={() => setMemberType("GROUP")}
+                  className={`
+                    h-16
+                    rounded-2xl
+                    text-xl
+                    font-black
+                    transition-all
+                    border-2
+                    ${
+                      memberType === "GROUP"
+                        ? "bg-yellow-400 text-black border-yellow-400"
+                        : "bg-zinc-900 text-white border-zinc-700 hover:border-yellow-400"
+                    }
+                  `}
+                >
+                  GROUP
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMemberType("PT")}
+                  className={`
+                    h-16
+                    rounded-2xl
+                    text-xl
+                    font-black
+                    transition-all
+                    border-2
+                    ${
+                      memberType === "PT"
+                        ? "bg-yellow-400 text-black border-yellow-400"
+                        : "bg-zinc-900 text-white border-zinc-700 hover:border-yellow-400"
+                    }
+                  `}
+                >
+                  PT
+                </button>
+
+              </div>
 
             </div>
 

@@ -17,7 +17,6 @@ function CheckInPage() {
     "7:00 AM",
     "8:15 AM",
     "6:00 PM",
-    "PT"
   ];
 
   const isAdmin =
@@ -33,10 +32,12 @@ function CheckInPage() {
       return;
     }
 
-    const filteredMembers = allMembers.filter((member) =>
-      member.name
-        .toLowerCase()
-        .includes(query.toLowerCase())
+    const filteredMembers = allMembers.filter(
+      (member) =>
+        member.memberType === "GROUP" &&
+        member.name
+          .toLowerCase()
+          .includes(query.toLowerCase())
     );
 
     setMembers(filteredMembers);
@@ -109,6 +110,7 @@ function CheckInPage() {
       } else {
         toast.error("No active membership.");
       }
+
       return;
     }
 
@@ -128,7 +130,8 @@ function CheckInPage() {
         {
           memberId,
           type,
-          classTiming
+          classTiming,
+          memberType: "GROUP"
         }
       );
 
@@ -288,6 +291,7 @@ function CheckInPage() {
             e.stopPropagation()
           }
         >
+
           {/* SEARCH ICON */}
 
           <svg
@@ -470,6 +474,7 @@ function CheckInPage() {
                       width: "140px"
                     }}
                   >
+
                     <select
                       value={selectedTiming}
                       disabled={attendanceDisabled}
@@ -557,6 +562,7 @@ function CheckInPage() {
                         <polyline points="6 9 12 15 18 9" />
                       </svg>
                     )}
+
                   </div>
 
                   {/* CHECK IN */}
