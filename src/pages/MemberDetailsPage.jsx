@@ -148,6 +148,7 @@ function MemberDetailsPage() {
       // Refresh everything from the backend so the UI
       // reflects the actual database values.
       await fetchMember();
+
     } catch (error) {
       console.error(error);
 
@@ -403,6 +404,17 @@ function MemberDetailsPage() {
   );
 
   // ============================================================
+  // MEMBER TYPE DISPLAY
+  // ============================================================
+
+  const memberTypeDisplay =
+    member.memberType === "PT"
+      ? "One on One"
+      : member.memberType === "GROUP"
+        ? "Group"
+        : "";
+
+  // ============================================================
   // PAGE
   // ============================================================
 
@@ -480,40 +492,29 @@ function MemberDetailsPage() {
                   Member
                 </div>
 
-                <div className="flex items-center gap-4 flex-wrap">
-  <h1
-    className="
-      text-5xl
-      md:text-6xl
-      font-black
-      tracking-tight
-      leading-none
-    "
-  >
-    {member.name}
-  </h1>
+                <h1
+                  className="
+                    text-5xl
+                    md:text-6xl
+                    font-black
+                    tracking-tight
+                    leading-none
+                  "
+                >
+                  {member.name}
+                </h1>
 
-  {member.memberType && (
-    <span
-      className={`
-        px-4
-        py-2
-        rounded-full
-        text-sm
-        font-black
-        tracking-wider
-        uppercase
-        ${
-          member.memberType === "PT"
-            ? "bg-purple-400 text-black"
-            : "bg-yellow-400 text-black"
-        }
-      `}
-    >
-      {member.memberType}
-    </span>
-  )}
-</div>
+                {memberTypeDisplay && (
+                  <div
+                    className="
+                      text-lg
+                      text-zinc-400
+                      mt-3
+                    "
+                  >
+                    {memberTypeDisplay}
+                  </div>
+                )}
 
                 <div
                   className="
@@ -937,6 +938,7 @@ function MemberDetailsPage() {
 
                     {(!isExpired || isPaused) && (
                       <div className="mt-5 flex justify-end gap-3 flex-wrap">
+
                         {!isExpiryRemoved && (
                           <button
                             type="button"
