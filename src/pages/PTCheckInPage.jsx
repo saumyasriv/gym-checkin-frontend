@@ -115,7 +115,7 @@ function PTCheckInPage() {
           memberId,
           type,
           classTiming: selectedTime,
-    memberType: "GROUP"
+    memberType: "PT"
         }
       );
 
