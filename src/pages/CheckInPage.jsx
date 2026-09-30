@@ -69,8 +69,13 @@ function CheckInPage() {
       (membership) =>
         !membership.paused &&
         membership.remainingCredits > 0 &&
-        membership.expiryDate &&
-        membership.expiryDate >= today
+        (
+          membership.expiryRemoved ||
+          (
+            membership.expiryDate &&
+            membership.expiryDate >= today
+          )
+        )
     );
   };
 
