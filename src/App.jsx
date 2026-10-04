@@ -34,56 +34,50 @@ function FigmaNavbar({ isAdmin }) {
           <span className="absolute -bottom-1 left-0 h-[3px] w-full bg-yellow-400" />
         </Link>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setMembersOpen((open) => !open)}
-            className="flex items-center gap-1 py-2 text-sm font-medium text-black"
-          >
-            Members
-            <span className={`text-xs transition-transform ${membersOpen ? "rotate-180" : ""}`}>
-              ⌄
-            </span>
-          </button>
+        {isAdmin && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMembersOpen((open) => !open)}
+              className="flex items-center gap-2 py-2 text-sm font-medium text-black"
+            >
+              Members
+              <span
+                className={`text-xl font-semibold leading-none transition-transform ${
+                  membersOpen ? "rotate-180" : ""
+                }`}
+              >
+                ⌄
+              </span>
+            </button>
 
-          {membersOpen && (
-            <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-black bg-white shadow-[0_8px_25px_rgba(0,0,0,0.16)]">
-              {isAdmin ? (
-                <>
-                  <Link
-                    to="/add-member"
-                    onClick={() => setMembersOpen(false)}
-                    className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
-                  >
-                    New Member
-                  </Link>
-                  <Link
-                    to="/add-membership"
-                    onClick={() => setMembersOpen(false)}
-                    className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
-                  >
-                    Add New Membership
-                  </Link>
-                  <Link
-                    to="/update-existing-member"
-                    onClick={() => setMembersOpen(false)}
-                    className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
-                  >
-                    Update Existing Member
-                  </Link>
-                </>
-              ) : (
+            {membersOpen && (
+              <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-black bg-white shadow-[0_8px_25px_rgba(0,0,0,0.16)]">
                 <Link
-                  to="/admin"
+                  to="/add-member"
                   onClick={() => setMembersOpen(false)}
                   className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
                 >
-                  Admin Login
+                  New Member
                 </Link>
-              )}
-            </div>
-          )}
-        </div>
+                <Link
+                  to="/add-membership"
+                  onClick={() => setMembersOpen(false)}
+                  className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
+                >
+                  Add New Membership
+                </Link>
+                <Link
+                  to="/update-existing-member"
+                  onClick={() => setMembersOpen(false)}
+                  className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
+                >
+                  Update Existing Member
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
 
         {isAdmin ? (
           <button
