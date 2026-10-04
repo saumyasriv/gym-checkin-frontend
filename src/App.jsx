@@ -3,7 +3,7 @@ import {
   Routes,
   Route,
   Link,
-  useLocation
+  useLocation,
 } from "react-router-dom";
 
 import { Toaster } from "react-hot-toast";
@@ -19,376 +19,227 @@ import LoginPage from "./pages/LoginPage";
 
 import logo from "./assets/gorilla-logo.jpg";
 
-function Layout() {
+function FigmaNavbar({ isAdmin }) {
+  return (
+    <div className="fixed left-0 right-0 top-0 z-50 border-t-[18px] border-yellow-400 bg-white">
+      <div className="mx-auto flex h-[72px] items-center justify-end gap-6 px-6 sm:px-10 lg:px-14">
+        <Link
+          to="/check-in/group"
+          className="relative py-2 text-sm font-medium text-black"
+        >
+          Check-In
+          <span className="absolute -bottom-1 left-0 h-[3px] w-full bg-yellow-400" />
+        </Link>
 
+        <button
+          type="button"
+          className="flex items-center gap-1 py-2 text-sm font-medium text-black"
+          onClick={() => {}}
+        >
+          Members
+          <span className="text-xs">⌄</span>
+        </button>
+
+        {isAdmin ? (
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem("isAdmin");
+              window.location.href = "/";
+            }}
+            className="h-12 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+          >
+            Logout
+          </button>
+        ) : (
+          <Link
+            to="/admin"
+            className="flex h-12 items-center rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+          >
+            Login
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExistingNavbar({ isAdmin, isLoginPage }) {
+  return (
+    <div className="flex h-[88px] items-center bg-black px-7 text-white">
+      <div className="flex items-center">
+        <Link
+          to="/"
+          className="flex items-center gap-3 pr-8 text-2xl font-bold whitespace-nowrap transition hover:opacity-80"
+        >
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-yellow-400 text-2xl font-black text-black">
+            ✓
+          </div>
+          <span>Check-In</span>
+        </Link>
+
+        {isAdmin && !isLoginPage && (
+          <>
+            <div className="mx-4 h-10 w-px bg-white/20" />
+
+            <div className="ml-4 flex items-center gap-4">
+              <Link
+                to="/add-member"
+                className="flex h-12 items-center justify-center rounded-xl bg-white/[0.08] px-6 text-lg font-semibold whitespace-nowrap transition-all hover:bg-white/[0.16]"
+              >
+                New Member
+              </Link>
+
+              <Link
+                to="/add-membership"
+                className="flex h-12 items-center justify-center rounded-xl bg-white/[0.08] px-6 text-lg font-semibold whitespace-nowrap transition-all hover:bg-white/[0.16]"
+              >
+                Add New Membership
+              </Link>
+
+              <Link
+                to="/update-existing-member"
+                className="flex h-12 items-center justify-center rounded-xl bg-white/[0.08] px-6 text-lg font-semibold whitespace-nowrap transition-all hover:bg-white/[0.16]"
+              >
+                Update Existing Member
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="ml-auto flex items-center">
+        {!isAdmin && !isLoginPage && (
+          <Link
+            to="/admin"
+            className="flex h-12 items-center gap-2 rounded-xl border border-white/30 px-6 text-lg font-bold whitespace-nowrap transition-all hover:bg-white hover:text-black"
+          >
+            Login <span>→</span>
+          </Link>
+        )}
+
+        {isAdmin && !isLoginPage && (
+          <button
+            onClick={() => {
+              localStorage.removeItem("isAdmin");
+              window.location.href = "/";
+            }}
+            className="flex h-12 items-center justify-center rounded-xl border border-white/30 px-6 text-lg font-bold whitespace-nowrap transition-all hover:bg-white hover:text-black"
+          >
+            Logout
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Layout() {
   const location = useLocation();
 
-  const isAdmin =
-    localStorage.getItem("isAdmin") === "true";
-
-  const isLoginPage =
-    location.pathname === "/admin";
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  const isLoginPage = location.pathname === "/admin";
+  const isFigmaCheckInPage =
+    location.pathname === "/check-in/group" ||
+    location.pathname === "/check-in/pt";
 
   return (
-
     <>
-
       <Toaster
         position="top-center"
         containerStyle={{
           top: "50%",
-          transform: "translateY(-50%)"
+          transform: "translateY(-50%)",
         }}
         toastOptions={{
           duration: 3000,
           style: {
             background: "#000",
             color: "#fff",
-            fontSize: "24px",
+            fontSize: "18px",
             fontWeight: "bold",
-            padding: "28px 40px",
-            borderRadius: "24px",
-            minWidth: "420px",
+            padding: "18px 28px",
+            borderRadius: "14px",
+            minWidth: "320px",
             textAlign: "center",
-            boxShadow:
-              "0 10px 40px rgba(0, 0, 0, 0.4)"
-          }
+            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.4)",
+          },
         }}
       />
 
-      <div className="min-h-screen bg-yellow-400 relative overflow-hidden">
-
-        {/* Watermark */}
-        <img
-          src={logo}
-          alt="Logo"
-          className="
-            absolute
-            top-1/2
-            left-1/2
-            -translate-x-1/2
-            -translate-y-1/2
-            w-[700px]
-            opacity-[0.5]
-            pointer-events-none
-          "
-        />
+      <div
+        className={
+          isFigmaCheckInPage
+            ? "min-h-screen bg-white"
+            : "min-h-screen bg-yellow-400 relative overflow-hidden"
+        }
+      >
+        {!isFigmaCheckInPage && (
+          <img
+            src={logo}
+            alt="Logo"
+            className="pointer-events-none absolute left-1/2 top-1/2 w-[700px] -translate-x-1/2 -translate-y-1/2 opacity-[0.5]"
+          />
+        )}
 
         <div className="relative z-10">
+          {isFigmaCheckInPage ? (
+            <FigmaNavbar isAdmin={isAdmin} />
+          ) : (
+            <ExistingNavbar
+              isAdmin={isAdmin}
+              isLoginPage={isLoginPage}
+            />
+          )}
 
-          {/* ================= NAVBAR ================= */}
-          <div
-            className="
-              bg-black
-              text-white
-              px-7
-              h-[88px]
-              flex
-              items-center
-            "
-          >
+          <div className={isFigmaCheckInPage ? "pt-[90px]" : ""}>
+            <Routes>
+              <Route path="/" element={<CheckInTypePage />} />
+              <Route
+                path="/check-in/group"
+                element={<CheckInPage />}
+              />
+              <Route
+                path="/check-in/pt"
+                element={<PTCheckInPage />}
+              />
 
-            {/* LEFT SIDE */}
-            <div className="flex items-center">
-
-              {/* CHECK-IN HOME */}
-              <Link
-                to="/"
-                className="
-                  flex
-                  items-center
-                  gap-3
-                  pr-8
-                  text-2xl
-                  font-bold
-                  whitespace-nowrap
-                  transition
-                  hover:opacity-80
-                "
-              >
-
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-full
-                    bg-yellow-400
-                    text-black
-                    flex
-                    items-center
-                    justify-center
-                    text-2xl
-                    font-black
-                    flex-shrink-0
-                  "
-                >
-                  ✓
-                </div>
-
-                <span>
-                  Check-In
-                </span>
-
-              </Link>
-
-
-              {/* DIVIDER */}
-              {isAdmin && !isLoginPage && (
-                <div
-                  className="
-                    h-10
-                    w-px
-                    bg-white/20
-                    mx-4
-                  "
-                />
+              {isAdmin && (
+                <>
+                  <Route
+                    path="/add-member"
+                    element={<AddMemberPage />}
+                  />
+                  <Route
+                    path="/add-membership"
+                    element={<AddMembershipPage />}
+                  />
+                  <Route
+                    path="/update-existing-member"
+                    element={<UpdateExistingMemberPage />}
+                  />
+                  <Route
+                    path="/members/:id"
+                    element={<MemberDetailsPage />}
+                  />
+                </>
               )}
 
-
-              {/* ADMIN NAVIGATION */}
-              {isAdmin && !isLoginPage && (
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-4
-                    ml-4
-                  "
-                >
-
-                  {/* NEW MEMBER */}
-                  <Link
-                    to="/add-member"
-                    className="
-                      flex
-                      items-center
-                      justify-center
-                      h-12
-                      px-6
-                      rounded-xl
-                      bg-white/[0.08]
-                      text-lg
-                      font-semibold
-                      whitespace-nowrap
-                      transition-all
-                      hover:bg-white/[0.16]
-                    "
-                  >
-                    New Member
-                  </Link>
-
-
-                  {/* MEMBERSHIP */}
-                  <Link
-                    to="/add-membership"
-                    className="
-                      flex
-                      items-center
-                      justify-center
-                      h-12
-                      px-6
-                      rounded-xl
-                      bg-white/[0.08]
-                      text-lg
-                      font-semibold
-                      whitespace-nowrap
-                      transition-all
-                      hover:bg-white/[0.16]
-                    "
-                  >
-                    Add New Membership
-                  </Link>
-
-
-                  {/* UPDATE MEMBER */}
-                  <Link
-                    to="/update-existing-member"
-                    className="
-                      flex
-                      items-center
-                      justify-center
-                      h-12
-                      px-6
-                      rounded-xl
-                      bg-white/[0.08]
-                      text-lg
-                      font-semibold
-                      whitespace-nowrap
-                      transition-all
-                      hover:bg-white/[0.16]
-                    "
-                  >
-                    Update Existing Member
-                  </Link>
-
-                </div>
-
-              )}
-
-            </div>
-
-
-            {/* RIGHT SIDE */}
-            <div className="ml-auto flex items-center">
-
-              {/* LOGIN */}
-              {!isAdmin && !isLoginPage && (
-
-                <Link
-                  to="/admin"
-                  className="
-                    flex
-                    items-center
-                    gap-2
-                    h-12
-                    px-6
-                    rounded-xl
-                    border
-                    border-white/30
-                    text-lg
-                    font-bold
-                    whitespace-nowrap
-                    transition-all
-                    hover:bg-white
-                    hover:text-black
-                  "
-                >
-                  Login
-
-                  <span className="text-lg">
-                    →
-                  </span>
-
-                </Link>
-
-              )}
-
-
-              {/* LOGOUT */}
-              {isAdmin && !isLoginPage && (
-
-                <button
-                  onClick={() => {
-
-                    localStorage.removeItem(
-                      "isAdmin"
-                    );
-
-                    window.location.href = "/";
-                  }}
-                  className="
-                    flex
-                    items-center
-                    justify-center
-                    h-12
-                    px-6
-                    rounded-xl
-                    border
-                    border-white/30
-                    text-lg
-                    font-bold
-                    whitespace-nowrap
-                    transition-all
-                    hover:bg-white
-                    hover:text-black
-                  "
-                >
-                  Logout
-                </button>
-
-              )}
-
-            </div>
-
+              <Route path="/admin" element={<LoginPage />} />
+            </Routes>
           </div>
-
-
-          {/* ================= ROUTES ================= */}
-          <Routes>
-
-            {/* Check-In Selection */}
-            <Route
-              path="/"
-              element={<CheckInTypePage />}
-            />
-
-
-            {/* Group Class Check-In */}
-            <Route
-              path="/check-in/group"
-              element={<CheckInPage />}
-            />
-
-
-            {/* PT Check-In */}
-            <Route
-              path="/check-in/pt"
-              element={<PTCheckInPage />}
-            />
-
-
-            {/* Admin Routes */}
-            {isAdmin && (
-
-              <>
-
-                <Route
-                  path="/add-member"
-                  element={<AddMemberPage />}
-                />
-
-                <Route
-                  path="/add-membership"
-                  element={<AddMembershipPage />}
-                />
-
-                <Route
-                  path="/update-existing-member"
-                  element={
-                    <UpdateExistingMemberPage />
-                  }
-                />
-
-                <Route
-                  path="/members/:id"
-                  element={
-                    <MemberDetailsPage />
-                  }
-                />
-
-              </>
-
-            )}
-
-
-            {/* Admin Login */}
-            <Route
-              path="/admin"
-              element={<LoginPage />}
-            />
-
-          </Routes>
-
         </div>
-
       </div>
-
     </>
   );
 }
 
-
 function App() {
-
   return (
     <BrowserRouter>
-
       <Layout />
-
     </BrowserRouter>
   );
 }
-
 
 export default App;

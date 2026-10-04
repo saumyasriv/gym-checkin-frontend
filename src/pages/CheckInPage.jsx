@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
+import troopGym from "../assets/troop-gym.jpg";
+import logo from "../assets/gorilla-logo.jpg";
 
 function CheckInPage() {
   const navigate = useNavigate();
@@ -11,6 +13,8 @@ function CheckInPage() {
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
   const [selectedTimings, setSelectedTimings] = useState({});
+  const [checkedInMembers, setCheckedInMembers] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const classTimings = [
     "6:00 AM",
@@ -19,8 +23,7 @@ function CheckInPage() {
     "6:00 PM",
   ];
 
-  const isAdmin =
-    localStorage.getItem("isAdmin") === "true";
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
     fetchAllMembers();
@@ -32,23 +35,20 @@ function CheckInPage() {
       return;
     }
 
-    const filteredMembers = allMembers.filter(
-      (member) =>
-        member.memberType === "GROUP" &&
-        member.name
-          .toLowerCase()
-          .includes(query.toLowerCase())
-    );
+    const search = query.trim().toLowerCase();
 
-    setMembers(filteredMembers);
+    setMembers(
+      allMembers.filter(
+        (member) =>
+          member.memberType === "GROUP" &&
+          member.name?.toLowerCase().includes(search)
+      )
+    );
   }, [query, allMembers]);
 
   const fetchAllMembers = async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/members`
-      );
-
+      const response = await axios.get(`${API_BASE_URL}/members`);
       setAllMembers(response.data);
     } catch (error) {
       console.error(error);
@@ -56,26 +56,15 @@ function CheckInPage() {
     }
   };
 
-  // ============================================================
-  // CHECK WHETHER MEMBER HAS A USABLE MEMBERSHIP
-  // ============================================================
-
   const hasUsableMembership = (member) => {
-    const today = new Date()
-      .toISOString()
-      .split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
 
     return (member.memberships || []).some(
       (membership) =>
         !membership.paused &&
         membership.remainingCredits > 0 &&
-        (
-          membership.expiryRemoved ||
-          (
-            membership.expiryDate &&
-            membership.expiryDate >= today
-          )
-        )
+        (membership.expiryRemoved ||
+          (membership.expiryDate && membership.expiryDate >= today))
     );
   };
 
@@ -90,24 +79,14 @@ function CheckInPage() {
 
     const hasPausedWithCredits = memberships.some(
       (membership) =>
-        membership.paused === true &&
-        membership.remainingCredits > 0
+        membership.paused === true && membership.remainingCredits > 0
     );
 
     return !hasUsable && hasPausedWithCredits;
   };
 
-  // ============================================================
-  // PROCESS ATTENDANCE
-  // ============================================================
-
-  const processAttendance = async (
-    memberId,
-    type
-  ) => {
-    const member = allMembers.find(
-      (member) => member.id === memberId
-    );
+  const processAttendance = async (memberId, type) => {
+    const member = allMembers.find((item) => item.id === memberId);
 
     if (member && !hasUsableMembership(member)) {
       if (hasPausedMembershipOnly(member)) {
@@ -115,82 +94,67 @@ function CheckInPage() {
       } else {
         toast.error("No active membership.");
       }
-
       return;
     }
 
-    const classTiming =
-      selectedTimings[memberId];
+    const classTiming = selectedTimings[memberId];
 
     if (!classTiming) {
-      toast.error(
-        "Please select a class timing first."
-      );
+      toast.error("Please select a class timing first.");
       return;
     }
 
     try {
-      await axios.post(
-        `${API_BASE_URL}/checkins`,
-        {
-          memberId,
-          type,
-          classTiming,
-          memberType: "GROUP"
-        }
-      );
+      await axios.post(`${API_BASE_URL}/checkins`, {
+        memberId,
+        type,
+        classTiming,
+        memberType: "GROUP",
+      });
 
       if (type === "CHECKIN") {
         toast.success("Checked in!");
+        setCheckedInMembers((previous) => ({
+          ...previous,
+          [memberId]: true,
+        }));
       } else {
         toast.success("No show marked!");
       }
 
-      setMembers((prevMembers) =>
-        prevMembers.map((member) => {
-          if (member.id === memberId) {
-            return {
-              ...member,
-              totalRemainingCredits:
-                Number(
-                  member.totalRemainingCredits
-                ) - 1
-            };
-          }
-
-          return member;
-        })
+      setMembers((previous) =>
+        previous.map((item) =>
+          item.id === memberId
+            ? {
+                ...item,
+                totalRemainingCredits:
+                  Number(item.totalRemainingCredits) - 1,
+              }
+            : item
+        )
       );
 
-      setAllMembers((prevMembers) =>
-        prevMembers.map((member) => {
-          if (member.id === memberId) {
-            return {
-              ...member,
-              totalRemainingCredits:
-                Number(
-                  member.totalRemainingCredits
-                ) - 1
-            };
-          }
-
-          return member;
-        })
+      setAllMembers((previous) =>
+        previous.map((item) =>
+          item.id === memberId
+            ? {
+                ...item,
+                totalRemainingCredits:
+                  Number(item.totalRemainingCredits) - 1,
+              }
+            : item
+        )
       );
 
-      setSelectedTimings((prev) => {
-        const updated = { ...prev };
-
+      setSelectedTimings((previous) => {
+        const updated = { ...previous };
         delete updated[memberId];
-
         return updated;
       });
-
     } catch (error) {
       console.error(error);
 
-      const message =
-        error.response?.data;
+      const message = error.response?.data;
 
       if (message === "Credits expired") {
         toast.error("Credits expired!");
@@ -202,501 +166,288 @@ function CheckInPage() {
     }
   };
 
-  // ============================================================
-  // DELETE MEMBER
-  // ============================================================
-
   const deleteMember = async (memberId) => {
-    const confirmed = window.confirm(
-      "Delete this member permanently?"
-    );
+    const confirmed = window.confirm("Delete this member permanently?");
 
     if (!confirmed) {
       return;
     }
 
     try {
-      await axios.delete(
-        `${API_BASE_URL}/members/${memberId}`
-      );
+      await axios.delete(`${API_BASE_URL}/members/${memberId}`);
 
       toast.success("Member deleted");
 
-      setMembers((currentMembers) =>
-        currentMembers.filter(
-          (member) =>
-            member.id !== memberId
-        )
+      setMembers((current) =>
+        current.filter((member) => member.id !== memberId)
       );
 
-      setAllMembers((currentMembers) =>
-        currentMembers.filter(
-          (member) =>
-            member.id !== memberId
-        )
+      setAllMembers((current) =>
+        current.filter((member) => member.id !== memberId)
       );
-
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete member");
     }
   };
 
+  const clearSearch = () => {
+    setMembers([]);
+    setQuery("");
+  };
+
   return (
     <div
-      className="
-        min-h-screen
-        text-black
-        px-8
-        py-10
-      "
-      onClick={() => {
-        setMembers([]);
-        setQuery("");
-      }}
+      className="min-h-screen bg-white text-black"
+      onClick={clearSearch}
     >
-      <div className="max-w-5xl mx-auto">
+      {/* Figma-inspired yellow top bar */}
+      <div className="fixed inset-x-0 top-0 z-50 h-[18px] bg-[#FFC800]" />
 
-        {/* HEADER */}
-
-        <div className="mb-10">
-          <h1
-            className="
-              text-5xl
-              md:text-6xl
-              font-black
-              tracking-tight
-              leading-none
-            "
-          >
-            Group Class Check-In
-          </h1>
-
-          <p
-            className="
-              text-lg
-              md:text-xl
-              mt-3
-              text-black/60
-              font-medium
-            "
-          >
-            Search for your name to check in
-          </p>
-        </div>
-
-        {/* SEARCH BAR */}
-
-        <div
-          className="
-            relative
-            group
-          "
-          onClick={(e) =>
-            e.stopPropagation()
-          }
-        >
-
-          {/* SEARCH ICON */}
-
-          <svg
-            className="
-              absolute
-              left-7
-              top-1/2
-              -translate-y-1/2
-              w-8
-              h-8
-              text-black
-              pointer-events-none
-              transition
-              group-focus-within:scale-110
-            "
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle
-              cx="11"
-              cy="11"
-              r="7"
+      <div className="min-h-screen pt-[18px]">
+        <div className="grid min-h-[calc(100vh-18px)] grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)]">
+          {/* LEFT IMAGE PANEL */}
+          <aside className="relative hidden overflow-hidden bg-black lg:block">
+            <img
+              src={troopGym}
+              alt="Gym"
+              className="absolute inset-0 h-full w-full object-cover grayscale"
             />
 
-            <line
-              x1="16.65"
-              y1="16.65"
-              x2="21"
-              y2="21"
-            />
-          </svg>
+            <div className="absolute inset-0 bg-black/35" />
 
-          <input
-            type="text"
-            placeholder="Search member..."
-            value={query}
-            onChange={(e) =>
-              setQuery(e.target.value)
-            }
-            className="
-              w-full
-              h-24
-              pl-20
-              pr-8
-              rounded-[28px]
-              bg-white
-              text-black
-              text-3xl
-              font-medium
-              outline-none
-              shadow-[0_12px_35px_rgba(0,0,0,0.14)]
-              border-2
-              border-transparent
-              focus:border-black
-              transition
-              placeholder:text-black/40
-            "
-          />
-        </div>
+            <div className="absolute left-8 top-8 z-10">
+              <img
+                src={logo}
+                alt="Troop"
+                className="h-20 w-20 object-contain mix-blend-screen"
+              />
+            </div>
+          </aside>
 
-        {/* MEMBER RESULTS */}
-
-        <div className="mt-10 space-y-5">
-
-          {members.map((member) => {
-
-            const selectedTiming =
-              selectedTimings[member.id] || "";
-
-            const usable =
-              hasUsableMembership(member);
-
-            const paused =
-              hasPausedMembershipOnly(member);
-
-            const attendanceDisabled =
-              !usable;
-
-            return (
-              <div
-                key={member.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-
-                  if (isAdmin) {
-                    navigate(
-                      `/members/${member.id}`
-                    );
-                  }
-                }}
-                className="
-                  bg-black
-                  border
-                  border-black/10
-                  p-6
-                  rounded-[28px]
-                  flex
-                  items-center
-                  shadow-[0_12px_30px_rgba(0,0,0,0.20)]
-                  cursor-pointer
-                  transition
-                  hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)]
-                "
+          {/* RIGHT CONTENT */}
+          <main
+            className="relative min-w-0 bg-white"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {/* TOP NAV */}
+            <header className="flex items-center justify-end gap-7 px-7 py-8 sm:px-10">
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="relative pb-2 text-sm font-medium"
               >
+                Check-In
+                <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-[#FFC800]" />
+              </button>
 
-                {/* MEMBER INFORMATION */}
+              <button
+                type="button"
+                onClick={() => navigate("/members")}
+                className="text-sm font-medium"
+              >
+                Members <span className="text-xs">⌄</span>
+              </button>
 
-                <div className="flex-1 min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem("isAdmin");
+                  navigate("/admin");
+                }}
+                className="rounded-xl border border-black px-5 py-3 text-sm font-medium transition hover:bg-black hover:text-white"
+              >
+                Logout
+              </button>
+            </header>
 
-                  <div
-                    className="
-                      text-3xl
-                      md:text-4xl
-                      font-bold
-                      tracking-tight
-                      text-white
-                    "
-                  >
-                    {member.name}
-                  </div>
-
-                  {paused ? (
-                    <div
-                      className="
-                        text-xl
-                        mt-2
-                        font-bold
-                        text-orange-400
-                      "
-                    >
-                      Membership Paused
-                    </div>
-                  ) : (
-                    <div
-                      className={`
-                        text-xl
-                        mt-2
-                        font-medium
-                        ${
-                          member.totalRemainingCredits <= 4
-                            ? "text-red-500 font-bold"
-                            : "text-zinc-400"
-                        }
-                      `}
-                    >
-                      {member.totalRemainingCredits}{" "}
-                      credits remaining
-                    </div>
-                  )}
-
-                </div>
-
-                {/* CONTROLS */}
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    gap-3
-                    flex-shrink-0
-                  "
-                  onClick={(e) =>
-                    e.stopPropagation()
-                  }
+            <section className="mx-auto w-full max-w-[720px] px-6 pb-16 pt-16 sm:px-10 lg:pt-20">
+              {/* GROUP / PT SWITCH */}
+              <div className="flex flex-wrap gap-5">
+                <button
+                  type="button"
+                  onClick={() => navigate("/check-in/group")}
+                  className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
                 >
+                  Group Class
+                </button>
 
-                  {/* SESSION DROPDOWN */}
+                <button
+                  type="button"
+                  onClick={() => navigate("/check-in/pt")}
+                  className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+                >
+                  Personal Training
+                </button>
+              </div>
 
-                  <div
-                    className="
-                      relative
-                      h-12
-                      flex-shrink-0
-                    "
-                    style={{
-                      width: "140px"
+              {/* SEARCH */}
+              <div className="mt-16 flex gap-2">
+                <div className="relative min-w-0 flex-1">
+                  <svg
+                    className="pointer-events-none absolute left-4 top-1/2 h-7 w-7 -translate-y-1/2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="16.65" y1="16.65" x2="21" y2="21" />
+                  </svg>
+
+                  <input
+                    type="text"
+                    value={query}
+                    placeholder="Search member..."
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        clearSearch();
+                      }
                     }}
-                  >
-
-                    <select
-                      value={selectedTiming}
-                      disabled={attendanceDisabled}
-                      onChange={(e) => {
-                        setSelectedTimings(
-                          (prev) => ({
-                            ...prev,
-                            [member.id]:
-                              e.target.value
-                          })
-                        );
-                      }}
-                      className={`
-                        appearance-none
-                        w-full
-                        h-12
-                        rounded-2xl
-                        text-lg
-                        font-bold
-                        outline-none
-                        pl-4
-                        pr-10
-                        border-2
-                        transition
-
-                        ${
-                          attendanceDisabled
-                            ? `
-                              bg-white/20
-                              text-white/30
-                              border-transparent
-                              cursor-not-allowed
-                            `
-                            : `
-                              bg-white
-                              text-black
-                              border-transparent
-                              hover:border-black/20
-                              focus:border-black
-                              cursor-pointer
-                            `
-                        }
-                      `}
-                    >
-                      <option value="">
-                        {paused
-                          ? "Paused"
-                          : "Session"}
-                      </option>
-
-                      {!attendanceDisabled &&
-                        classTimings.map(
-                          (timing) => (
-                            <option
-                              key={timing}
-                              value={timing}
-                            >
-                              {timing}
-                            </option>
-                          )
-                        )}
-                    </select>
-
-                    {/* DROPDOWN ARROW */}
-
-                    {!attendanceDisabled && (
-                      <svg
-                        className="
-                          pointer-events-none
-                          absolute
-                          right-3
-                          top-1/2
-                          -translate-y-1/2
-                          w-5
-                          h-5
-                          text-black
-                        "
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    )}
-
-                  </div>
-
-                  {/* CHECK IN */}
-
-                  <button
-                    disabled={
-                      attendanceDisabled ||
-                      !selectedTiming
-                    }
-                    onClick={() =>
-                      processAttendance(
-                        member.id,
-                        "CHECKIN"
-                      )
-                    }
-                    className={`
-                      h-12
-                      px-6
-                      rounded-2xl
-                      text-lg
-                      font-bold
-                      whitespace-nowrap
-                      transition-all
-
-                      ${
-                        attendanceDisabled ||
-                        !selectedTiming
-                          ? `
-                            bg-white/20
-                            text-white/30
-                            cursor-not-allowed
-                          `
-                          : `
-                            bg-yellow-400
-                            text-black
-                            shadow-md
-                            hover:bg-yellow-300
-                            active:scale-95
-                            cursor-pointer
-                          `
-                      }
-                    `}
-                  >
-                    {paused
-                      ? "Paused"
-                      : "Check In"}
-                  </button>
-
-                  {/* NO SHOW — ADMIN ONLY */}
-
-                  {isAdmin && (
-                    <button
-                      disabled={
-                        attendanceDisabled ||
-                        !selectedTiming
-                      }
-                      onClick={() =>
-                        processAttendance(
-                          member.id,
-                          "NO_SHOW"
-                        )
-                      }
-                      className={`
-                        h-12
-                        px-5
-                        rounded-2xl
-                        text-lg
-                        font-bold
-                        whitespace-nowrap
-                        transition-all
-
-                        ${
-                          attendanceDisabled ||
-                          !selectedTiming
-                            ? `
-                              bg-zinc-700/30
-                              text-white/30
-                              cursor-not-allowed
-                            `
-                            : `
-                              bg-zinc-700
-                              text-white
-                              hover:bg-zinc-600
-                              active:scale-95
-                              cursor-pointer
-                            `
-                        }
-                      `}
-                    >
-                      No Show
-                    </button>
-                  )}
-
-                  {/* DELETE — ADMIN ONLY */}
-
-                  {isAdmin && (
-                    <button
-                      onClick={() =>
-                        deleteMember(
-                          member.id
-                        )
-                      }
-                      className="
-                        h-12
-                        px-5
-                        rounded-2xl
-                        text-lg
-                        font-bold
-                        whitespace-nowrap
-                        bg-red-600
-                        text-white
-                        hover:bg-red-500
-                        active:scale-95
-                        transition
-                        cursor-pointer
-                      "
-                    >
-                      Delete
-                    </button>
-                  )}
-
+                    className="h-12 w-full rounded-xl border border-black bg-white pl-12 pr-4 text-base italic outline-none transition focus:ring-2 focus:ring-[#FFC800]"
+                  />
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => setQuery(query.trim())}
+                  className="h-12 rounded-xl bg-[#171722] px-6 text-sm font-semibold text-white transition hover:bg-black"
+                >
+                  Search
+                </button>
               </div>
-            );
-          })}
 
+              {/* RESULTS */}
+              <div className="mt-7 space-y-4">
+                {members.map((member) => {
+                  const selectedTiming = selectedTimings[member.id] || "";
+                  const usable = hasUsableMembership(member);
+                  const paused = hasPausedMembershipOnly(member);
+                  const isCheckedIn = checkedInMembers[member.id];
+                  const attendanceDisabled = !usable || isCheckedIn;
+
+                  return (
+                    <div
+                      key={member.id}
+                      onClick={() => {
+                        if (isAdmin) {
+                          navigate(`/members/${member.id}`);
+                        }
+                      }}
+                      className="rounded-2xl border border-black bg-white px-4 py-4 shadow-[0_3px_0_#FFC800] sm:px-5"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                        {/* MEMBER INFO */}
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-xl font-medium">
+                            {member.name}
+                          </div>
+
+                          {paused ? (
+                            <div className="mt-1 text-xs font-bold uppercase tracking-wide text-orange-600">
+                              Membership Paused
+                            </div>
+                          ) : (
+                            <div
+                              className={`mt-1 text-xs font-bold uppercase tracking-wide ${
+                                Number(member.totalRemainingCredits) <= 4
+                                  ? "text-red-600"
+                                  : "text-black"
+                              }`}
+                            >
+                              Credits Remaining:{" "}
+                              {member.totalRemainingCredits}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* CONTROLS */}
+                        <div
+                          className="flex flex-wrap items-center justify-end gap-2"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <select
+                            value={selectedTiming}
+                            disabled={attendanceDisabled}
+                            onChange={(event) =>
+                              setSelectedTimings((previous) => ({
+                                ...previous,
+                                [member.id]: event.target.value,
+                              }))
+                            }
+                            className={`h-12 min-w-[150px] rounded-xl border border-black bg-white px-4 text-sm outline-none ${
+                              attendanceDisabled
+                                ? "cursor-not-allowed opacity-40"
+                                : "cursor-pointer"
+                            }`}
+                          >
+                            <option value="">
+                              {isCheckedIn
+                                ? "Checked In"
+                                : paused
+                                  ? "Paused"
+                                  : "Select a Time Slot"}
+                            </option>
+
+                            {!attendanceDisabled &&
+                              classTimings.map((timing) => (
+                                <option key={timing} value={timing}>
+                                  {timing}
+                                </option>
+                              ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            disabled={attendanceDisabled || !selectedTiming}
+                            onClick={() =>
+                              processAttendance(member.id, "CHECKIN")
+                            }
+                            className={`h-12 rounded-xl px-5 text-sm font-semibold transition ${
+                              attendanceDisabled || !selectedTiming
+                                ? "cursor-not-allowed border border-black/10 bg-zinc-100 text-zinc-400"
+                                : "bg-[#FFC800] text-black hover:bg-[#f0bc00] active:scale-[0.98]"
+                            }`}
+                          >
+                            {isCheckedIn ? "Checked In" : "Check In"}
+                          </button>
+
+                          {isAdmin && !isCheckedIn && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={
+                                  attendanceDisabled || !selectedTiming
+                                }
+                                onClick={() =>
+                                  processAttendance(member.id, "NO_SHOW")
+                                }
+                                className="h-12 rounded-xl bg-[#171722] px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-30"
+                              >
+                                No Show
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => deleteMember(member.id)}
+                                className="h-12 rounded-xl bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-500"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          </main>
         </div>
-
       </div>
     </div>
   );
