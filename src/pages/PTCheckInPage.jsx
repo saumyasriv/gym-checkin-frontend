@@ -189,7 +189,7 @@ function PTCheckInPage() {
 
           <div className="absolute inset-0 bg-black/30" />
 
-          <div className="absolute left-7 top-7 z-20 h-36 w-36">
+          <div className="absolute left-8 top-8 z-20 h-44 w-44">
             <img
               src={logo}
               alt="TROOP"
@@ -200,11 +200,11 @@ function PTCheckInPage() {
 
         <main className="min-h-screen bg-white">
           <section className="mx-auto w-full max-w-[1100px] px-6 pb-16 pt-[120px] sm:px-10 lg:px-14">
-            <div className="flex flex-wrap gap-5">
+            <div className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px] active:shadow-[0_2px_0_#111]">
               <button
                 type="button"
                 onClick={() => navigate("/check-in/group")}
-                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+                className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
               >
                 Group Class
               </button>
@@ -212,7 +212,7 @@ function PTCheckInPage() {
               <button
                 type="button"
                 onClick={() => navigate("/check-in/pt")}
-                className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px]"
+                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
               >
                 Personal Training
               </button>

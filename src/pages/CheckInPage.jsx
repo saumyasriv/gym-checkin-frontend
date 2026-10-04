@@ -208,7 +208,7 @@ function CheckInPage() {
 
           <div className="absolute inset-0 bg-black/35" />
 
-          <div className="absolute left-7 top-7 z-20 h-36 w-36">
+          <div className="absolute left-8 top-8 z-20 h-44 w-44">
             <img
               src={logo}
               alt="Troop"
