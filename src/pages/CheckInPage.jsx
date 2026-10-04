@@ -14,6 +14,7 @@ function CheckInPage() {
   const [members, setMembers] = useState([]);
   const [selectedTimings, setSelectedTimings] = useState({});
   const [checkedInMembers, setCheckedInMembers] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
 
   const classTimings = [
     "6:00 AM",
@@ -112,13 +113,15 @@ function CheckInPage() {
       });
 
       if (type === "CHECKIN") {
-        toast.success("Checked in!");
+        setSuccessMessage("You've been checked in!");
+        window.setTimeout(() => setSuccessMessage(""), 1500);
         setCheckedInMembers((previous) => ({
           ...previous,
           [memberId]: true,
         }));
       } else {
-        toast.success("No show marked!");
+        setSuccessMessage("No-show marked");
+        window.setTimeout(() => setSuccessMessage(""), 1500);
       }
 
       setMembers((previous) =>
@@ -197,6 +200,13 @@ function CheckInPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {successMessage && (
+        <div className="fixed bottom-8 left-1/2 z-[70] -translate-x-1/2">
+          <div className="rounded-xl bg-[#171722] px-7 py-3 text-sm font-semibold text-white shadow-[0_8px_25px_rgba(0,0,0,0.18)]">
+            {successMessage}
+          </div>
+        </div>
+      )}
       <div className="min-h-screen lg:ml-[35vw]">
         {/* Fixed image: its height never changes when search results appear */}
         <aside className="fixed bottom-0 left-0 top-[18px] hidden w-[35vw] overflow-hidden bg-black lg:block">
@@ -208,11 +218,11 @@ function CheckInPage() {
 
           <div className="absolute inset-0 bg-black/35" />
 
-          <div className="absolute left-8 top-8 z-10">
+          <div className="absolute left-8 top-8 z-20 h-24 w-24">
             <img
               src={logo}
               alt="Troop"
-              className="h-24 w-24 object-contain mix-blend-screen"
+              className="h-full w-full object-contain"
             />
           </div>
         </aside>

@@ -14,6 +14,7 @@ function PTCheckInPage() {
   const [members, setMembers] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({});
   const [checkedInMembers, setCheckedInMembers] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
@@ -110,13 +111,15 @@ function PTCheckInPage() {
       });
 
       if (type === "CHECKIN") {
-        toast.success("Checked in!");
+        setSuccessMessage("You've been checked in!");
+        window.setTimeout(() => setSuccessMessage(""), 1500);
         setCheckedInMembers((previous) => ({
           ...previous,
           [memberId]: true,
         }));
       } else {
-        toast.success("No show marked!");
+        setSuccessMessage("No-show marked");
+        window.setTimeout(() => setSuccessMessage(""), 1500);
       }
 
       const updateCredits = (previous) =>
@@ -179,6 +182,13 @@ function PTCheckInPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {successMessage && (
+        <div className="fixed bottom-8 left-1/2 z-[70] -translate-x-1/2">
+          <div className="rounded-xl bg-[#171722] px-7 py-3 text-sm font-semibold text-white shadow-[0_8px_25px_rgba(0,0,0,0.18)]">
+            {successMessage}
+          </div>
+        </div>
+      )}
       <div className="min-h-screen lg:ml-[35vw]">
         <aside className="fixed bottom-0 left-0 top-[18px] hidden w-[35vw] overflow-hidden bg-black lg:block">
           <img
@@ -189,11 +199,11 @@ function PTCheckInPage() {
 
           <div className="absolute inset-0 bg-black/30" />
 
-          <div className="absolute left-10 top-10 z-10 h-24 w-24 overflow-hidden">
+          <div className="absolute left-8 top-8 z-20 h-24 w-24">
             <img
               src={logo}
               alt="TROOP"
-              className="h-full w-full object-contain mix-blend-screen"
+              className="h-full w-full object-contain"
             />
           </div>
         </aside>
