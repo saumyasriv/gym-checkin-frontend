@@ -201,67 +201,32 @@ function CheckInPage() {
       className="min-h-screen bg-white text-black"
       onClick={clearSearch}
     >
-      {/* Figma-inspired yellow top bar */}
-      <div className="fixed inset-x-0 top-0 z-50 h-[18px] bg-[#FFC800]" />
+      <div className="min-h-[calc(100vh-90px)] lg:grid lg:grid-cols-[minmax(380px,35vw)_minmax(0,1fr)]">
+        {/* LEFT IMAGE PANEL */}
+        <aside className="relative hidden min-h-[calc(100vh-90px)] overflow-hidden bg-black lg:block">
+          <img
+            src={troopGym}
+            alt="Gym"
+            className="absolute inset-0 h-full w-full object-cover grayscale"
+          />
 
-      <div className="min-h-screen pt-[18px]">
-        <div className="grid min-h-[calc(100vh-18px)] grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)]">
-          {/* LEFT IMAGE PANEL */}
-          <aside className="relative hidden overflow-hidden bg-black lg:block">
+          <div className="absolute inset-0 bg-black/35" />
+
+          <div className="absolute left-8 top-8 z-10">
             <img
-              src={troopGym}
-              alt="Gym"
-              className="absolute inset-0 h-full w-full object-cover grayscale"
+              src={logo}
+              alt="Troop"
+              className="h-24 w-24 object-contain mix-blend-screen"
             />
+          </div>
+        </aside>
 
-            <div className="absolute inset-0 bg-black/35" />
-
-            <div className="absolute left-8 top-8 z-10">
-              <img
-                src={logo}
-                alt="Troop"
-                className="h-20 w-20 object-contain mix-blend-screen"
-              />
-            </div>
-          </aside>
-
-          {/* RIGHT CONTENT */}
-          <main
-            className="relative min-w-0 bg-white"
-            onClick={(event) => event.stopPropagation()}
-          >
-            {/* TOP NAV */}
-            <header className="flex items-center justify-end gap-7 px-7 py-8 sm:px-10">
-              <button
-                type="button"
-                onClick={() => navigate("/")}
-                className="relative pb-2 text-sm font-medium"
-              >
-                Check-In
-                <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-[#FFC800]" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/members")}
-                className="text-sm font-medium"
-              >
-                Members <span className="text-xs">⌄</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  localStorage.removeItem("isAdmin");
-                  navigate("/admin");
-                }}
-                className="rounded-xl border border-black px-5 py-3 text-sm font-medium transition hover:bg-black hover:text-white"
-              >
-                Logout
-              </button>
-            </header>
-
-            <section className="mx-auto w-full max-w-[720px] px-6 pb-16 pt-16 sm:px-10 lg:pt-20">
+        {/* RIGHT CONTENT */}
+        <main
+          className="relative min-w-0 bg-white"
+          onClick={(event) => event.stopPropagation()}
+        >
+            <section className="mx-auto w-full max-w-[1100px] px-6 pb-16 pt-20 sm:px-10 lg:px-14 lg:pt-24">
               {/* GROUP / PT SWITCH */}
               <div className="flex flex-wrap gap-5">
                 <button
@@ -282,7 +247,7 @@ function CheckInPage() {
               </div>
 
               {/* SEARCH */}
-              <div className="mt-16 flex gap-2">
+              <div className="mt-14 flex w-full max-w-[1000px] gap-3">
                 <div className="relative min-w-0 flex-1">
                   <svg
                     className="pointer-events-none absolute left-4 top-1/2 h-7 w-7 -translate-y-1/2"
@@ -307,14 +272,14 @@ function CheckInPage() {
                         clearSearch();
                       }
                     }}
-                    className="h-12 w-full rounded-xl border border-black bg-white pl-12 pr-4 text-base italic outline-none transition focus:ring-2 focus:ring-[#FFC800]"
+                    className="h-14 w-full rounded-xl border border-black bg-white pl-12 pr-4 text-base italic outline-none transition focus:ring-2 focus:ring-[#FFC800]"
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setQuery(query.trim())}
-                  className="h-12 rounded-xl bg-[#171722] px-6 text-sm font-semibold text-white transition hover:bg-black"
+                  className="h-14 rounded-xl bg-[#171722] px-8 text-sm font-semibold text-white transition hover:bg-black"
                 >
                   Search
                 </button>
@@ -337,12 +302,12 @@ function CheckInPage() {
                           navigate(`/members/${member.id}`);
                         }
                       }}
-                      className="rounded-2xl border border-black bg-white px-4 py-4 shadow-[0_3px_0_#FFC800] sm:px-5"
+                      className="rounded-2xl border border-black bg-white px-5 py-5 shadow-[0_3px_0_#FFC800] sm:px-6"
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                         {/* MEMBER INFO */}
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-xl font-medium">
+                          <div className="break-words text-xl font-medium leading-snug">
                             {member.name}
                           </div>
 
@@ -366,7 +331,7 @@ function CheckInPage() {
 
                         {/* CONTROLS */}
                         <div
-                          className="flex flex-wrap items-center justify-end gap-2"
+                          className="flex shrink-0 flex-wrap items-center justify-end gap-2"
                           onClick={(event) => event.stopPropagation()}
                         >
                           <select
