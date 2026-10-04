@@ -208,11 +208,11 @@ function CheckInPage() {
 
           <div className="absolute inset-0 bg-black/35" />
 
-          <div className="absolute left-8 top-8 z-20 h-44 w-44">
+          <div className="absolute left-10 top-10 z-10 h-24 w-24 overflow-hidden">
             <img
               src={logo}
-              alt="Troop"
-              className="h-full w-full object-contain"
+              alt="TROOP"
+              className="h-full w-full object-contain mix-blend-screen"
             />
           </div>
         </aside>
@@ -223,7 +223,7 @@ function CheckInPage() {
               <button
                 type="button"
                 onClick={() => navigate("/check-in/group")}
-                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-[#FFC800] active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
               >
                 Group Class
               </button>
@@ -231,7 +231,7 @@ function CheckInPage() {
               <button
                 type="button"
                 onClick={() => navigate("/check-in/pt")}
-                className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+                className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-[#FFC800] active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
               >
                 Personal Training
               </button>
