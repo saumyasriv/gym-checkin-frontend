@@ -4,7 +4,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../config";
 import troopGym from "../assets/troop-gym.jpg";
-import logo from "../assets/gorilla-logo.jpg";
+import logo from "../assets/troop-logo-white.png";
 
 function CheckInPage() {
   const navigate = useNavigate();
