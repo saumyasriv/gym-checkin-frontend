@@ -14,7 +14,6 @@ function CheckInPage() {
   const [members, setMembers] = useState([]);
   const [selectedTimings, setSelectedTimings] = useState({});
   const [checkedInMembers, setCheckedInMembers] = useState({});
-  const [loading, setLoading] = useState(false);
 
   const classTimings = [
     "6:00 AM",
@@ -414,7 +413,6 @@ function CheckInPage() {
           </main>
         </div>
       </div>
-    </div>
   );
 }
 
