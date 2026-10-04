@@ -14,7 +14,6 @@ function PTCheckInPage() {
   const [members, setMembers] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({});
   const [checkedInMembers, setCheckedInMembers] = useState({});
-  const [successMessage, setSuccessMessage] = useState("");
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
@@ -111,15 +110,13 @@ function PTCheckInPage() {
       });
 
       if (type === "CHECKIN") {
-        setSuccessMessage("You've been checked in!");
-        window.setTimeout(() => setSuccessMessage(""), 1500);
+        toast.success("Checked in!");
         setCheckedInMembers((previous) => ({
           ...previous,
           [memberId]: true,
         }));
       } else {
-        setSuccessMessage("No-show marked");
-        window.setTimeout(() => setSuccessMessage(""), 1500);
+        toast.success("No show marked!");
       }
 
       const updateCredits = (previous) =>
@@ -182,13 +179,6 @@ function PTCheckInPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {successMessage && (
-        <div className="fixed bottom-8 left-1/2 z-[70] -translate-x-1/2">
-          <div className="rounded-xl bg-[#171722] px-7 py-3 text-sm font-semibold text-white shadow-[0_8px_25px_rgba(0,0,0,0.18)]">
-            {successMessage}
-          </div>
-        </div>
-      )}
       <div className="min-h-screen lg:ml-[35vw]">
         <aside className="fixed bottom-0 left-0 top-[18px] hidden w-[35vw] overflow-hidden bg-black lg:block">
           <img
@@ -199,7 +189,7 @@ function PTCheckInPage() {
 
           <div className="absolute inset-0 bg-black/30" />
 
-          <div className="absolute left-8 top-8 z-20 h-24 w-24">
+          <div className="absolute left-7 top-7 z-20 h-36 w-36">
             <img
               src={logo}
               alt="TROOP"
@@ -214,7 +204,7 @@ function PTCheckInPage() {
               <button
                 type="button"
                 onClick={() => navigate("/check-in/group")}
-                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px]"
+                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
               >
                 Group Class
               </button>
