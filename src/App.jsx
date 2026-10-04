@@ -21,8 +21,8 @@ import logo from "./assets/gorilla-logo.jpg";
 
 function FigmaNavbar({ isAdmin }) {
   return (
-    <div className="fixed left-0 right-0 top-0 z-50 border-t-[18px] border-yellow-400 bg-white">
-      <div className="mx-auto flex h-[72px] items-center justify-end gap-6 px-6 sm:px-10 lg:px-14">
+    <div className="fixed right-0 top-[18px] z-50 w-[65vw] bg-white">
+      <div className="flex h-[72px] items-center justify-end gap-6 px-6 sm:px-10 lg:px-14">
         <Link
           to="/check-in/group"
           className="relative py-2 text-sm font-medium text-black"
@@ -167,11 +167,15 @@ function Layout() {
         }}
       />
 
+      {isFigmaCheckInPage && (
+        <div className="fixed inset-x-0 top-0 z-[60] h-[18px] bg-yellow-400" />
+      )}
+
       <div
         className={
           isFigmaCheckInPage
             ? "min-h-screen bg-white"
-            : "min-h-screen bg-yellow-400 relative overflow-hidden"
+            : "relative min-h-screen overflow-hidden bg-yellow-400"
         }
       >
         {!isFigmaCheckInPage && (
@@ -182,52 +186,35 @@ function Layout() {
           />
         )}
 
-        <div className="relative z-10">
-          {isFigmaCheckInPage ? (
-            <FigmaNavbar isAdmin={isAdmin} />
-          ) : (
+        <div className={isFigmaCheckInPage ? "" : "relative z-10"}>
+          {!isFigmaCheckInPage && (
             <ExistingNavbar
               isAdmin={isAdmin}
               isLoginPage={isLoginPage}
             />
           )}
 
-          <div className={isFigmaCheckInPage ? "pt-[90px]" : ""}>
-            <Routes>
-              <Route path="/" element={<CheckInTypePage />} />
-              <Route
-                path="/check-in/group"
-                element={<CheckInPage />}
-              />
-              <Route
-                path="/check-in/pt"
-                element={<PTCheckInPage />}
-              />
+          {isFigmaCheckInPage && <FigmaNavbar isAdmin={isAdmin} />}
 
-              {isAdmin && (
-                <>
-                  <Route
-                    path="/add-member"
-                    element={<AddMemberPage />}
-                  />
-                  <Route
-                    path="/add-membership"
-                    element={<AddMembershipPage />}
-                  />
-                  <Route
-                    path="/update-existing-member"
-                    element={<UpdateExistingMemberPage />}
-                  />
-                  <Route
-                    path="/members/:id"
-                    element={<MemberDetailsPage />}
-                  />
-                </>
-              )}
+          <Routes>
+            <Route path="/" element={<CheckInTypePage />} />
+            <Route path="/check-in/group" element={<CheckInPage />} />
+            <Route path="/check-in/pt" element={<PTCheckInPage />} />
 
-              <Route path="/admin" element={<LoginPage />} />
-            </Routes>
-          </div>
+            {isAdmin && (
+              <>
+                <Route path="/add-member" element={<AddMemberPage />} />
+                <Route path="/add-membership" element={<AddMembershipPage />} />
+                <Route
+                  path="/update-existing-member"
+                  element={<UpdateExistingMemberPage />}
+                />
+                <Route path="/members/:id" element={<MemberDetailsPage />} />
+              </>
+            )}
+
+            <Route path="/admin" element={<LoginPage />} />
+          </Routes>
         </div>
       </div>
     </>

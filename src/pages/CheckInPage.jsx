@@ -196,17 +196,14 @@ function CheckInPage() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-white text-black"
-      onClick={clearSearch}
-    >
-      <div className="min-h-[calc(100vh-90px)] lg:grid lg:grid-cols-[minmax(380px,35vw)_minmax(0,1fr)]">
-        {/* LEFT IMAGE PANEL */}
-        <aside className="relative hidden min-h-[calc(100vh-90px)] overflow-hidden bg-black lg:block">
+    <div className="min-h-screen bg-white text-black">
+      <div className="min-h-screen lg:ml-[35vw]">
+        {/* Fixed image: its height never changes when search results appear */}
+        <aside className="fixed bottom-0 left-0 top-[18px] hidden w-[35vw] overflow-hidden bg-black lg:block">
           <img
             src={troopGym}
             alt="Gym"
-            className="absolute inset-0 h-full w-full object-cover grayscale"
+            className="absolute inset-0 h-full w-full object-cover object-center grayscale"
           />
 
           <div className="absolute inset-0 bg-black/35" />
@@ -220,199 +217,189 @@ function CheckInPage() {
           </div>
         </aside>
 
-        {/* RIGHT CONTENT */}
-        <main
-          className="relative min-w-0 bg-white"
-          onClick={(event) => event.stopPropagation()}
-        >
-            <section className="mx-auto w-full max-w-[1100px] px-6 pb-16 pt-20 sm:px-10 lg:px-14 lg:pt-24">
-              {/* GROUP / PT SWITCH */}
-              <div className="flex flex-wrap gap-5">
-                <button
-                  type="button"
-                  onClick={() => navigate("/check-in/group")}
-                  className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
-                >
-                  Group Class
-                </button>
+        <main className="min-h-screen bg-white">
+          <section className="mx-auto w-full max-w-[1100px] px-6 pb-16 pt-[120px] sm:px-10 lg:px-14">
+            <div className="flex flex-wrap gap-5">
+              <button
+                type="button"
+                onClick={() => navigate("/check-in/group")}
+                className="rounded-2xl border-2 border-black bg-[#FFC800] px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+              >
+                Group Class
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() => navigate("/check-in/pt")}
-                  className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+              <button
+                type="button"
+                onClick={() => navigate("/check-in/pt")}
+                className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-zinc-50 active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
+              >
+                Personal Training
+              </button>
+            </div>
+
+            <div className="mt-14 flex w-full gap-3">
+              <div className="relative min-w-0 flex-1">
+                <svg
+                  className="pointer-events-none absolute left-4 top-1/2 h-7 w-7 -translate-y-1/2"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  Personal Training
-                </button>
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="16.65" y1="16.65" x2="21" y2="21" />
+                </svg>
+
+                <input
+                  type="text"
+                  value={query}
+                  placeholder="Search member..."
+                  onChange={(event) => setQuery(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      clearSearch();
+                    }
+                  }}
+                  className="h-14 w-full rounded-xl border border-black bg-white pl-12 pr-4 text-base italic outline-none transition focus:ring-2 focus:ring-[#FFC800]"
+                />
               </div>
 
-              {/* SEARCH */}
-              <div className="mt-14 flex w-full max-w-[1000px] gap-3">
-                <div className="relative min-w-0 flex-1">
-                  <svg
-                    className="pointer-events-none absolute left-4 top-1/2 h-7 w-7 -translate-y-1/2"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="16.65" y1="16.65" x2="21" y2="21" />
-                  </svg>
+              <button
+                type="button"
+                onClick={() => setQuery(query.trim())}
+                className="h-14 shrink-0 rounded-xl bg-[#171722] px-8 text-sm font-semibold text-white transition hover:bg-black"
+              >
+                Search
+              </button>
+            </div>
 
-                  <input
-                    type="text"
-                    value={query}
-                    placeholder="Search member..."
-                    onChange={(event) => setQuery(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Escape") {
-                        clearSearch();
+            <div className="mt-7 space-y-4">
+              {members.map((member) => {
+                const selectedTiming = selectedTimings[member.id] || "";
+                const usable = hasUsableMembership(member);
+                const paused = hasPausedMembershipOnly(member);
+                const isCheckedIn = checkedInMembers[member.id];
+                const attendanceDisabled = !usable || isCheckedIn;
+
+                return (
+                  <div
+                    key={member.id}
+                    onClick={() => {
+                      if (isAdmin) {
+                        navigate(`/members/${member.id}`);
                       }
                     }}
-                    className="h-14 w-full rounded-xl border border-black bg-white pl-12 pr-4 text-base italic outline-none transition focus:ring-2 focus:ring-[#FFC800]"
-                  />
-                </div>
+                    className="rounded-2xl border border-black bg-white px-5 py-5 shadow-[0_3px_0_#FFC800] sm:px-6"
+                  >
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                      <div className="min-w-0 flex-1">
+                        <div className="break-words text-xl font-medium leading-snug">
+                          {member.name}
+                        </div>
 
-                <button
-                  type="button"
-                  onClick={() => setQuery(query.trim())}
-                  className="h-14 rounded-xl bg-[#171722] px-8 text-sm font-semibold text-white transition hover:bg-black"
-                >
-                  Search
-                </button>
-              </div>
-
-              {/* RESULTS */}
-              <div className="mt-7 space-y-4">
-                {members.map((member) => {
-                  const selectedTiming = selectedTimings[member.id] || "";
-                  const usable = hasUsableMembership(member);
-                  const paused = hasPausedMembershipOnly(member);
-                  const isCheckedIn = checkedInMembers[member.id];
-                  const attendanceDisabled = !usable || isCheckedIn;
-
-                  return (
-                    <div
-                      key={member.id}
-                      onClick={() => {
-                        if (isAdmin) {
-                          navigate(`/members/${member.id}`);
-                        }
-                      }}
-                      className="rounded-2xl border border-black bg-white px-5 py-5 shadow-[0_3px_0_#FFC800] sm:px-6"
-                    >
-                      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        {/* MEMBER INFO */}
-                        <div className="min-w-0 flex-1">
-                          <div className="break-words text-xl font-medium leading-snug">
-                            {member.name}
+                        {paused ? (
+                          <div className="mt-1 text-xs font-bold uppercase tracking-wide text-orange-600">
+                            Membership Paused
                           </div>
+                        ) : (
+                          <div
+                            className={`mt-1 text-xs font-bold uppercase tracking-wide ${
+                              Number(member.totalRemainingCredits) <= 4
+                                ? "text-red-600"
+                                : "text-black"
+                            }`}
+                          >
+                            Credits Remaining: {member.totalRemainingCredits}
+                          </div>
+                        )}
+                      </div>
 
-                          {paused ? (
-                            <div className="mt-1 text-xs font-bold uppercase tracking-wide text-orange-600">
-                              Membership Paused
-                            </div>
-                          ) : (
-                            <div
-                              className={`mt-1 text-xs font-bold uppercase tracking-wide ${
-                                Number(member.totalRemainingCredits) <= 4
-                                  ? "text-red-600"
-                                  : "text-black"
-                              }`}
-                            >
-                              Credits Remaining:{" "}
-                              {member.totalRemainingCredits}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* CONTROLS */}
-                        <div
-                          className="flex shrink-0 flex-wrap items-center justify-end gap-2"
-                          onClick={(event) => event.stopPropagation()}
+                      <div
+                        className="flex shrink-0 flex-wrap items-center justify-end gap-2"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <select
+                          value={selectedTiming}
+                          disabled={attendanceDisabled}
+                          onChange={(event) =>
+                            setSelectedTimings((previous) => ({
+                              ...previous,
+                              [member.id]: event.target.value,
+                            }))
+                          }
+                          className={`h-12 min-w-[150px] rounded-xl border border-black bg-white px-4 text-sm outline-none ${
+                            attendanceDisabled
+                              ? "cursor-not-allowed opacity-40"
+                              : "cursor-pointer"
+                          }`}
                         >
-                          <select
-                            value={selectedTiming}
-                            disabled={attendanceDisabled}
-                            onChange={(event) =>
-                              setSelectedTimings((previous) => ({
-                                ...previous,
-                                [member.id]: event.target.value,
-                              }))
-                            }
-                            className={`h-12 min-w-[150px] rounded-xl border border-black bg-white px-4 text-sm outline-none ${
-                              attendanceDisabled
-                                ? "cursor-not-allowed opacity-40"
-                                : "cursor-pointer"
-                            }`}
-                          >
-                            <option value="">
-                              {isCheckedIn
-                                ? "Checked In"
-                                : paused
-                                  ? "Paused"
-                                  : "Select a Time Slot"}
-                            </option>
+                          <option value="">
+                            {isCheckedIn
+                              ? "Checked In"
+                              : paused
+                                ? "Paused"
+                                : "Select a Time Slot"}
+                          </option>
 
-                            {!attendanceDisabled &&
-                              classTimings.map((timing) => (
-                                <option key={timing} value={timing}>
-                                  {timing}
-                                </option>
-                              ))}
-                          </select>
+                          {!attendanceDisabled &&
+                            classTimings.map((timing) => (
+                              <option key={timing} value={timing}>
+                                {timing}
+                              </option>
+                            ))}
+                        </select>
 
-                          <button
-                            type="button"
-                            disabled={attendanceDisabled || !selectedTiming}
-                            onClick={() =>
-                              processAttendance(member.id, "CHECKIN")
-                            }
-                            className={`h-12 rounded-xl px-5 text-sm font-semibold transition ${
-                              attendanceDisabled || !selectedTiming
-                                ? "cursor-not-allowed border border-black/10 bg-zinc-100 text-zinc-400"
-                                : "bg-[#FFC800] text-black hover:bg-[#f0bc00] active:scale-[0.98]"
-                            }`}
-                          >
-                            {isCheckedIn ? "Checked In" : "Check In"}
-                          </button>
+                        <button
+                          type="button"
+                          disabled={attendanceDisabled || !selectedTiming}
+                          onClick={() =>
+                            processAttendance(member.id, "CHECKIN")
+                          }
+                          className={`h-12 rounded-xl px-5 text-sm font-semibold transition ${
+                            attendanceDisabled || !selectedTiming
+                              ? "cursor-not-allowed border border-black/10 bg-zinc-100 text-zinc-400"
+                              : "bg-[#FFC800] text-black hover:bg-[#f0bc00] active:scale-[0.98]"
+                          }`}
+                        >
+                          {isCheckedIn ? "Checked In" : "Check In"}
+                        </button>
 
-                          {isAdmin && !isCheckedIn && (
-                            <>
-                              <button
-                                type="button"
-                                disabled={
-                                  attendanceDisabled || !selectedTiming
-                                }
-                                onClick={() =>
-                                  processAttendance(member.id, "NO_SHOW")
-                                }
-                                className="h-12 rounded-xl bg-[#171722] px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-30"
-                              >
-                                No Show
-                              </button>
+                        {isAdmin && !isCheckedIn && (
+                          <>
+                            <button
+                              type="button"
+                              disabled={
+                                attendanceDisabled || !selectedTiming
+                              }
+                              onClick={() =>
+                                processAttendance(member.id, "NO_SHOW")
+                              }
+                              className="h-12 rounded-xl bg-[#171722] px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-30"
+                            >
+                              No Show
+                            </button>
 
-                              <button
-                                type="button"
-                                onClick={() => deleteMember(member.id)}
-                                className="h-12 rounded-xl bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-500"
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
-                        </div>
+                            <button
+                              type="button"
+                              onClick={() => deleteMember(member.id)}
+                              className="h-12 rounded-xl bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-500"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </section>
-          </main>
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </main>
       </div>
+    </div>
   );
 }
 
