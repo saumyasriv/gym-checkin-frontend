@@ -238,7 +238,7 @@ function PTCheckInPage() {
                 <input
                   type="text"
                   value={query}
-                  placeholder="Search PT member..."
+                  placeholder="Search member..."
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === "Escape") clearSearch();
