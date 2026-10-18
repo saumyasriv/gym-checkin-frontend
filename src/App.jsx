@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Routes,
@@ -40,15 +41,26 @@ function FigmaNavbar({ isAdmin }) {
               type="button"
               onClick={() => setMembersOpen((open) => !open)}
               className="flex items-center gap-2 py-2 text-sm font-medium text-black"
+              aria-expanded={membersOpen}
             >
               Members
-              <span
-                className={`text-xl font-semibold leading-none transition-transform ${
+
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                className={`relative top-[1px] h-4 w-4 shrink-0 transition-transform ${
                   membersOpen ? "rotate-180" : ""
                 }`}
+                fill="none"
               >
-                ⌄
-              </span>
+                <path
+                  d="M3.5 5.75 8 10.25l4.5-4.5"
+                  stroke="currentColor"
+                  strokeWidth="2.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
 
             {membersOpen && (
@@ -60,6 +72,7 @@ function FigmaNavbar({ isAdmin }) {
                 >
                   New Member
                 </Link>
+
                 <Link
                   to="/add-membership"
                   onClick={() => setMembersOpen(false)}
@@ -67,6 +80,7 @@ function FigmaNavbar({ isAdmin }) {
                 >
                   Add New Membership
                 </Link>
+
                 <Link
                   to="/update-existing-member"
                   onClick={() => setMembersOpen(false)}
@@ -178,6 +192,7 @@ function Layout() {
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   const isLoginPage = location.pathname === "/admin";
+
   const isFigmaCheckInPage =
     location.pathname === "/check-in/group" ||
     location.pathname === "/check-in/pt";
@@ -237,18 +252,38 @@ function Layout() {
 
           <Routes>
             <Route path="/" element={<CheckInTypePage />} />
-            <Route path="/check-in/group" element={<CheckInPage />} />
-            <Route path="/check-in/pt" element={<PTCheckInPage />} />
+
+            <Route
+              path="/check-in/group"
+              element={<CheckInPage />}
+            />
+
+            <Route
+              path="/check-in/pt"
+              element={<PTCheckInPage />}
+            />
 
             {isAdmin && (
               <>
-                <Route path="/add-member" element={<AddMemberPage />} />
-                <Route path="/add-membership" element={<AddMembershipPage />} />
+                <Route
+                  path="/add-member"
+                  element={<AddMemberPage />}
+                />
+
+                <Route
+                  path="/add-membership"
+                  element={<AddMembershipPage />}
+                />
+
                 <Route
                   path="/update-existing-member"
                   element={<UpdateExistingMemberPage />}
                 />
-                <Route path="/members/:id" element={<MemberDetailsPage />} />
+
+                <Route
+                  path="/members/:id"
+                  element={<MemberDetailsPage />}
+                />
               </>
             )}
 
