@@ -82,25 +82,18 @@ function FigmaNavbar({ isAdmin }) {
           </div>
         )}
 
-        {isAdmin ? (
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.removeItem("isAdmin");
-              window.location.href = "/";
-            }}
-            className="h-11 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
-          >
-            Logout
-          </button>
-        ) : (
-          <Link
-            to="/admin"
-            className="flex h-11 items-center rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
-          >
-            Login
-          </Link>
-        )}
+        {isAdmin && (
+  <button
+    type="button"
+    onClick={() => {
+      localStorage.removeItem("isAdmin");
+      window.location.href = "/";
+    }}
+    className="h-11 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+  >
+    Logout
+  </button>
+)}
       </div>
     </div>
   );
