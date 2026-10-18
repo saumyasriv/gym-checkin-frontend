@@ -233,7 +233,7 @@ function CheckInPage() {
                 onClick={() => navigate("/check-in/pt")}
                 className="rounded-2xl border-2 border-black bg-white px-7 py-3 text-base font-bold shadow-[0_4px_0_#111] transition hover:bg-[#FFC800] active:translate-y-[2px] active:shadow-[0_2px_0_#111]"
               >
-                Personal Training
+                One on One Training
               </button>
             </div>
 
