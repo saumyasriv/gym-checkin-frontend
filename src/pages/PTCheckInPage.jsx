@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -179,17 +180,18 @@ function PTCheckInPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="min-h-screen lg:ml-[35vw]">
-        <aside className="fixed bottom-0 left-0 top-[18px] hidden w-[35vw] overflow-hidden bg-black lg:block">
+      <div className="min-h-screen sm:ml-[35vw]">
+        {/* On narrow screens the photo is a banner; on tablets and desktops it stays in the left sidebar. */}
+        <aside className="relative mt-[18px] h-[30vh] min-h-[180px] w-full overflow-hidden bg-black sm:fixed sm:bottom-0 sm:left-0 sm:top-[18px] sm:mt-0 sm:h-auto sm:min-h-0 sm:w-[35vw]">
           <img
             src={troopGym}
             alt="Gym"
             className="absolute inset-0 h-full w-full object-cover object-center grayscale"
           />
 
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/35" />
 
-          <div className="absolute left-10 top-10 z-10 h-24 w-24 overflow-hidden">
+          <div className="absolute left-4 top-4 z-10 h-16 w-16 overflow-hidden sm:left-10 sm:top-10 sm:h-24 sm:w-24">
             <img
               src={logo}
               alt="TROOP"
@@ -199,7 +201,7 @@ function PTCheckInPage() {
         </aside>
 
         <main className="min-h-screen bg-white">
-          <section className="mx-auto w-full max-w-[1100px] px-6 pb-16 pt-[120px] sm:px-10 lg:px-14">
+          <section className="mx-auto w-full max-w-[1100px] px-5 pb-16 pt-8 sm:px-5 sm:pt-[120px] lg:px-10">
             <div className="flex flex-wrap gap-5">
               <button
                 type="button"
