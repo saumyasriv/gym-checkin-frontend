@@ -197,9 +197,9 @@ function CheckInPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="min-h-screen lg:ml-[35vw]">
-        {/* Fixed image: its height never changes when search results appear */}
-        <aside className="fixed bottom-0 left-0 top-[18px] block w-full overflow-hidden bg-black lg:w-[35vw]">
+      <div className="min-h-screen md:ml-[35vw]">
+        {/* On narrow screens the photo is a banner; on tablets and desktops it stays in the left sidebar. */}
+        <aside className="relative mt-[18px] h-[30vh] min-h-[180px] w-full overflow-hidden bg-black md:fixed md:bottom-0 md:left-0 md:top-[18px] md:mt-0 md:h-auto md:min-h-0 md:w-[35vw]">
           <img
             src={troopGym}
             alt="Gym"
@@ -208,7 +208,7 @@ function CheckInPage() {
 
           <div className="absolute inset-0 bg-black/35" />
 
-          <div className="absolute left-10 top-10 z-10 h-24 w-24 overflow-hidden">
+          <div className="absolute left-5 top-5 z-10 h-20 w-20 overflow-hidden md:left-10 md:top-10 md:h-24 md:w-24">
             <img
               src={logo}
               alt="TROOP"
@@ -218,7 +218,7 @@ function CheckInPage() {
         </aside>
 
         <main className="min-h-screen bg-white">
-          <section className="mx-auto w-full max-w-[1100px] px-6 pb-16 pt-[120px] sm:px-10 lg:px-14">
+          <section className="mx-auto w-full max-w-[1100px] px-5 pb-16 pt-8 sm:px-8 md:px-6 md:pt-[120px] lg:px-14">
             <div className="flex flex-wrap gap-5">
               <button
                 type="button"
