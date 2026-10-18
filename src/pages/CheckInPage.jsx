@@ -199,7 +199,7 @@ function CheckInPage() {
     <div className="min-h-screen bg-white text-black">
       <div className="min-h-screen lg:ml-[35vw]">
         {/* Fixed image: its height never changes when search results appear */}
-        <aside className="fixed bottom-0 left-0 top-[18px] hidden w-[35vw] overflow-hidden bg-black lg:block">
+        <aside className="fixed bottom-0 left-0 top-[18px] block w-full overflow-hidden bg-black lg:w-[35vw]">
           <img
             src={troopGym}
             alt="Gym"
