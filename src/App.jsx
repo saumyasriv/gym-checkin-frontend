@@ -25,26 +25,17 @@ function FigmaNavbar({ isAdmin }) {
   const [membersOpen, setMembersOpen] = useState(false);
 
   return (
-    <div className="fixed right-0 top-[18px] z-50 w-[65vw] bg-white">
-      <div className="flex h-[72px] items-center justify-end gap-6 px-6 sm:px-10 lg:px-14">
-        <Link
-          to="/check-in/group"
-          className="relative py-2 text-sm font-medium text-black"
-        >
-          Check-In
-          <span className="absolute -bottom-1 left-0 h-[3px] w-full bg-yellow-400" />
-        </Link>
-
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-end px-4 sm:bottom-6 sm:px-6 lg:px-10">
+      <div className="pointer-events-auto flex items-center gap-3 rounded-xl bg-white/95 p-2 shadow-sm">
         {isAdmin && (
           <div className="relative">
             <button
               type="button"
               onClick={() => setMembersOpen((open) => !open)}
-              className="flex items-center gap-2 py-2 text-sm font-medium text-black"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-black hover:bg-zinc-100"
               aria-expanded={membersOpen}
             >
               Members
-
               <svg
                 aria-hidden="true"
                 viewBox="0 0 16 16"
@@ -64,7 +55,7 @@ function FigmaNavbar({ isAdmin }) {
             </button>
 
             {membersOpen && (
-              <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-black bg-white shadow-[0_8px_25px_rgba(0,0,0,0.16)]">
+              <div className="absolute bottom-full right-0 z-50 mb-2 w-64 overflow-hidden rounded-xl border border-black bg-white shadow-lg">
                 <Link
                   to="/add-member"
                   onClick={() => setMembersOpen(false)}
@@ -72,7 +63,6 @@ function FigmaNavbar({ isAdmin }) {
                 >
                   New Member
                 </Link>
-
                 <Link
                   to="/add-membership"
                   onClick={() => setMembersOpen(false)}
@@ -80,7 +70,6 @@ function FigmaNavbar({ isAdmin }) {
                 >
                   Add New Membership
                 </Link>
-
                 <Link
                   to="/update-existing-member"
                   onClick={() => setMembersOpen(false)}
@@ -100,14 +89,14 @@ function FigmaNavbar({ isAdmin }) {
               localStorage.removeItem("isAdmin");
               window.location.href = "/";
             }}
-            className="h-12 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+            className="h-11 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
           >
             Logout
           </button>
         ) : (
           <Link
             to="/admin"
-            className="flex h-12 items-center rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+            className="flex h-11 items-center rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
           >
             Login
           </Link>
@@ -248,7 +237,9 @@ function Layout() {
             />
           )}
 
-          {isFigmaCheckInPage && <FigmaNavbar isAdmin={isAdmin} />}
+          {isFigmaCheckInPage && (
+            <FigmaNavbar isAdmin={isAdmin} />
+          )}
 
           <Routes>
             <Route path="/" element={<CheckInTypePage />} />
