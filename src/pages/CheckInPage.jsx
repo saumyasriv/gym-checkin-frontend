@@ -197,9 +197,9 @@ function CheckInPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="min-h-screen sm:ml-[30vw]">
+      <div className="min-h-screen sm:ml-[35vw]">
         {/* On narrow screens the photo is a banner; on tablets and desktops it stays in the left sidebar. */}
-        <aside className="relative mt-[18px] h-[30vh] min-h-[180px] w-full overflow-hidden bg-black sm:fixed sm:bottom-0 sm:left-0 sm:top-[18px] sm:mt-0 sm:h-auto sm:min-h-0 sm:w-[30vw]">
+        <aside className="relative mt-[18px] h-[30vh] min-h-[180px] w-full overflow-hidden bg-black sm:fixed sm:bottom-0 sm:left-0 sm:top-[18px] sm:mt-0 sm:h-auto sm:min-h-0 sm:w-[35vw]">
           <img
             src={troopGym}
             alt="Gym"
@@ -208,7 +208,7 @@ function CheckInPage() {
 
           <div className="absolute inset-0 bg-black/35" />
 
-          <div className="absolute left-4 top-4 z-10 h-16 w-16 overflow-hidden sm:left-5 sm:top-6 sm:h-20 sm:w-20">
+          <div className="absolute left-4 top-4 z-10 h-16 w-16 overflow-hidden sm:left-10 sm:top-10 sm:h-24 sm:w-24">
             <img
               src={logo}
               alt="TROOP"
