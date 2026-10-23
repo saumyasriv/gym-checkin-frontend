@@ -18,7 +18,6 @@ import AddMembershipPage from "./pages/AddMembershipPage";
 import UpdateExistingMemberPage from "./pages/UpdateExistingMemberPage";
 import MemberDetailsPage from "./pages/MemberDetailsPage";
 import LoginPage from "./pages/LoginPage";
-import BackdatedCheckInPage from "./pages/BackdatedCheckInPage";
 
 import logo from "./assets/gorilla-logo.jpg";
 
@@ -70,13 +69,6 @@ function FigmaNavbar({ isAdmin }) {
                   className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
                 >
                   Add New Membership
-                </Link>
-                <Link
-                  to="/backdated-check-in"
-                  onClick={() => setMembersOpen(false)}
-                  className="block px-5 py-3 text-sm font-medium hover:bg-yellow-400"
-                >
-                  Backdated Check-In
                 </Link>
                 <Link
                   to="/update-existing-member"
@@ -138,13 +130,6 @@ function ExistingNavbar({ isAdmin, isLoginPage }) {
                 className="flex h-12 items-center justify-center rounded-xl bg-white/[0.08] px-6 text-lg font-semibold whitespace-nowrap transition-all hover:bg-white/[0.16]"
               >
                 Add New Membership
-              </Link>
-
-              <Link
-                to="/backdated-check-in"
-                className="flex h-12 items-center justify-center rounded-xl bg-white/[0.08] px-6 text-lg font-semibold whitespace-nowrap transition-all hover:bg-white/[0.16]"
-              >
-                Backdated Check-In
               </Link>
 
               <Link
@@ -277,11 +262,6 @@ function Layout() {
                 <Route
                   path="/update-existing-member"
                   element={<UpdateExistingMemberPage />}
-                />
-
-                <Route
-                  path="/backdated-check-in"
-                  element={<BackdatedCheckInPage />}
                 />
 
                 <Route
