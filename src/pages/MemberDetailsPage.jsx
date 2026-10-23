@@ -1162,6 +1162,12 @@ function MemberDetailsPage() {
                                       {formatCheckinTime(
                                         checkin.checkinTime
                                       )}
+                                      {checkin.backdated && (
+                                        <span className="ml-2 inline-flex flex-wrap gap-1 align-middle">
+                                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">Backdated</span>
+                                          {checkin.expiredMembership && <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-950">Expired Membership</span>}
+                                        </span>
+                                      )}
                                     </div>
 
                                     <div
