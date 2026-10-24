@@ -243,9 +243,7 @@ function PTCheckInPage() {
 
             {/* Session selection */}
             <div className="mb-8">
-              <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#777777]">
-                <span className="text-[#B58C00]">01</span>
-                <span className="h-px flex-1 bg-[#DADAD5]" />
+              <div className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-[#777777]">
                 Choose your session
               </div>
 
@@ -320,9 +318,7 @@ function PTCheckInPage() {
 
             {/* Member search */}
             <div className="mb-7">
-              <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#777777]">
-                <span className="text-[#B58C00]">02</span>
-                <span className="h-px flex-1 bg-[#DADAD5]" />
+              <div className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-[#777777]">
                 Find your profile
               </div>
 
@@ -387,128 +383,114 @@ function PTCheckInPage() {
                     }}
                     className="group overflow-hidden rounded-xl border-2 border-[#E0E0DB] bg-white transition duration-150 hover:border-[#C6A000] hover:shadow-[0_4px_0_#FFC800]"
                   >
-                    <div className="h-1.5 bg-[#E9E9E4] transition group-hover:bg-[#FFC800]" />
+                    <div className="h-1.5 bg-[#FFC800]" />
 
-                    <div className="px-4 py-5 sm:px-5">
-                      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#171717] text-lg font-black uppercase text-[#FFC800]">
-                              {member.name?.trim()?.charAt(0) || "M"}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="break-words text-lg font-black uppercase leading-snug tracking-tight sm:text-xl">
-                                {member.name}
-                              </div>
-
-                              {paused ? (
-                                <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-orange-700">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                                  Membership Paused
-                                </div>
-                              ) : (
-                                <div
-                                  className={`mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wider ${
-                                    Number(member.totalRemainingCredits) <= 4
-                                      ? "bg-red-50 text-red-600"
-                                      : "bg-[#FFF5CC] text-[#6E5600]"
-                                  }`}
-                                >
-                                  <span
-                                    className={`h-1.5 w-1.5 rounded-full ${
-                                      Number(member.totalRemainingCredits) <= 4
-                                        ? "bg-red-500"
-                                        : "bg-[#D5A600]"
-                                    }`}
-                                  />
-                                  Credits Remaining: {member.totalRemainingCredits}
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                    <div className="grid grid-cols-1 gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-8">
+                      {/* Member information */}
+                      <div className="min-w-0">
+                        <div className="break-words text-xl font-black uppercase leading-tight tracking-tight sm:text-2xl">
+                          {member.name}
                         </div>
 
                         <div
-                          className="flex shrink-0 flex-col gap-2 sm:min-w-[190px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-end"
-                          onClick={(event) => event.stopPropagation()}
+                          className={`mt-3 inline-flex max-w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-black uppercase tracking-wider ${
+                            paused
+                              ? "bg-orange-50 text-orange-700"
+                              : Number(member.totalRemainingCredits) <= 4
+                                ? "bg-red-50 text-red-600"
+                                : "bg-[#FFF5CC] text-[#6E5600]"
+                          }`}
                         >
-                          <label className="block sm:min-w-[150px] sm:flex-1">
-                            <span className="mb-1.5 block text-[10px] font-black uppercase tracking-wider text-[#777777]">
-                              Session time
-                            </span>
+                          <span
+                            className={`h-2 w-2 shrink-0 rounded-full ${
+                              paused
+                                ? "bg-orange-500"
+                                : Number(member.totalRemainingCredits) <= 4
+                                  ? "bg-red-500"
+                                  : "bg-[#D5A600]"
+                            }`}
+                          />
 
-                            <select
-                              value={selectedTime}
-                              disabled={disabled}
-                              onChange={(event) =>
-                                setSelectedTimes((previous) => ({
-                                  ...previous,
-                                  [member.id]: event.target.value,
-                                }))
-                              }
-                              className={`h-12 w-full rounded-lg border-2 border-[#D6D6D0] bg-white px-3 text-sm font-semibold outline-none focus:border-[#171717] focus:ring-2 focus:ring-[#FFC800] ${
-                                disabled
-                                  ? "cursor-not-allowed opacity-40"
-                                  : "cursor-pointer"
-                              }`}
-                            >
-                              <option value="">
-                                {isCheckedIn
-                                  ? "Checked In"
-                                  : paused
-                                    ? "Paused"
-                                    : "Select PT Time"}
-                              </option>
+                          <span className="break-words">
+                            {paused
+                              ? "Membership Paused"
+                              : `Credits Remaining: ${member.totalRemainingCredits}`}
+                          </span>
+                        </div>
+                      </div>
 
-                              {!disabled &&
-                                ptTimings.map((timing) => (
-                                  <option key={timing} value={timing}>
-                                    {timing}
-                                  </option>
-                                ))}
-                            </select>
-                          </label>
+                      {/* Session controls */}
+                      <div
+                        className="grid min-w-0 grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(190px,1fr)_auto] lg:min-w-[390px]"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <label className="block min-w-0">
+                          <span className="mb-2 block text-xs font-black uppercase tracking-wider text-[#777777]">
+                            Session Time
+                          </span>
 
-                          <div className="flex flex-wrap gap-2 sm:items-end">
-                            <button
-                              type="button"
-                              disabled={disabled || !selectedTime}
-                              onClick={() =>
-                                processAttendance(member.id, "CHECKIN")
-                              }
-                              className={`h-12 flex-1 rounded-lg border-2 px-4 text-xs font-black uppercase tracking-wider transition sm:flex-none ${
-                                disabled || !selectedTime
-                                  ? "cursor-not-allowed border-[#E6E6E1] bg-[#F0F0EC] text-[#AAAAAA]"
-                                  : "border-[#171717] bg-[#FFC800] text-[#171717] hover:bg-[#FFD633] active:translate-y-0.5"
-                              }`}
-                            >
-                              {isCheckedIn ? "Checked In" : "Check In"}
-                            </button>
+                          <select
+                            value={selectedTime}
+                            disabled={disabled}
+                            onChange={(event) =>
+                              setSelectedTimes((previous) => ({
+                                ...previous,
+                                [member.id]: event.target.value,
+                              }))
+                            }
+                            className="h-14 w-full min-w-0 rounded-xl border-2 border-[#D6D6D0] bg-white px-3 text-base font-semibold outline-none focus:border-[#171717] focus:ring-2 focus:ring-[#FFC800] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <option value="">
+                              {isCheckedIn
+                                ? "Checked In"
+                                : paused
+                                  ? "Paused"
+                                  : "Select PT Time"}
+                            </option>
 
-                            {isAdmin && !isCheckedIn && (
-                              <>
-                                <button
-                                  type="button"
-                                  disabled={disabled || !selectedTime}
-                                  onClick={() =>
-                                    processAttendance(member.id, "NO_SHOW")
-                                  }
-                                  className="h-12 flex-1 rounded-lg border-2 border-[#171717] bg-[#171717] px-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-30 sm:flex-none"
-                                >
-                                  No Show
-                                </button>
+                            {!disabled &&
+                              ptTimings.map((timing) => (
+                                <option key={timing} value={timing}>
+                                  {timing}
+                                </option>
+                              ))}
+                          </select>
+                        </label>
 
-                                <button
-                                  type="button"
-                                  onClick={() => deleteMember(member.id)}
-                                  className="h-12 rounded-lg border-2 border-red-600 bg-white px-3 text-xs font-black uppercase tracking-wider text-red-600 transition hover:bg-red-600 hover:text-white"
-                                >
-                                  Delete
-                                </button>
-                              </>
-                            )}
-                          </div>
+                        <div className="flex flex-wrap items-end gap-2">
+                          <button
+                            type="button"
+                            disabled={disabled || !selectedTime}
+                            onClick={() =>
+                              processAttendance(member.id, "CHECKIN")
+                            }
+                            className="h-14 min-w-[120px] flex-1 rounded-xl border-2 border-[#171717] bg-[#FFC800] px-4 text-xs font-black uppercase tracking-wider text-[#171717] transition hover:bg-[#FFD633] disabled:cursor-not-allowed disabled:border-[#E6E6E1] disabled:bg-[#F0F0EC] disabled:text-[#AAAAAA] sm:flex-none"
+                          >
+                            {isCheckedIn ? "Checked In" : "Check In"}
+                          </button>
+
+                          {isAdmin && !isCheckedIn && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={disabled || !selectedTime}
+                                onClick={() =>
+                                  processAttendance(member.id, "NO_SHOW")
+                                }
+                                className="h-14 rounded-xl border-2 border-[#171717] bg-[#171717] px-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-30"
+                              >
+                                No Show
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => deleteMember(member.id)}
+                                className="h-14 rounded-xl border-2 border-red-600 bg-white px-3 text-xs font-black uppercase tracking-wider text-red-600 transition hover:bg-red-600 hover:text-white"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -552,14 +534,6 @@ function PTCheckInPage() {
                 </button>
               </div>
             )}
-
-            {/* Bottom accent */}
-            <div className="mt-10 flex items-center gap-3 border-t border-[#DADAD5] pt-5">
-              <div className="h-1.5 w-10 rounded-full bg-[#FFC800]" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#888888]">
-                The Troop · Show up. Get stronger.
-              </p>
-            </div>
           </section>
         </main>
       </div>
