@@ -13,6 +13,9 @@ function CheckInPage() {
   const [query, setQuery] = useState("");
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
+  const [selectedClassTimes, setSelectedClassTimes] = useState({});
+
+  const classTimings = ["6am", "7am", "8:15am", "9am", "6pm"];
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
@@ -48,10 +51,18 @@ function CheckInPage() {
   };
 
   const processAttendance = async (memberId, type) => {
+    const classTiming = selectedClassTimes[memberId];
+
+    if (!classTiming) {
+      toast.error("Please select a class time.");
+      return;
+    }
+
     try {
       await axios.post(`${API_BASE_URL}/checkins`, {
         memberId,
         type,
+        classTiming,
       });
 
       if (type === "CHECKIN") {
@@ -338,17 +349,42 @@ function CheckInPage() {
                         </div>
                       </div>
 
-                      {/* Group check-in actions */}
+                      {/* Group class time and check-in actions */}
                       <div
-                        className="flex flex-wrap items-end gap-2 lg:justify-end"
+                        className="flex flex-col gap-2 sm:flex-row sm:items-end lg:justify-end"
                         onClick={(event) => event.stopPropagation()}
                       >
+                        <label className="flex min-w-[180px] flex-1 flex-col gap-2 sm:flex-none">
+                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#777777]">
+                            Session Time
+                          </span>
+                          <select
+                            value={selectedClassTimes[member.id] || ""}
+                            onChange={(event) =>
+                              setSelectedClassTimes((current) => ({
+                                ...current,
+                                [member.id]: event.target.value,
+                              }))
+                            }
+                            aria-label={`Session time for ${member.name}`}
+                            className="h-14 w-full rounded-xl border-2 border-[#D1D1CC] bg-white px-4 text-sm font-bold text-[#171717] outline-none focus:border-[#171717] focus:ring-2 focus:ring-[#FFC800]"
+                          >
+                            <option value="">Select class time</option>
+                            {classTimings.map((timing) => (
+                              <option key={timing} value={timing}>
+                                {timing}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
                         <button
                           type="button"
+                          disabled={!selectedClassTimes[member.id]}
                           onClick={() =>
                             processAttendance(member.id, "CHECKIN")
                           }
-                          className="h-14 min-w-[120px] flex-1 rounded-xl border-2 border-[#171717] bg-[#FFC800] px-4 text-xs font-black uppercase tracking-wider text-[#171717] transition hover:bg-[#FFD633] active:translate-y-0.5 sm:flex-none"
+                          className="h-14 min-w-[120px] rounded-xl border-2 border-[#171717] bg-[#FFC800] px-4 text-xs font-black uppercase tracking-wider text-[#171717] transition hover:bg-[#FFD633] active:translate-y-0.5 disabled:cursor-not-allowed disabled:border-[#E0E0DB] disabled:bg-[#EEEEEA] disabled:text-[#AAAAAA] sm:flex-none"
                         >
                           Check In
                         </button>
@@ -357,10 +393,11 @@ function CheckInPage() {
                           <>
                             <button
                               type="button"
+                              disabled={!selectedClassTimes[member.id]}
                               onClick={() =>
                                 processAttendance(member.id, "NO_SHOW")
                               }
-                              className="h-14 rounded-xl border-2 border-[#171717] bg-[#171717] px-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#333333] active:translate-y-0.5"
+                              className="h-14 rounded-xl border-2 border-[#171717] bg-[#171717] px-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#333333] active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               No Show
                             </button>
