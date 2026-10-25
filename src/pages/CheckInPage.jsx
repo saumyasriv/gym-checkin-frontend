@@ -65,10 +65,11 @@ function CheckInPage() {
 
     try {
       await axios.post(`${API_BASE_URL}/checkins`, {
-        memberId,
-        type,
-        classTiming,
-      });
+  memberId,
+  type,
+  classTiming,
+  memberType: "GROUP",
+});
 
       if (type === "CHECKIN") {
         toast.success("Checked in!");
