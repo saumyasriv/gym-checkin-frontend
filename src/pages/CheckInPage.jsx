@@ -156,15 +156,7 @@ function CheckInPage() {
               Group class training
             </div>
 
-            <h2 className="max-w-sm text-3xl font-black uppercase leading-[0.95] tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Show up.
-              <br />
-              Get stronger.
-            </h2>
-
-            <p className="mt-3 max-w-xs text-sm font-medium leading-relaxed text-white/70 sm:text-base">
-              Train together. Get better together.
-            </p>
+           
 
             <div className="mt-5 h-1.5 w-16 rounded-full bg-[#FFC800]" />
           </div>
@@ -180,16 +172,9 @@ function CheckInPage() {
                 The Troop / Member Check-in
               </div>
 
-              <h1 className="text-3xl font-black uppercase leading-none tracking-tight sm:text-4xl lg:text-5xl">
-                Time to put
-                <br className="sm:hidden" /> in work.
-                <span className="text-[#D6A600]"> Let’s go.</span>
-              </h1>
+            
 
-              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-[#686868] sm:text-base">
-                Select your training session, find your name, and get ready to
-                move.
-              </p>
+      
             </div>
 
             {/* Session selection */}
@@ -268,7 +253,7 @@ function CheckInPage() {
             {/* Member search */}
             <div className="mb-7">
               <div className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-[#777777]">
-                Find your profile
+                Find your name
               </div>
 
               <form
