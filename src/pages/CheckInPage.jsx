@@ -150,16 +150,7 @@ function CheckInPage() {
             />
           </div>
 
-          <div className="absolute bottom-6 left-5 right-5 z-10 sm:bottom-12 sm:left-10 sm:right-10">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#FFC800]/60 bg-black/40 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#FFC800] sm:text-xs">
-              <span className="h-2 w-2 rounded-full bg-[#FFC800]" />
-              Group class training
-            </div>
-
-           
-
-            <div className="mt-5 h-1.5 w-16 rounded-full bg-[#FFC800]" />
-          </div>
+          
         </aside>
 
         {/* Main check-in area */}
@@ -169,7 +160,7 @@ function CheckInPage() {
             <div className="mb-8">
               <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[#777777]">
                 <span className="h-2 w-2 rounded-full bg-[#FFC800]" />
-                The Troop / Member Check-in
+                Troop - Member Check-in
               </div>
 
             
