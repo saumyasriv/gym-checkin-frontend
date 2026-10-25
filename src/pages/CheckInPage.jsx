@@ -15,7 +15,12 @@ function CheckInPage() {
   const [members, setMembers] = useState([]);
   const [selectedClassTimes, setSelectedClassTimes] = useState({});
 
-  const classTimings = ["6am", "7am", "8:15am", "9am", "6pm"];
+  const classTimings = [
+    "6:00 AM",
+    "7:00 AM",
+    "8:15 AM",
+    "6:00 PM",
+  ];
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
