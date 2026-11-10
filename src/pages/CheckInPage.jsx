@@ -7,6 +7,39 @@ import { API_BASE_URL } from "../config";
 import troopGym from "../assets/troop-gym.jpg";
 import logo from "../assets/troop-logo-white.png";
 
+function getNextExpiryLabel(member) {
+  const memberships = (member.memberships || [])
+    .filter(
+      (membership) =>
+        Number(membership.remainingCredits) > 0 &&
+        !membership.paused &&
+        !membership.expiryRemoved &&
+        membership.expiryDate
+    )
+    .sort((a, b) =>
+      String(a.expiryDate).slice(0, 10).localeCompare(
+        String(b.expiryDate).slice(0, 10)
+      )
+    );
+
+  if (memberships.length === 0) {
+    return "—";
+  }
+
+  const expiryDate = String(memberships[0].expiryDate).slice(0, 10);
+  const [year, month, day] = expiryDate.split("-");
+
+  return new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day)
+  ).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function CheckInPage() {
   const navigate = useNavigate();
 
@@ -65,11 +98,11 @@ function CheckInPage() {
 
     try {
       await axios.post(`${API_BASE_URL}/checkins`, {
-  memberId,
-  type,
-  classTiming,
-  memberType: "GROUP",
-});
+        memberId,
+        type,
+        classTiming,
+        memberType: "GROUP",
+      });
 
       if (type === "CHECKIN") {
         toast.success("Checked in!");
@@ -149,8 +182,6 @@ function CheckInPage() {
               className="h-full w-full object-contain mix-blend-screen"
             />
           </div>
-
-          
         </aside>
 
         {/* Main check-in area */}
@@ -162,10 +193,6 @@ function CheckInPage() {
                 <span className="h-2 w-2 rounded-full bg-[#FFC800]" />
                 Troop - Member Check-in
               </div>
-
-            
-
-      
             </div>
 
             {/* Session selection */}
@@ -295,6 +322,7 @@ function CheckInPage() {
             <div className="space-y-4">
               {members.map((member) => {
                 const credits = Number(member.totalRemainingCredits ?? 0);
+                const expiryLabel = getNextExpiryLabel(member);
 
                 return (
                   <div
@@ -307,27 +335,40 @@ function CheckInPage() {
                     <div className="h-1.5 bg-[#FFC800]" />
 
                     <div className="grid grid-cols-1 items-center gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8">
-                      {/* Member information */}
+                      {/* Member information - visible to everyone */}
                       <div className="min-w-0">
                         <div className="break-words text-xl font-black uppercase leading-tight tracking-tight sm:text-2xl">
                           {member.name}
                         </div>
 
-                        <div
-                          className={`mt-3 inline-flex max-w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-black uppercase tracking-wider ${
-                            credits <= 4
-                              ? "bg-red-50 text-red-600"
-                              : "bg-[#FFF5CC] text-[#6E5600]"
-                          }`}
-                        >
-                          <span
-                            className={`h-2 w-2 shrink-0 rounded-full ${
-                              credits <= 4 ? "bg-red-500" : "bg-[#D5A600]"
+                        <div className="mt-4 grid max-w-[560px] grid-cols-2 gap-3">
+                          {/* Remaining credits */}
+                          <div
+                            className={`min-w-0 rounded-xl border-2 px-3 py-4 sm:px-4 ${
+                              credits <= 4
+                                ? "border-red-200 bg-red-50 text-red-700"
+                                : "border-[#F0D46A] bg-[#FFF5CC] text-[#6E5600]"
                             }`}
-                          />
-                          <span className="break-words">
-                            Credits Remaining: {credits}
-                          </span>
+                          >
+                            <div className="text-[10px] font-black uppercase tracking-wider opacity-75 sm:text-xs">
+                              Credits Remaining
+                            </div>
+
+                            <div className="mt-2 text-4xl font-black leading-none tabular-nums sm:text-5xl">
+                              {credits}
+                            </div>
+                          </div>
+
+                          {/* Membership expiry */}
+                          <div className="min-w-0 rounded-xl border-2 border-[#D6D6D0] bg-[#F3F3EF] px-3 py-4 text-[#171717] sm:px-4">
+                            <div className="text-[10px] font-black uppercase tracking-wider text-[#777777] sm:text-xs">
+                              Expiry Date
+                            </div>
+
+                            <div className="mt-2 break-words text-xl font-black leading-tight sm:text-2xl">
+                              {expiryLabel}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
