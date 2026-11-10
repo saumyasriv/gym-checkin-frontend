@@ -27,6 +27,31 @@ function PTCheckInPage() {
     ptTimings.push(`${hour12}:${minute === 0 ? "00" : "30"} ${period}`);
   }
 
+  const getNextExpiryLabel = (member) => {
+    const eligibleMemberships = (member.memberships || [])
+      .filter(
+        (membership) =>
+          Number(membership.remainingCredits) > 0 &&
+          !membership.paused &&
+          !membership.expiryRemoved &&
+          membership.expiryDate
+      )
+      .sort((a, b) =>
+        String(a.expiryDate).localeCompare(String(b.expiryDate))
+      );
+
+    if (eligibleMemberships.length === 0) return "—";
+
+    const expiryDate = String(eligibleMemberships[0].expiryDate).split("T")[0];
+    const [year, month, day] = expiryDate.split("-").map(Number);
+
+    return new Date(year, month - 1, day).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   useEffect(() => {
     fetchAllMembers();
   }, []);
@@ -198,8 +223,6 @@ function PTCheckInPage() {
               className="h-full w-full object-contain mix-blend-screen"
             />
           </div>
-
-      
         </aside>
 
         {/* Main check-in area */}
@@ -211,9 +234,6 @@ function PTCheckInPage() {
                 <span className="h-2 w-2 rounded-full bg-[#FFC800]" />
                 Troop - Member Check-in
               </div>
-
-              
-
             </div>
 
             {/* Session selection */}
@@ -350,6 +370,9 @@ function PTCheckInPage() {
                 const isCheckedIn = checkedInMembers[member.id];
                 const disabled = !usable || isCheckedIn;
 
+                const credits = Number(member.totalRemainingCredits ?? 0);
+                const expiryLabel = getNextExpiryLabel(member);
+
                 return (
                   <div
                     key={member.id}
@@ -367,30 +390,46 @@ function PTCheckInPage() {
                           {member.name}
                         </div>
 
-                        <div
-                          className={`mt-3 inline-flex max-w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-black uppercase tracking-wider ${
-                            paused
-                              ? "bg-orange-50 text-orange-700"
-                              : Number(member.totalRemainingCredits) <= 4
-                                ? "bg-red-50 text-red-600"
-                                : "bg-[#FFF5CC] text-[#6E5600]"
-                          }`}
-                        >
-                          <span
-                            className={`h-2 w-2 shrink-0 rounded-full ${
+                        {/* Credits and expiry - visible to everyone */}
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div
+                            className={`rounded-xl border-2 px-3 py-3 ${
                               paused
-                                ? "bg-orange-500"
-                                : Number(member.totalRemainingCredits) <= 4
-                                  ? "bg-red-500"
-                                  : "bg-[#D5A600]"
+                                ? "border-orange-200 bg-orange-50"
+                                : credits <= 4
+                                  ? "border-red-200 bg-red-50"
+                                  : "border-[#E8D58A] bg-[#FFF8DC]"
                             }`}
-                          />
+                          >
+                            <div className="text-[10px] font-black uppercase tracking-wider text-[#777777] sm:text-xs">
+                              Credits Remaining
+                            </div>
+                            <div
+                              className={`mt-1 text-4xl font-black leading-none sm:text-5xl ${
+                                paused
+                                  ? "text-orange-700"
+                                  : credits <= 4
+                                    ? "text-red-600"
+                                    : "text-[#171717]"
+                              }`}
+                            >
+                              {credits}
+                            </div>
+                            {paused && (
+                              <div className="mt-1 text-[10px] font-black uppercase text-orange-700">
+                                Membership Paused
+                              </div>
+                            )}
+                          </div>
 
-                          <span className="break-words">
-                            {paused
-                              ? "Membership Paused"
-                              : `Credits Remaining: ${member.totalRemainingCredits}`}
-                          </span>
+                          <div className="rounded-xl border-2 border-[#DADAD4] bg-[#F7F7F3] px-3 py-3">
+                            <div className="text-[10px] font-black uppercase tracking-wider text-[#777777] sm:text-xs">
+                              Next Expiry
+                            </div>
+                            <div className="mt-2 break-words text-xl font-black leading-tight text-[#171717] sm:text-2xl">
+                              {expiryLabel}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
