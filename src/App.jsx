@@ -18,6 +18,7 @@ import AddMembershipPage from "./pages/AddMembershipPage";
 import UpdateExistingMemberPage from "./pages/UpdateExistingMemberPage";
 import MemberDetailsPage from "./pages/MemberDetailsPage";
 import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
 
 import logo from "./assets/gorilla-logo.jpg";
 
@@ -27,6 +28,16 @@ function FigmaNavbar({ isAdmin }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-end px-4 sm:bottom-6 sm:px-6 lg:px-10">
       <div className="pointer-events-auto flex items-center gap-3 rounded-xl bg-white/95 p-2 shadow-sm">
+
+        {isAdmin && (
+          <Link
+            to="/dashboard"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-black hover:bg-zinc-100"
+          >
+            Dashboard
+          </Link>
+        )}
+
         {isAdmin && (
           <div className="relative">
             <button
@@ -63,6 +74,7 @@ function FigmaNavbar({ isAdmin }) {
                 >
                   New Member
                 </Link>
+
                 <Link
                   to="/add-membership"
                   onClick={() => setMembersOpen(false)}
@@ -70,6 +82,7 @@ function FigmaNavbar({ isAdmin }) {
                 >
                   Add New Membership
                 </Link>
+
                 <Link
                   to="/update-existing-member"
                   onClick={() => setMembersOpen(false)}
@@ -83,17 +96,17 @@ function FigmaNavbar({ isAdmin }) {
         )}
 
         {isAdmin && (
-  <button
-    type="button"
-    onClick={() => {
-      localStorage.removeItem("isAdmin");
-      window.location.href = "/";
-    }}
-    className="h-11 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
-  >
-    Logout
-  </button>
-)}
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem("isAdmin");
+              window.location.href = "/";
+            }}
+            className="h-11 rounded-[10px] border border-black bg-white px-5 text-sm font-medium text-black transition hover:bg-black hover:text-white"
+          >
+            Logout
+          </button>
+        )}
       </div>
     </div>
   );
@@ -118,6 +131,13 @@ function ExistingNavbar({ isAdmin, isLoginPage }) {
             <div className="mx-4 h-10 w-px bg-white/20" />
 
             <div className="ml-4 flex items-center gap-4">
+              <Link
+                to="/dashboard"
+                className="flex h-12 items-center justify-center rounded-xl bg-yellow-400 px-6 text-lg font-bold whitespace-nowrap text-black transition-all hover:bg-yellow-300"
+              >
+                Dashboard
+              </Link>
+
               <Link
                 to="/add-member"
                 className="flex h-12 items-center justify-center rounded-xl bg-white/[0.08] px-6 text-lg font-semibold whitespace-nowrap transition-all hover:bg-white/[0.16]"
@@ -249,6 +269,11 @@ function Layout() {
 
             {isAdmin && (
               <>
+                <Route
+                  path="/dashboard"
+                  element={<DashboardPage />}
+                />
+
                 <Route
                   path="/add-member"
                   element={<AddMemberPage />}
