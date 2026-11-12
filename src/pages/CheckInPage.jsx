@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -48,6 +48,10 @@ function CheckInPage() {
   const [members, setMembers] = useState([]);
   const [selectedClassTimes, setSelectedClassTimes] = useState({});
   const [cooldowns, setCooldowns] = useState({});
+  const [pendingCheckins, setPendingCheckins] = useState({});
+
+  // Prevents duplicate clicks before React re-renders.
+  const checkinInProgressRef = useRef(new Set());
 
   const classTimings = [
     "6:00 AM",
@@ -154,6 +158,16 @@ function CheckInPage() {
   };
 
   const processAttendance = async (memberId, type) => {
+    // Silently ignore repeated check-in clicks.
+    if (type === "CHECKIN") {
+      if (
+        cooldowns[memberId] ||
+        checkinInProgressRef.current.has(memberId)
+      ) {
+        return;
+      }
+    }
+
     const classTiming = selectedClassTimes[memberId];
 
     if (!classTiming) {
@@ -161,9 +175,14 @@ function CheckInPage() {
       return;
     }
 
-    if (type === "CHECKIN" && cooldowns[memberId]) {
-      toast.error("This member has already checked in recently.");
-      return;
+    // Lock this member immediately before making the API request.
+    if (type === "CHECKIN") {
+      checkinInProgressRef.current.add(memberId);
+
+      setPendingCheckins((current) => ({
+        ...current,
+        [memberId]: true,
+      }));
     }
 
     try {
@@ -177,7 +196,6 @@ function CheckInPage() {
       if (type === "CHECKIN") {
         toast.success("Checked in!");
 
-        // Start a 15-minute cooldown for this member only.
         setCooldowns((current) => ({
           ...current,
           [memberId]: Date.now() + 15 * 60 * 1000,
@@ -205,12 +223,8 @@ function CheckInPage() {
       const message = error.response?.data;
 
       if (error.response?.status === 409) {
-        toast.error(
-          "This member has already checked in. Please try again after 15 minutes."
-        );
-
-        // Refresh cooldown information from the backend.
-        fetchActiveCooldowns();
+        // A check-in already exists. Refresh cooldown silently.
+        await fetchActiveCooldowns();
       } else if (message === "Credits expired") {
         toast.error("Credits expired!");
       } else if (message === "Membership is paused") {
@@ -219,6 +233,16 @@ function CheckInPage() {
         toast.error("No Credits!");
       } else {
         toast.error("Check-in failed. Please try again.");
+      }
+    } finally {
+      if (type === "CHECKIN") {
+        checkinInProgressRef.current.delete(memberId);
+
+        setPendingCheckins((current) => {
+          const updated = { ...current };
+          delete updated[memberId];
+          return updated;
+        });
       }
     }
   };
@@ -415,6 +439,9 @@ function CheckInPage() {
                 const credits = Number(member.totalRemainingCredits ?? 0);
                 const expiryLabel = getNextExpiryLabel(member);
                 const isCoolingDown = Boolean(cooldowns[member.id]);
+                const isCheckinPending = Boolean(
+                  pendingCheckins[member.id]
+                );
 
                 return (
                   <div
@@ -473,6 +500,7 @@ function CheckInPage() {
                           <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#777777]">
                             Session Time
                           </span>
+
                           <select
                             value={selectedClassTimes[member.id] || ""}
                             onChange={(event) =>
@@ -496,14 +524,20 @@ function CheckInPage() {
                         <button
                           type="button"
                           disabled={
-                            !selectedClassTimes[member.id] || isCoolingDown
+                            !selectedClassTimes[member.id] ||
+                            isCoolingDown ||
+                            isCheckinPending
                           }
                           onClick={() =>
                             processAttendance(member.id, "CHECKIN")
                           }
                           className="h-14 min-w-[120px] rounded-xl border-2 border-[#171717] bg-[#FFC800] px-4 text-xs font-black uppercase tracking-wider text-[#171717] transition hover:bg-[#FFD633] active:translate-y-0.5 disabled:cursor-not-allowed disabled:border-[#E0E0DB] disabled:bg-[#EEEEEA] disabled:text-[#AAAAAA] sm:flex-none"
                         >
-                          {isCoolingDown ? "Checked In" : "Check In"}
+                          {isCoolingDown
+                            ? "Checked In"
+                            : isCheckinPending
+                              ? "Please Wait"
+                              : "Check In"}
                         </button>
 
                         {isAdmin && (
@@ -557,6 +591,7 @@ function CheckInPage() {
                 <h3 className="text-base font-black uppercase tracking-wide">
                   No member found
                 </h3>
+
                 <p className="mt-1 text-sm font-medium text-[#777777]">
                   Check the spelling or try another name.
                 </p>
