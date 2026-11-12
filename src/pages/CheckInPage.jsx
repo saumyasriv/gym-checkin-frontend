@@ -198,7 +198,7 @@ function CheckInPage() {
 
         setCooldowns((current) => ({
           ...current,
-          [memberId]: Date.now() + 15 * 60 * 1000,
+          [memberId]: Date.now() + 1 * 60 * 1000,
         }));
       } else {
         toast.success("No show marked!");
