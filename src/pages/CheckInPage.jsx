@@ -143,7 +143,7 @@ function CheckInPage() {
             `${checkinTime}+05:30`
           ).getTime();
 
-          const expiryTime = checkinTimestamp + 15 * 60 * 1000;
+          const expiryTime = checkinTimestamp + 1 * 60 * 1000;
 
           if (expiryTime > Date.now()) {
             activeCooldowns[memberId] = expiryTime;
