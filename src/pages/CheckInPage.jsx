@@ -47,6 +47,7 @@ function CheckInPage() {
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
   const [selectedClassTimes, setSelectedClassTimes] = useState({});
+  const [cooldowns, setCooldowns] = useState({});
 
   const classTimings = [
     "6:00 AM",
@@ -59,6 +60,7 @@ function CheckInPage() {
 
   useEffect(() => {
     fetchAllMembers();
+    fetchActiveCooldowns();
   }, []);
 
   useEffect(() => {
@@ -78,6 +80,40 @@ function CheckInPage() {
     );
   }, [query, allMembers]);
 
+  // Automatically remove expired cooldowns.
+  // No countdown is displayed.
+  useEffect(() => {
+    const timers = [];
+
+    Object.entries(cooldowns).forEach(([memberId, expiryTime]) => {
+      const remainingTime = expiryTime - Date.now();
+
+      if (remainingTime <= 0) {
+        setCooldowns((current) => {
+          if (!current[memberId]) return current;
+
+          const updated = { ...current };
+          delete updated[memberId];
+          return updated;
+        });
+      } else {
+        const timer = setTimeout(() => {
+          setCooldowns((current) => {
+            const updated = { ...current };
+            delete updated[memberId];
+            return updated;
+          });
+        }, remainingTime);
+
+        timers.push(timer);
+      }
+    });
+
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, [cooldowns]);
+
   const fetchAllMembers = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/members`);
@@ -88,11 +124,45 @@ function CheckInPage() {
     }
   };
 
+  const fetchActiveCooldowns = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/checkins/cooldowns`
+      );
+
+      const activeCooldowns = {};
+
+      Object.entries(response.data || {}).forEach(
+        ([memberId, checkinTime]) => {
+          // Backend timestamps are in Asia/Kolkata.
+          const checkinTimestamp = new Date(
+            `${checkinTime}+05:30`
+          ).getTime();
+
+          const expiryTime = checkinTimestamp + 15 * 60 * 1000;
+
+          if (expiryTime > Date.now()) {
+            activeCooldowns[memberId] = expiryTime;
+          }
+        }
+      );
+
+      setCooldowns(activeCooldowns);
+    } catch (error) {
+      console.error("Failed to fetch active cooldowns:", error);
+    }
+  };
+
   const processAttendance = async (memberId, type) => {
     const classTiming = selectedClassTimes[memberId];
 
     if (!classTiming) {
       toast.error("Please select a class time.");
+      return;
+    }
+
+    if (type === "CHECKIN" && cooldowns[memberId]) {
+      toast.error("This member has already checked in recently.");
       return;
     }
 
@@ -106,6 +176,12 @@ function CheckInPage() {
 
       if (type === "CHECKIN") {
         toast.success("Checked in!");
+
+        // Start a 15-minute cooldown for this member only.
+        setCooldowns((current) => ({
+          ...current,
+          [memberId]: Date.now() + 15 * 60 * 1000,
+        }));
       } else {
         toast.success("No show marked!");
       }
@@ -128,12 +204,21 @@ function CheckInPage() {
 
       const message = error.response?.data;
 
-      if (message === "Credits expired") {
+      if (error.response?.status === 409) {
+        toast.error(
+          "This member has already checked in. Please try again after 15 minutes."
+        );
+
+        // Refresh cooldown information from the backend.
+        fetchActiveCooldowns();
+      } else if (message === "Credits expired") {
         toast.error("Credits expired!");
       } else if (message === "Membership is paused") {
         toast.error("Membership is paused.");
-      } else {
+      } else if (message === "No credits") {
         toast.error("No Credits!");
+      } else {
+        toast.error("Check-in failed. Please try again.");
       }
     }
   };
@@ -151,6 +236,12 @@ function CheckInPage() {
       setAllMembers((current) =>
         current.filter((member) => member.id !== memberId)
       );
+
+      setCooldowns((current) => {
+        const updated = { ...current };
+        delete updated[memberId];
+        return updated;
+      });
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete member");
@@ -323,6 +414,7 @@ function CheckInPage() {
               {members.map((member) => {
                 const credits = Number(member.totalRemainingCredits ?? 0);
                 const expiryLabel = getNextExpiryLabel(member);
+                const isCoolingDown = Boolean(cooldowns[member.id]);
 
                 return (
                   <div
@@ -403,13 +495,15 @@ function CheckInPage() {
 
                         <button
                           type="button"
-                          disabled={!selectedClassTimes[member.id]}
+                          disabled={
+                            !selectedClassTimes[member.id] || isCoolingDown
+                          }
                           onClick={() =>
                             processAttendance(member.id, "CHECKIN")
                           }
                           className="h-14 min-w-[120px] rounded-xl border-2 border-[#171717] bg-[#FFC800] px-4 text-xs font-black uppercase tracking-wider text-[#171717] transition hover:bg-[#FFD633] active:translate-y-0.5 disabled:cursor-not-allowed disabled:border-[#E0E0DB] disabled:bg-[#EEEEEA] disabled:text-[#AAAAAA] sm:flex-none"
                         >
-                          Check In
+                          {isCoolingDown ? "Checked In" : "Check In"}
                         </button>
 
                         {isAdmin && (
