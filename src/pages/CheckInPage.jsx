@@ -50,7 +50,6 @@ function CheckInPage() {
   const [cooldowns, setCooldowns] = useState({});
   const [pendingCheckins, setPendingCheckins] = useState({});
 
-  // Prevents duplicate clicks before React re-renders.
   const checkinInProgressRef = useRef(new Set());
 
   const classTimings = [
@@ -85,7 +84,6 @@ function CheckInPage() {
   }, [query, allMembers]);
 
   // Automatically remove expired cooldowns.
-  // No countdown is displayed.
   useEffect(() => {
     const timers = [];
 
@@ -138,7 +136,6 @@ function CheckInPage() {
 
       Object.entries(response.data || {}).forEach(
         ([memberId, checkinTime]) => {
-          // Backend timestamps are in Asia/Kolkata.
           const checkinTimestamp = new Date(
             `${checkinTime}+05:30`
           ).getTime();
@@ -196,14 +193,19 @@ function CheckInPage() {
       if (type === "CHECKIN") {
         toast.success("Checked in!");
 
-        setCooldowns((current) => ({
-          ...current,
-          [memberId]: Date.now() + 1 * 60 * 1000,
-        }));
+        // Reload after successful check-in.
+        // The backend retains the cooldown, so the member
+        // will remain disabled when the page loads again.
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+
+        return;
       } else {
         toast.success("No show marked!");
       }
 
+      // Update credits for NO_SHOW.
       const updateCredits = (previous) =>
         previous.map((member) =>
           member.id === memberId
@@ -223,7 +225,6 @@ function CheckInPage() {
       const message = error.response?.data;
 
       if (error.response?.status === 409) {
-        // A check-in already exists. Refresh cooldown silently.
         await fetchActiveCooldowns();
       } else if (message === "Credits expired") {
         toast.error("Credits expired!");
@@ -454,14 +455,13 @@ function CheckInPage() {
                     <div className="h-1.5 bg-[#FFC800]" />
 
                     <div className="grid grid-cols-1 items-center gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8">
-                      {/* Member information - visible to everyone */}
+                      {/* Member information */}
                       <div className="min-w-0">
                         <div className="break-words text-xl font-black uppercase leading-tight tracking-tight sm:text-2xl">
                           {member.name}
                         </div>
 
                         <div className="mt-4 grid max-w-[560px] grid-cols-2 gap-3">
-                          {/* Remaining credits */}
                           <div
                             className={`min-w-0 rounded-xl border-2 px-3 py-4 sm:px-4 ${
                               credits <= 4
@@ -478,7 +478,6 @@ function CheckInPage() {
                             </div>
                           </div>
 
-                          {/* Membership expiry */}
                           <div className="min-w-0 rounded-xl border-2 border-[#D6D6D0] bg-[#F3F3EF] px-3 py-4 text-[#171717] sm:px-4">
                             <div className="text-[10px] font-black uppercase tracking-wider text-[#777777] sm:text-xs">
                               Expiry Date
