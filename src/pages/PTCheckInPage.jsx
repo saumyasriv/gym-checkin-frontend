@@ -226,14 +226,18 @@ function PTCheckInPage() {
       if (type === "CHECKIN") {
         toast.success("Checked in!");
 
-        setCooldowns((current) => ({
-          ...current,
-          [memberId]: Date.now() + 1 * 60 * 1000,
-        }));
+        // Reload after successful PT check-in.
+        // Backend cooldown remains active after the reload.
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+
+        return;
       } else {
         toast.success("No show marked!");
       }
 
+      // Update credits for NO_SHOW.
       const updateCredits = (previous) =>
         previous.map((memberItem) =>
           memberItem.id === memberId
