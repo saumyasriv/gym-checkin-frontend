@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -14,7 +14,11 @@ function PTCheckInPage() {
   const [allMembers, setAllMembers] = useState([]);
   const [members, setMembers] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({});
-  const [checkedInMembers, setCheckedInMembers] = useState({});
+  const [cooldowns, setCooldowns] = useState({});
+  const [pendingCheckins, setPendingCheckins] = useState({});
+
+  // Prevent duplicate clicks before React re-renders.
+  const checkinInProgressRef = useRef(new Set());
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
@@ -54,6 +58,7 @@ function PTCheckInPage() {
 
   useEffect(() => {
     fetchAllMembers();
+    fetchActiveCooldowns();
   }, []);
 
   useEffect(() => {
@@ -73,6 +78,40 @@ function PTCheckInPage() {
     );
   }, [query, allMembers]);
 
+  // Automatically remove expired cooldowns.
+  // No countdown is displayed.
+  useEffect(() => {
+    const timers = [];
+
+    Object.entries(cooldowns).forEach(([memberId, expiryTime]) => {
+      const remainingTime = expiryTime - Date.now();
+
+      if (remainingTime <= 0) {
+        setCooldowns((current) => {
+          if (!current[memberId]) return current;
+
+          const updated = { ...current };
+          delete updated[memberId];
+          return updated;
+        });
+      } else {
+        const timer = setTimeout(() => {
+          setCooldowns((current) => {
+            const updated = { ...current };
+            delete updated[memberId];
+            return updated;
+          });
+        }, remainingTime);
+
+        timers.push(timer);
+      }
+    });
+
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, [cooldowns]);
+
   const fetchAllMembers = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/members`);
@@ -80,6 +119,35 @@ function PTCheckInPage() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to load members");
+    }
+  };
+
+  const fetchActiveCooldowns = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/checkins/cooldowns`
+      );
+
+      const activeCooldowns = {};
+
+      Object.entries(response.data || {}).forEach(
+        ([memberId, checkinTime]) => {
+          // Backend timestamps are in Asia/Kolkata.
+          const checkinTimestamp = new Date(
+            `${checkinTime}+05:30`
+          ).getTime();
+
+          const expiryTime = checkinTimestamp + 1 * 60 * 1000;
+
+          if (expiryTime > Date.now()) {
+            activeCooldowns[memberId] = expiryTime;
+          }
+        }
+      );
+
+      setCooldowns(activeCooldowns);
+    } catch (error) {
+      console.error("Failed to fetch active cooldowns:", error);
     }
   };
 
@@ -109,6 +177,23 @@ function PTCheckInPage() {
   };
 
   const processAttendance = async (memberId, type) => {
+    // Silently ignore repeated check-in clicks.
+    if (type === "CHECKIN") {
+      if (
+        cooldowns[memberId] ||
+        checkinInProgressRef.current.has(memberId)
+      ) {
+        return;
+      }
+    }
+
+    const selectedTime = selectedTimes[memberId];
+
+    if (!selectedTime) {
+      toast.error("Please select a PT timing first.");
+      return;
+    }
+
     const member = allMembers.find((item) => item.id === memberId);
 
     if (member && !hasUsableMembership(member)) {
@@ -120,11 +205,14 @@ function PTCheckInPage() {
       return;
     }
 
-    const selectedTime = selectedTimes[memberId];
+    // Lock this member immediately before making the API request.
+    if (type === "CHECKIN") {
+      checkinInProgressRef.current.add(memberId);
 
-    if (!selectedTime) {
-      toast.error("Please select a PT timing first.");
-      return;
+      setPendingCheckins((current) => ({
+        ...current,
+        [memberId]: true,
+      }));
     }
 
     try {
@@ -137,9 +225,10 @@ function PTCheckInPage() {
 
       if (type === "CHECKIN") {
         toast.success("Checked in!");
-        setCheckedInMembers((previous) => ({
-          ...previous,
-          [memberId]: true,
+
+        setCooldowns((current) => ({
+          ...current,
+          [memberId]: Date.now() + 1 * 60 * 1000,
         }));
       } else {
         toast.success("No show marked!");
@@ -169,12 +258,28 @@ function PTCheckInPage() {
 
       const message = error.response?.data;
 
-      if (message === "Credits expired") {
+      if (error.response?.status === 409) {
+        // Another request already checked this member in.
+        // Refresh cooldown information without showing an error.
+        await fetchActiveCooldowns();
+      } else if (message === "Credits expired") {
         toast.error("Credits expired!");
       } else if (message === "Membership is paused") {
         toast.error("Membership is paused.");
-      } else {
+      } else if (message === "No credits") {
         toast.error("No Credits!");
+      } else {
+        toast.error("Check-in failed. Please try again.");
+      }
+    } finally {
+      if (type === "CHECKIN") {
+        checkinInProgressRef.current.delete(memberId);
+
+        setPendingCheckins((current) => {
+          const updated = { ...current };
+          delete updated[memberId];
+          return updated;
+        });
       }
     }
   };
@@ -192,6 +297,12 @@ function PTCheckInPage() {
       setAllMembers((current) =>
         current.filter((member) => member.id !== memberId)
       );
+
+      setCooldowns((current) => {
+        const updated = { ...current };
+        delete updated[memberId];
+        return updated;
+      });
     } catch (error) {
       console.error(error);
       toast.error("Failed to delete member");
@@ -367,7 +478,11 @@ function PTCheckInPage() {
                 const selectedTime = selectedTimes[member.id] || "";
                 const usable = hasUsableMembership(member);
                 const paused = hasPausedMembershipOnly(member);
-                const isCheckedIn = checkedInMembers[member.id];
+                const isCoolingDown = Boolean(cooldowns[member.id]);
+                const isCheckinPending = Boolean(
+                  pendingCheckins[member.id]
+                );
+                const isCheckedIn = isCoolingDown || isCheckinPending;
                 const disabled = !usable || isCheckedIn;
 
                 const credits = Number(member.totalRemainingCredits ?? 0);
@@ -455,11 +570,13 @@ function PTCheckInPage() {
                             className="h-14 w-full min-w-0 rounded-xl border-2 border-[#D6D6D0] bg-white px-3 text-base font-semibold outline-none focus:border-[#171717] focus:ring-2 focus:ring-[#FFC800] disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <option value="">
-                              {isCheckedIn
+                              {isCoolingDown
                                 ? "Checked In"
-                                : paused
-                                  ? "Paused"
-                                  : "Select PT Time"}
+                                : isCheckinPending
+                                  ? "Please Wait"
+                                  : paused
+                                    ? "Paused"
+                                    : "Select PT Time"}
                             </option>
 
                             {!disabled &&
@@ -474,13 +591,21 @@ function PTCheckInPage() {
                         <div className="flex flex-wrap items-end gap-2">
                           <button
                             type="button"
-                            disabled={disabled || !selectedTime}
+                            disabled={
+                              disabled ||
+                              !selectedTime ||
+                              isCheckinPending
+                            }
                             onClick={() =>
                               processAttendance(member.id, "CHECKIN")
                             }
                             className="h-14 min-w-[120px] flex-1 rounded-xl border-2 border-[#171717] bg-[#FFC800] px-4 text-xs font-black uppercase tracking-wider text-[#171717] transition hover:bg-[#FFD633] disabled:cursor-not-allowed disabled:border-[#E6E6E1] disabled:bg-[#F0F0EC] disabled:text-[#AAAAAA] sm:flex-none"
                           >
-                            {isCheckedIn ? "Checked In" : "Check In"}
+                            {isCoolingDown
+                              ? "Checked In"
+                              : isCheckinPending
+                                ? "Please Wait"
+                                : "Check In"}
                           </button>
 
                           {isAdmin && !isCheckedIn && (
